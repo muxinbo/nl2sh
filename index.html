@@ -2217,6 +2217,7 @@ html[data-mode="geek"] .geek-only { display: block; }
   box-shadow: 0 0 6px currentColor;
 }
 .trace__row b { color: var(--ink); font-weight: 600; }
+.trace__row--srv { color: var(--safe); font-size: 10.5px; }
 .trace__row--ep,
 .trace__row--key { color: var(--ink-3); font-size: 10.5px; }
 .trace__row--ep { overflow-wrap: anywhere; }
@@ -6722,6 +6723,8 @@ window.NL2SH_AI = (function () {
        它回答的是"这到底是真·大模型生成，还是本地关键词匹配"。 */
     var firstByteMs = 0;
     var chunks = 0;
+    /* 服务端回告的"我做了什么"（注入安全约束 / 裁剪上下文 / 用的哪个模型） */
+    var serverMeta = null;
 
     var tick = setInterval(function () {
       if (settled) return;
@@ -6808,6 +6811,17 @@ window.NL2SH_AI = (function () {
       if (!res.ok) {
         return res.text().then(function (t) { throw httpError(res.status, t); });
       }
+      /* 读服务端回告的"我做了什么"——后端智能不该是隐形的。
+         Worker 会告诉我们：注入了几条安全约束、裁掉了几条上下文、用的哪个模型。
+         跨源读自定义头要求服务端显式 expose（Worker 里已设），否则这里是 null。 */
+      try {
+        serverMeta = {
+          server: res.headers.get('X-NL2SH-Server') || '',
+          trimmed: Number(res.headers.get('X-NL2SH-Trimmed') || 0) || 0,
+          safety: res.headers.get('X-NL2SH-Safety') || '',
+          model: res.headers.get('X-NL2SH-Model') || ''
+        };
+      } catch (e) { serverMeta = null; }
       if (!res.body || typeof res.body.getReader !== 'function') {
         return res.json().then(function (j) {
           var msg = j.choices && j.choices[0] && j.choices[0].message;
@@ -6895,7 +6909,10 @@ window.NL2SH_AI = (function () {
         totalMs: Date.now() - started,
         chunks: chunks,
         chars: acc.length,
-        thinking: !!opts.thinking
+        thinking: !!opts.thinking,
+        /* 服务端那一层做了什么。这是"后端智能"在界面上的落点——
+           没有它，"后端智能突出"就只是一句架构描述。 */
+        server: serverMeta
       };
       finish(handlers.onDone, item);
     }).catch(function (err) {
@@ -8058,6 +8075,16 @@ window.NL2SH_FX = (function () {
   function traceHtml(item) {
     var t = item.trace;
     if (t) {
+      /* 服务端那一层做了什么，摊在凭证的下一行。
+         赛道三说"后端智能必须突出"——那就别只说，把它做过的事写出来。 */
+      var sv = '';
+      if (t.server && t.server.server) {
+        var bits = ['安全约束已注入'];
+        if (t.server.safety === 'strict') bits.push('本次命中高危意图检测 · 已加严');
+        if (t.server.trimmed > 0) bits.push('裁剪了 ' + t.server.trimmed + ' 条旧上下文');
+        else bits.push('上下文无需裁剪');
+        sv = '<span class="trace__row trace__row--srv">边缘服务端：' + esc(bits.join(' · ')) + '</span>';
+      }
       return '<div class="trace trace--ai">' +
         '<span class="trace__badge"><i class="trace__dot"></i>AI 实时生成</span>' +
         '<span class="trace__row">模型 <b>' + esc(t.model) + '</b></span>' +
@@ -8065,6 +8092,7 @@ window.NL2SH_FX = (function () {
         '<span class="trace__row">总耗时 <b>' + fmtMs(t.totalMs) + '</b></span>' +
         '<span class="trace__row">流式分片 <b>' + t.chunks + '</b></span>' +
         '<span class="trace__row">输出 <b>' + t.chars + '</b> 字符</span>' +
+        sv +
         '<span class="trace__row trace__row--ep">POST ' + esc(t.endpoint) + '</span>' +
         '<span class="trace__row trace__row--key">密钥只在服务端环境变量里，前端没有</span>' +
       '</div>';
