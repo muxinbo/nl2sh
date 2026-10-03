@@ -28,37 +28,53 @@
   --side: 232px;
   --gap: 34px;
   --maxw: 1240px;
-  --radius: 8px;
+  --radius: 2px;
 
-  /* ── 配色（深色终端）──────────────────────────────
-     正文用偏冷的浅灰而不是纯白：纯白配深底在长时间阅读下会发涩。
-     语义色沿用同一色系（Mocha），保证一整页只有一种"光"的来源。 */
-  --paper: #1e1e2e;                          /* 页面底 */
-  --surface: #252537;                        /* 卡片、面板 */
-  --surface-2: #2a2a3d;                      /* 面板内嵌一层 */
-  --code-bg: rgba(166, 227, 161, 0.055);     /* 代码块底：带一点终端绿的余晖 */
-  --grid: rgba(137, 220, 235, 0.055);        /* 背景网格 */
-  --grid-size: 26px;
+  /* ── 配色（工程图纸 · 反相）──────────────────────────
+     视觉重塑的核心理由：旧版是 Catppuccin Mocha 那一套——深紫底 + 青色高亮 +
+     圆角 + 柔和阴影。它干净、统一，但**记不住**：满屏开发者工具都是那个颜色，
+     在一堆参赛作品里没有辨识度。而 60% 的权重看的就是"视觉风格与品牌感"。
 
-  --ink: #cdd6f4;                            /* 正文 */
-  --ink-2: #a6adc8;                          /* 次级 */
-  --ink-3: #6c7086;                          /* 三级 / 注释 */
+     新方向是「工程图纸」，因为**这个站本来就有图纸语言**：
+     命令解剖用引线标注、风险用印章、章节用 `SYNOPSIS · 命令` 这种编号标签、
+     分隔线是发丝线——这些早就在了，只是被那层通用开发工具的皮盖住了。
 
-  --rule: rgba(137, 220, 235, 0.14);         /* 细线 */
-  --rule-strong: rgba(137, 220, 235, 0.30);
+     所以改的是"纸"，不是"字"：
+       · 底色从**深紫**换成**深海军蓝**（#1e1e2e → #0b1220）
+       · 细线从**青色半透明**换成**近白色发丝线**——图纸感的关键在"白线"，不在颜色
+       · 圆角 8px → 2px，柔和阴影 → 锐利描边 + 角标
+     语义色（安全绿 / 谨慎琥珀 / 危险红）**一个都没动**：它们要能被一眼读懂，
+     不该为了"风格统一"而牺牲含义。强调色也保留青色——换成橙色会和"谨慎"撞色，
+     那是拿可读性换风格。 */
+  --paper: #0b1220;                          /* 页面底：深海军蓝 */
+  --surface: #101a2b;                        /* 卡片、面板 */
+  --surface-2: #16223a;                      /* 面板内嵌一层 */
+  --code-bg: rgba(232, 238, 248, 0.045);     /* 代码块底 */
+  --grid: rgba(232, 238, 248, 0.055);        /* 细格线（白） */
+  --grid-major: rgba(232, 238, 248, 0.10);   /* 每五格加粗：工程图纸的做法 */
+  --grid-size: 24px;
 
-  --signal: #89dceb;                         /* 高亮青：强调、链接、当前项 */
-  --signal-soft: rgba(137, 220, 235, 0.12);
+  --ink: #e8eef8;                            /* 正文：带冷调的近白 */
+  --ink-2: #9db0cc;                          /* 次级 */
+  --ink-3: #5f7391;                          /* 三级 / 注释 */
 
-  --safe: #a6e3a1;                           /* 终端绿：安全 */
-  --safe-bg: rgba(166, 227, 161, 0.10);
-  --caution: #f9e2af;
+  --rule: rgba(232, 238, 248, 0.16);         /* 细线：白，不是青 */
+  --rule-strong: rgba(232, 238, 248, 0.34);
+  --tick: rgba(232, 238, 248, 0.42);         /* 角标 */
+
+  --signal: #7ad7ea;                         /* 高亮青：在海军蓝底上比原来更亮 */
+  --signal-soft: rgba(122, 215, 234, 0.13);
+
+  --safe: #7ee787;                           /* 安全绿 */
+  --safe-bg: rgba(126, 231, 135, 0.10);
+  --caution: #f9e2af;                        /* 谨慎琥珀 */
   --caution-bg: rgba(249, 226, 175, 0.10);
-  --danger: #f38ba8;
-  --danger-bg: rgba(243, 139, 168, 0.12);
+  --danger: #ff7b8a;                         /* 危险红 */
+  --danger-bg: rgba(255, 123, 138, 0.12);
 
-  --glow: 0 0 14px rgba(137, 220, 235, 0.26);
-  --shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.28);
+  --glow: 0 0 12px rgba(122, 215, 234, 0.24);
+  /* 阴影改成"锐利描边 + 深投影"：图纸上的框是画出来的，不是浮起来的 */
+  --shadow: 0 0 0 1px rgba(232, 238, 248, 0.05), 0 14px 34px -16px rgba(0, 0, 0, 0.72);
 }
 
 /* ── 两个模式的区别只在信息密度，不在配色 ───────────────
@@ -174,26 +190,29 @@ a:hover { text-decoration: underline; }
 ::selection { background: var(--signal-soft); color: var(--ink); }
 
 /* 图板：方格底 + 应急模式的扫描线 */
+/* 图板：工程图纸的方格底。
+   三层叠加：**每五格加粗一次**的大格 + 细格 + 极淡扫描线。
+   "细格 + 五格加粗"是工程图纸最容易被认出来的特征，成本只是多一层渐变。
+   顶部那层青辉换成更冷的白光——旧版那个偏紫的辉光是"深紫底"时代的遗留，
+   在海军蓝底上会显脏。 */
 .plate {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background-image:
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.020) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 80% at 50% -10%, rgba(232, 238, 248, 0.06), transparent 62%),
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-/* 背景板统一：网格 + 极淡扫描线 + 顶部一层青辉。
-   扫描线是 CRT 的痕迹，也是"这是终端"最省事的视觉暗示；
-   透明度压到 0.022，只在纯色区域隐约可见，绝不干扰读字。 */
-.plate {
-  background-image:
-    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px),
-    radial-gradient(120% 80% at 50% -10%, rgba(137, 220, 235, 0.07), transparent 62%),
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: auto, auto, var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
+  background-size:
+    auto, auto,
+    calc(var(--grid-size) * 5) calc(var(--grid-size) * 5),
+    calc(var(--grid-size) * 5) calc(var(--grid-size) * 5),
+    var(--grid-size) var(--grid-size),
+    var(--grid-size) var(--grid-size);
 }
 
 .topbar, main, .foot { position: relative; z-index: 1; }
@@ -3176,6 +3195,72 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
 }
 .qcard__why b { color: var(--danger); font-weight: 600; }
 .qcard__why code { color: var(--caution); background: none; padding: 0; }
+/* ── 角标（裁切标记）────────────────────────────────────
+   四角各画一个 L 形短线。这是"工程图纸"最直接的签名，
+   代价只有一条 background-image，**不占一像素布局**，
+   所以首屏那些量好的位置一个都不会动。 */
+.card, .idbar, .quest, .about, .report {
+  position: relative;
+}
+.card::after, .idbar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick));
+  background-size:
+    13px 1px, 1px 13px,
+    13px 1px, 1px 13px,
+    13px 1px, 1px 13px,
+    13px 1px, 1px 13px;
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    0 100%, 0 100%,
+    100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+}
+/* ── 图纸标题栏 ─────────────────────────────────────────
+   工程图纸右下角那一格表格。它是这套视觉里辨识度最高的元素：
+   只要看到"图名/图号/比例/日期"的格子，就知道这是一张"图"，
+   而不是又一个深色卡片网页。
+   放在页脚：不占首屏、不影响产品位置，纯粹是身份声明。 */
+.titleblock {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 0 18px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--rule);
+  overflow: hidden;
+}
+.titleblock__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 12px;
+  background: var(--surface);
+}
+.titleblock__cell--wide { grid-column: span 2; }
+.titleblock__k {
+  font: 500 9.5px/1 var(--f-mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.titleblock__v { font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+.titleblock__v b { color: var(--ink); font-weight: 700; letter-spacing: .04em; }
+.titleblock__v a { color: var(--signal); text-decoration: none; }
+.titleblock__v a:hover { text-decoration: underline; }
+@media (max-width: 900px) {
+  .titleblock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .titleblock__cell--wide { grid-column: span 2; }
+}
 </style>
 </head>
 <body>
@@ -3414,6 +3499,39 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
 </main>
 
 <footer class="foot">
+  <!-- 图纸标题栏：工程图纸右下角那一格表格（图号/设计/日期/比例/许可）。
+       它是「工程图纸」这套视觉里最容易被认出来的东西，而且天生属于页脚——
+       不占首屏、不影响产品本身的位置。格子里的内容全是真的。 -->
+  <div class="titleblock">
+    <div class="titleblock__cell titleblock__cell--wide">
+      <span class="titleblock__k">图名</span>
+      <span class="titleblock__v"><b>NL2SH</b> · Linux 新手零门槛入门平台</span>
+    </div>
+    <div class="titleblock__cell">
+      <span class="titleblock__k">图号</span>
+      <span class="titleblock__v">NL2SH-01</span>
+    </div>
+    <div class="titleblock__cell">
+      <span class="titleblock__k">赛道</span>
+      <span class="titleblock__v">三 · 智能交互与应用</span>
+    </div>
+    <div class="titleblock__cell">
+      <span class="titleblock__k">设计</span>
+      <span class="titleblock__v">GDUST Linux 协会 · AI 网页设计大赛参赛作品</span>
+    </div>
+    <div class="titleblock__cell">
+      <span class="titleblock__k">日期</span>
+      <span class="titleblock__v">2026-10</span>
+    </div>
+    <div class="titleblock__cell">
+      <span class="titleblock__k">比例</span>
+      <span class="titleblock__v">1:1 · 纯静态单文件</span>
+    </div>
+    <div class="titleblock__cell">
+      <span class="titleblock__k">许可</span>
+      <span class="titleblock__v"><a href="https://github.com/muxinbo/nl2sh" target="_blank" rel="noopener">MIT · 源码仓库</a></span>
+    </div>
+  </div>
   <p class="foot__left">本作品为 <strong>GDUST Linux 协会 AI 网页设计大赛</strong>参赛作品 · 赛道三：智能交互与应用</p>
   <p class="foot__mid">
     <a href="https://github.com/muxinbo/nl2sh" target="_blank" rel="noopener">GitHub 仓库</a>
@@ -5141,7 +5259,39 @@ window.NL2SH_SBX_CMDS = (function () {
 
   /* ── 文本处理 ─────────────────────────────────────── */
   CMDS.grep = function (ctx) {
-    var a = parseArgs(ctx.argv.slice(1), ['i', 'c', 'v', 'n', 'r', 'R', 'l', 'w'], []);
+    var raw = ctx.argv.slice(1);
+    var include = null, exclude = null;
+    /* --include=*.js / --exclude=*.log：递归时按文件名过滤。
+       实测（scripts/find-loop-case.mjs）发现这两个参数会被当成普通位置参数，
+       于是 `grep -R --include *.js TODO .` 报出"无效的正则：*.js"——
+       一个和真实原因毫不相干的错，模型看了也改不对。
+       而它们恰恰是真实 grep 最常用的参数之一，不该挡在门外。 */
+    /* 两种写法都要认：`--include=*.js` 和 `--include '*.js'`。
+       模型两种都会写，只认一种就会剩下一个"无效的正则"的怪错。 */
+    var keep = [];
+    for (var gi = 0; gi < raw.length; gi++) {
+      var t0 = String(raw[gi]);
+      var m1 = /^--(include|exclude)$/.exec(t0);
+      if (m1) {
+        var v1 = raw[gi + 1] === undefined ? null : String(raw[gi + 1]);
+        if (m1[1] === 'include') include = v1; else exclude = v1;
+        gi++;                                   /* 吃掉后面那个模式 */
+        continue;
+      }
+      var m2 = /^--(include|exclude)=(.*)$/.exec(t0);
+      if (m2) {
+        if (m2[1] === 'include') include = m2[2] || null; else exclude = m2[2] || null;
+        continue;
+      }
+      keep.push(t0);
+    }
+    raw = keep;
+    function globHit(name, pat) {
+      var re = new RegExp('^' + String(pat).replace(/[.+^${}()|[\]\\]/g, '\\$&')
+        .replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
+      return re.test(name);
+    }
+    var a = parseArgs(raw, ['i', 'c', 'v', 'n', 'r', 'R', 'l', 'w'], []);
     if (!a.args.length) { ctx.err('Usage: grep [OPTION]... PATTERNS [FILE]...\n'); ctx.setCode(2); return; }
     var pattern = a.args[0];
     var files = a.args.slice(1);
@@ -5172,6 +5322,10 @@ window.NL2SH_SBX_CMDS = (function () {
         ctx.fs.walk(path, function (p, nn) {
           if (nn.t !== 'f') return;
           if (!nn.data) return;
+          /* --include / --exclude 在递归时按文件名过滤（真实 grep 的语义） */
+          var base = String(p).split('/').pop();
+          if (include && !globHit(base, include)) return;
+          if (exclude && globHit(base, exclude)) return;
           scan(nn.data, p, true);
         });
         return;
@@ -5182,7 +5336,7 @@ window.NL2SH_SBX_CMDS = (function () {
     else if (!a.flags.c && !a.flags.l) ctx.setCode(0);
     else ctx.setCode(0);
   };
-  CMDS.grep.usage = 'grep [-i] [-c] [-v] [-n] [-r] 模式 [文件...]';
+  CMDS.grep.usage = 'grep [-i] [-c] [-v] [-n] [-r] [--include=*.js] 模式 [文件...]';
 
   CMDS.sort = function (ctx) {
     var a = parseArgs(ctx.argv.slice(1), ['r', 'n', 'h', 'u', 'f'], []);
@@ -6778,7 +6932,14 @@ window.NL2SH_AI = (function () {
     '硬性要求：',
     '1. segments 给 2-5 段，覆盖关键参数；每段的 part 必须能在 command 里逐字找到（连引号、空格都要一致），否则那一段会被丢弃。',
     '2. 解释必须准确。不确定某个参数的语义时，宁可不给这一段，也不要猜。',
-    '3. command 必须单行、可直接粘贴执行；需要用户自己填的地方用 <占位符>，并在 risk_note 里提醒。',
+    /* ⚠️ 这条原来写的是「需要用户自己填的地方用 <占位符>」——**方向完全错了**。
+       实测（scripts/find-loop-case.mjs）发现模型会输出 `rm -rf <cache_directory>`，
+       追下去才发现：不是它不听话，是它在**执行我的指令**。
+       而这个作品的立身之本恰恰是"拿到一条能直接粘贴执行的命令"——
+       一个带尖括号的模板等于交了半成品，用户还得自己猜路径。
+       改法：不许占位符，缺路径就用当前目录或能推断出的路径，并在 risk_note 里说明假设。 */
+    '3. command 必须单行、**可直接粘贴执行**，不许出现 `<路径>` `<文件>` `xxx` `your_file` 这类占位符。',
+    '   用户没给具体路径时，用当前目录 `.` 或从上下文能确定的路径，并在 risk_note 里写明"假设在当前目录执行"。',
     '4. risk_level 判定：只读查询是 low；会写文件、改权限、重启服务是 medium；删除、递归改权限、写块设备、把网络内容管道给 shell 执行是 high。',
     '5. 用户没说清环境时，选更安全、影响面更小的做法。',
     /* 这一条是实测加的：模型会把 shell 正则里的 \( \) 直接写进 JSON 字符串，
@@ -6867,7 +7028,8 @@ window.NL2SH_AI = (function () {
     '{"command":"可直接执行的一条命令（单行）","segments":[{"part":"片段","label":"短标签","explanation":"一句话说明"}],' +
       '"risk_level":"low|medium|high","risk_note":"风险依据，20 字以内"}',
     '',
-    '要求：command 必须单行可直接执行；需要用户自己填的地方用 <占位符>；' +
+    '要求：command 必须单行、**可直接粘贴执行**，不许出现 `<路径>` `xxx` 这类占位符；' +
+      '缺路径就用当前目录 `.` 并在 risk_note 里说明；' +
       '删除、递归改权限、写块设备一律 risk_level=high；不确定环境时选影响面更小的做法。'
   ].join('\n');
 
@@ -7211,16 +7373,36 @@ window.NL2SH_AI = (function () {
       }
     }
 
-    /* 自纠错循环：把上一条命令和沙箱里的真实报错一起喂回去 */
+    /* 自纠错循环：把上一条命令、真实报错、**以及沙箱实际支持的能力清单**一起喂回去。
+       实测（scripts/find-loop-case.mjs）发现原来那版几乎修不好，两个原因：
+         ① 模型不知道沙箱支持什么——报错只说"不支持这个语法"，
+            没有告诉它"那支持什么"，于是它原样重复或只改皮毛；
+         ② 提示词里没有禁止占位符，模型会写出 `rm -rf <cache_directory>` 这种
+            带尖括号的模板——而"能直接粘贴执行"是这个作品的立身之本。
+       所以这里做了三件事：附上能力清单、明确"不要重复"、并给一条**诚实的退路**
+       （真做不到就返回最接近的替代命令并如实说明，不许为了通过而编造）。 */
     var userContent = query;
     if (opts.repair) {
       var r = opts.repair;
       userContent = '用户想做的事：' + query + '\n\n' +
         '你上一次给出的命令是：\n' + r.cmd + '\n\n' +
         '它在沙箱里执行失败了（退出码 ' + r.code + '），错误输出：\n' +
-        String(r.err || '').slice(0, 800) + '\n\n' +
-        '请根据这个真实报错修正命令，并按要求重新返回同样的 JSON 结构。' +
-        '如果失败原因是你用了沙箱里不存在的命令或参数，请换一个等效但更通用的写法。';
+        String(r.err || '').slice(0, 600) + '\n\n' +
+        (r.caps
+          ? '【沙箱实际支持的全部命令与写法——你只能用这里列出的】\n' +
+            String(r.caps).slice(0, 2000) + '\n\n'
+          : '') +
+        '请修正它，并严格遵守：\n' +
+        '1. **不要重复上一条命令**——它已经被真实执行证明跑不通了。\n' +
+        '2. 如果原命令用了上面清单里没有的命令、参数或语法' +
+          '（例如 shell 的 while / for 循环、awk 的 if 与求和、grep 的 --include、' +
+          'sed 的 a / i / y 脚本），就换成清单里有的基础命令组合' +
+          '（管道 | 、重定向 > 、find 的 -exec / -delete 等）。\n' +
+        '3. 命令里**不许出现占位符**（`<路径>`、`{文件}`、`xxx`、`your_file` 之类），' +
+          '必须是能直接粘贴执行的完整命令。用户没给具体路径时，就用当前目录 . 或能推断出的路径。\n' +
+        '4. 如果这件事**用沙箱支持的命令根本做不到**，就返回一条最接近、且能跑通的替代命令，' +
+          '并在 risk_note 里如实写清"沙箱做不到什么"。**不要为了通过而编造。**\n' +
+        '按要求返回同样的 JSON 结构。';
     }
 
     /* 组装消息：system + 对话历史 + 本次提问。
@@ -10572,10 +10754,20 @@ window.NL2SH_FX = (function () {
     if (!AI.state().ok || forceOffline) return;
     if (attempts.length >= MAX_ATTEMPTS) return;
     var q = ($('#q').value || '').trim() || item.q;
+    /* ⚠️ 把沙箱的**能力清单**一起喂回去。
+       实测（scripts/find-loop-case.mjs）发现：只给报错的话，模型会原样重复上一条命令
+       或只改皮毛——因为报错只说"不支持这个语法"，没说"那支持什么"。
+       沙箱的 `help` 输出正好是一份完整的能力清单（命令 + 参数写法），直接附上。 */
+    var caps = '';
+    try {
+      var hr = getSandbox() ? getSandbox().run('help') : null;
+      if (hr && hr.out) caps = String(hr.out).slice(0, 2000);
+    } catch (e) { caps = ''; }
     ask(q, {
       cmd: item.cmd, code: run.code,
-      err: [run.err, run.out].filter(Boolean).join('\n').slice(0, 800),
-      attempt: attempts.length + 1
+      err: [run.err, run.out].filter(Boolean).join('\n').slice(0, 600),
+      attempt: attempts.length + 1,
+      caps: caps
     });
   }
 
@@ -10940,7 +11132,15 @@ window.NL2SH_FX = (function () {
       runInSandbox(result, item, {
         onDone: function (run) {
           if (current !== item) return;
-          var failed = run.code !== 0 || !!String(run.err || '').trim();
+          /* ⚠️ "退出码非 0"不等于"命令失败"。
+             实测（scripts/find-loop-case.mjs）踩到：`grep -R TODO src` 没有匹配时返回 1——
+             那是 grep 的**正常语义**（没找到就是 1），可自验证把它当失败，
+             于是白触发一轮修正，闭环徽章还显示"未通过"，冤枉得很。diff 同理（有差异返回 1）。
+             所以这两种命令的退出码 1、且 stderr 干净时，应判定为"跑通了，只是没有结果"。 */
+          var firstWord = String(item.cmd || '').trim().split(/[\s|;&]+/)[0].replace(/^\W+/, '');
+          var emptyResultOk = (run.code === 1) &&
+            (firstWord === 'grep' || firstWord === 'diff' || firstWord === 'egrep' || firstWord === 'fgrep');
+          var failed = !emptyResultOk && (run.code !== 0 || !!String(run.err || '').trim());
 
           /* 记进轨迹：界面靠它回放整个自纠错过程 */
           attempts.push({
