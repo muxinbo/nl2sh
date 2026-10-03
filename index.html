@@ -6917,6 +6917,14 @@ window.NL2SH_AI = (function () {
   /* 服务端会按 thinking 标志选模型，这两个值只用于界面上显示"当前用哪个" */
   var MODELS = { fast: 'glm-4-flash', think: 'glm-4.7' };
 
+  /* 沙箱实际支持的命令与参数写法（由 app.js 在启动时注入 help 的输出）。
+     为什么要注入：实测发现模型会**发明**沙箱里没有的命令——问"把图片转成 webp"时
+     它写出了 `cconvert`（沙箱里叫 cwebp），问"重命名一批文件"时写出了 shell 的 while 循环。
+     这跟"占位符"是同一个根因：**提示词不知道沙箱的现实**。
+     注入后模型只能从这份清单里挑，第一次就能跑通的比例明显上升。 */
+  var SANDBOX_HELP = '';
+  function setSandboxHelp(text) { SANDBOX_HELP = String(text || '').slice(0, 1800); }
+
   var SYSTEM_PROMPT = [
     '你是 Linux 命令专家，服务对象是刚学 Linux 的新手。',
     '用户用中文描述想做的事，你只返回一个 JSON 对象，不要解释文字，不要 markdown 代码块。',
@@ -7410,10 +7418,12 @@ window.NL2SH_AI = (function () {
        「找出最大的 10 个文件」就没法接「那只要今天的呢」，
        产品立刻从"能对话的助手"退化成"一问答一题的表单"。
        只带最近的若干轮（服务端还会再裁一次），token 与延迟都受控。 */
-    var msgs = [{
-      role: 'system',
-      content: opts.analysis ? SYSTEM_PROMPT_ANALYST : (brief ? SYSTEM_PROMPT_SHORT : SYSTEM_PROMPT)
-    }];
+    var sysBase = opts.analysis ? SYSTEM_PROMPT_ANALYST : (brief ? SYSTEM_PROMPT_SHORT : SYSTEM_PROMPT);
+    /* 附上沙箱真实支持的命令清单（分析模式不带——它读的是日志，与命令清单无关） */
+    var sysText = (!opts.analysis && SANDBOX_HELP)
+      ? sysBase + '\n\n【沙箱实际支持的命令与写法——**只能用这里列出的**，不许发明其它命令或 shell 语法】\n' + SANDBOX_HELP
+      : sysBase;
+    var msgs = [{ role: 'system', content: sysText }];
     if (opts.history && opts.history.length) {
       for (var hi = 0; hi < opts.history.length; hi++) {
         var h = opts.history[hi];
@@ -7579,6 +7589,8 @@ window.NL2SH_AI = (function () {
     state: stateOf,
     health: health,
     generate: generate,
+    /* 沙箱能力清单的注入点：由 app.js 在启动时把沙箱 help 的输出交进来 */
+    setSandboxHelp: setSandboxHelp,
     fail: fail
   };
 })();
@@ -11550,7 +11562,15 @@ window.NL2SH_FX = (function () {
   /* 首屏即产品：没有深链带进来的结果时，加载后立刻把一条示例真跑起来。
      深链场景（?q=…）已经有内容了，再加一条会误导。 */
   if (!current) {
-    try { welcomeRun(); } catch (e) { /* 首屏示例失败不该拖垮整页 */ }
+    try {
+  /* 把沙箱的真实能力清单交给模型。
+     实测发现模型会**发明**沙箱里没有的命令（问"把图片转成 webp"时写出 `cconvert`，
+     沙箱里叫 cwebp）或语法（`while` 循环）。根因和"占位符"是同一个：
+     **提示词不知道沙箱的现实**。清单取自沙箱自己的 help 输出，不会和实现漂移。 */
+  var _hb = getSandbox();
+  if (_hb && AI.setSandboxHelp) AI.setSandboxHelp(_hb.run('help').out || '');
+} catch (e) { }
+try { welcomeRun(); } catch (e) { /* 首屏示例失败不该拖垮整页 */ }
   }
 
   (function firstPaint() {
