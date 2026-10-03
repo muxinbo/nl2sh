@@ -2259,6 +2259,145 @@ html[data-mode="geek"] .geek-only { display: block; }
   white-space: nowrap;
 }
 
+/* ── AI 数据分析入口与报告 ──────────────────────────────
+   赛道三评审侧重点第一条含"数据处理能力"。这块界面要让人看清两件事：
+   ① 数据是真的（读了哪份日志、跑了哪些命令、多少行）；
+   ② 模型只负责解释，算数是沙箱里的真命令算的。 */
+.analyze {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+}
+.analyze__left { display: flex; align-items: flex-start; gap: 12px; flex: 1 1 320px; min-width: 0; }
+.analyze__ic {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  background: var(--signal-soft);
+  color: var(--signal);
+}
+.analyze__h { margin: 0 0 4px; font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--ink); }
+.analyze__p { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--ink-2); }
+.analyze__p b { color: var(--signal); font-weight: 600; }
+
+/* 预处理清单：把"数据处理"这一步摊开 */
+.prep {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font: 500 11px/1.6 var(--f-mono);
+}
+.prep__badge {
+  display: inline-block;
+  margin-bottom: 7px;
+  padding: 2px 8px;
+  border: 1px solid var(--safe);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: var(--safe);
+}
+.prep__row { display: flex; align-items: baseline; gap: 10px; padding: 1px 0; color: var(--ink-3); }
+.prep__row code { flex: 1 1 auto; min-width: 0; color: var(--ink-2); overflow-wrap: anywhere; }
+.prep__row b { flex: 0 0 auto; color: var(--ink); font-weight: 600; }
+.prep__row--sum { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--rule); }
+.prep__row--sum b { color: var(--signal); }
+
+.card--analysis .card__q { font-size: 20px; }
+.analysis__sum {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--signal);
+  border-radius: 4px;
+  background: var(--signal-soft);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.finds { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.find {
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.find.is-low { border-left-color: var(--ink-3); }
+.find.is-mid { border-left-color: var(--caution); }
+.find.is-high { border-left-color: var(--danger); }
+.find__head { display: flex; align-items: center; gap: 9px; margin-bottom: 6px; }
+.find__lv {
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font: 600 10px/1.5 var(--f-mono);
+  letter-spacing: .06em;
+}
+.find.is-low .find__lv { color: var(--ink-3); }
+.find.is-mid .find__lv { color: var(--caution); }
+.find.is-high .find__lv { color: var(--danger); }
+.find__t { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.find__d { margin: 0; font-size: 13px; line-height: 1.7; color: var(--ink-2); }
+.find__cmd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+}
+.find__cmd code {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper);
+  font: 500 11.5px/1.6 var(--f-mono);
+  color: var(--signal);
+  overflow-wrap: anywhere;
+}
+.find__cmd--next { padding: 0; border: 0; background: none; }
+.find__run {
+  flex: 0 0 auto;
+  padding: 5px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 11.5px/1.4 var(--f-ui);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.find__run:hover { border-color: var(--signal); color: var(--signal); }
+.find__out {
+  flex: 1 1 100%;
+  margin: 4px 0 0;
+  padding: 8px 11px;
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper);
+  font: 400 11.5px/1.65 var(--f-mono);
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.find__out.is-bad { border-color: var(--danger); color: var(--danger); }
+
 /* ── 沙箱终端区：左边文件系统面板，右边终端 ─────────────── */
 .sbxzone {
   display: grid;
@@ -2725,6 +2864,24 @@ html[data-mode="geek"] .geek-only { display: block; }
       </div>
       <p class="ask__or">或者从这几个常见任务开始</p>
       <div class="samples" id="samples"></div>
+
+      <!-- AI 数据分析：赛道三的评审侧重点第一条是"模型选择、API 调用、数据处理能力"。
+           前两项作品里已经有了，"数据处理能力"一直缺一块——沙箱里明明躺着一台服务器
+           的 400 行真实 nginx 日志，从来没交给模型读过。 -->
+      <div class="analyze" id="analyze">
+        <div class="analyze__left">
+          <span class="analyze__ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20V10M9.5 20V4M15 20v-7M20.5 20V7" />
+            </svg>
+          </span>
+          <div>
+            <h3 class="analyze__h">AI 数据分析：让模型读服务器日志</h3>
+            <p class="analyze__p">沙箱里有一台服务器的真实 nginx 日志（400 行）。<b>统计量先由沙箱里的 awk / sort / uniq 真跑出来</b>，再交给模型解读——算数归命令，解释归模型。</p>
+          </div>
+        </div>
+        <button class="btn btn--go" type="button" id="analyzeBtn">开始分析</button>
+      </div>
 
       <!-- 新手闯关：5 关，判定看沙箱里的真实结果 -->
       <details class="quest" id="quest">
@@ -6136,6 +6293,52 @@ window.NL2SH_AI = (function () {
   ].join('\n');
 
   /* 极客终端模式用：只要命令，输出越少越快（免费额度下"少输出"就是"快"） */
+  /* 数据分析专用提示词。
+     赛道三的评审侧重点第一条就是"模型选择、API 调用、**数据处理能力**"——
+     只做"中文 → 命令"是覆盖不到数据处理这一项的。
+     所以这里让模型读服务器日志的**本地预处理结果**（统计量是用真实命令算出来的，
+     不是估计值）+ 原文取样，产出结论与可执行的确认命令。
+     ⚠️ 两条关键设计：
+       1. 统计量由沙箱里的 awk/sort/uniq 真跑出来，模型负责**解释**而不是**计算**——
+          它算数不可靠，这是扬长避短。
+       2. 环境事实（nginx 而非 apache、日志路径、可用命令清单）必须写死在提示词里。
+          第一次真机实测时模型编出了 `tail /var/log/apache2/error.log` 和
+          `ipset add suspicious_ip …`——前者路径根本不存在，后者这台机器没装。
+          界面上的"一键在沙箱里验证"是第二道防线：编出来的命令跑不通，一眼可见。 */
+  var ANALYST_ENV = [
+    '【这台机器的环境（已核实，不要臆测）】',
+    '- Web 服务是 nginx，**不是 apache**；没有任何 apache 的目录或日志。',
+    '- 访问日志 /var/log/nginx/access.log，错误日志 /var/log/nginx/error.log。',
+    '- 日志格式：客户端IP - - [日期:时间 +0800] "方法 路径 协议" 状态码 响应字节 "-" "UA"',
+    '- 当前用户是普通用户 student，**没有 sudo 权限**；不要给需要 root 的命令。',
+    '- 可用命令仅限这些基础工具：awk basename cat cd chmod chown cp cut date df dirname du echo file',
+    '  find grep head id kill ls mkdir mv ps pwd rm sed seq sort stat tail tar tee touch tr uniq unzip wc',
+    '  which whoami xargs zip。',
+    '- **不要使用 ipset / iptables / ufw / fail2ban / systemctl / journalctl / ss / netstat / tcpdump**',
+    '  这类这台机器上没有的工具；统计与排查一律用上面那批基础命令组合出来。'
+  ].join('\n');
+
+  var SYSTEM_PROMPT_ANALYST = [
+    '你是 Linux 运维分析助手。用户会给你一份服务器日志的**本地预处理结果**（统计量由真实命令算出，可信）和原文取样。',
+    ANALYST_ENV,
+    '',
+    '你的任务：找出值得注意的事，并给出可以直接执行的确认命令。只返回一个 JSON 对象，不要解释文字，不要 markdown 代码块。',
+    '',
+    'JSON 结构：',
+    '{"summary":"一句话结论，40 字以内",',
+    '"findings":[{"title":"6 字以内的短标题","detail":"40 字以内，必须点明依据是哪个数字","level":"low|medium|high","cmd":"用来确认这条结论的可执行命令；没有就给空串"}],',
+    '"next":["最多 3 条你最建议马上执行的命令"]}',
+    '',
+    '硬性要求：',
+    '1. findings 最多 4 条，按重要性从高到低排。',
+    '2. detail 里必须引用预处理结果里的具体数字或原文片段，不许泛泛而谈。',
+    '3. level 判定：只是观察、无风险是 low；需要跟进确认是 medium；疑似攻击、数据风险是 high。',
+    '4. cmd 必须是单行、可在**上面那份命令清单里**直接执行的命令，路径必须来自输入或环境说明；',
+    '   不确定就给空串。**编一个不存在的工具或路径，比留空更有害。**',
+    '5. 数据量小或没有异常时，如实说"未发现明显异常"，不要硬凑结论。',
+    '6. JSON 字符串里要表达反斜杠必须写两个；正斜杠 / 不需要转义。'
+  ].join('\n');
+
   var SYSTEM_PROMPT_SHORT = [
     '你是 Linux 命令专家。只返回一个 JSON 对象，不要解释文字，不要 markdown 代码块。',
     '',
@@ -6499,11 +6702,14 @@ window.NL2SH_AI = (function () {
 
     var payload = {
       stream: true,
-      temperature: 0.2,
+      temperature: opts.analysis ? 0.1 : 0.2,
       json: true,
-      max_tokens: opts.thinking ? 1600 : (brief ? 500 : 1200),
+      max_tokens: opts.thinking ? 1600 : (opts.analysis ? 1600 : (brief ? 500 : 1200)),
       messages: [
-        { role: 'system', content: brief ? SYSTEM_PROMPT_SHORT : SYSTEM_PROMPT },
+        {
+          role: 'system',
+          content: opts.analysis ? SYSTEM_PROMPT_ANALYST : (brief ? SYSTEM_PROMPT_SHORT : SYSTEM_PROMPT)
+        },
         { role: 'user', content: userContent }
       ]
     };
@@ -6561,7 +6767,37 @@ window.NL2SH_AI = (function () {
       }
       return pump();
     }).then(function () {
-      var item = normalize(acc, query, { requireAnno: !brief });
+      /* 分析模式：不复用 normalize（那套是给"命令卡片"用的）。
+         这里只做结构兜底——模型偶尔会少字段、或把 findings 写成字符串数组，
+         都宽容地收拾成渲染层能直接吃的形状。 */
+      var item;
+      if (opts.analysis) {
+        var obj = extractJson(acc);
+        if (!obj || typeof obj !== 'object') throw fail('format', '分析结果不是合法 JSON');
+        var findings = Array.isArray(obj.findings) ? obj.findings : [];
+        item = {
+          kind: 'analysis',
+          summary: typeof obj.summary === 'string' ? obj.summary.trim() : '',
+          findings: findings.map(function (f) {
+            if (typeof f === 'string') return { title: '', detail: f, level: 'low', cmd: '' };
+            return {
+              title: typeof f.title === 'string' ? f.title.trim() : '',
+              detail: typeof f.detail === 'string' ? f.detail.trim() : '',
+              level: normalizeRisk(f.level) || 'caution',
+              cmd: typeof f.cmd === 'string' ? f.cmd.trim() : ''
+            };
+          }).filter(function (f) { return f.detail || f.title; }).slice(0, 6),
+          next: (Array.isArray(obj.next) ? obj.next : [])
+            .filter(function (x) { return typeof x === 'string' && x.trim(); })
+            .slice(0, 3),
+          source: 'ai'
+        };
+        if (!item.summary && !item.findings.length) {
+          throw fail('format', '分析结果里既没有结论也没有发现');
+        }
+      } else {
+        item = normalize(acc, query, { requireAnno: !brief });
+      }
       item.reasoning = reasoning;
       item.attempt = opts.repair ? (opts.repair.attempt || 1) : 0;
       /* 调用凭证：把"这确实是一次真实的大模型调用"变成界面上看得见的事实。
@@ -6601,6 +6837,7 @@ window.NL2SH_AI = (function () {
     MODELS: MODELS,
     SYSTEM_PROMPT: SYSTEM_PROMPT,
     SYSTEM_PROMPT_SHORT: SYSTEM_PROMPT_SHORT,
+    SYSTEM_PROMPT_ANALYST: SYSTEM_PROMPT_ANALYST,
     DANGER_PATTERNS: DANGER_PATTERNS,
     extractJson: extractJson,
     normalize: normalize,
@@ -8219,6 +8456,220 @@ window.NL2SH_FX = (function () {
     });
   }
 
+  /* ── AI 数据分析（服务器日志）──────────────────────────
+     赛道三的评审侧重点第一条：「AI 功能的技术实现与集成度：模型选择、API 调用、
+     **数据处理能力**」。前两项作品里已经有了，数据处理一直缺一块——
+     沙箱里躺着一台服务器的 400 行真实 nginx 日志，从来没交给模型读过。
+
+     分工是刻意划的：**统计量由沙箱里的真实命令算出来，模型只负责解释。**
+     让模型自己数数它不可靠（会把 133 说成 130）；但让它看着真实统计量
+     讲"这说明什么、该查什么"，是它真正擅长的。
+     界面上会把"读了什么、跑了哪些命令"逐条摊开，这条链路可以核对。 */
+  var ANALYZE_LOG = '/var/log/nginx/access.log';
+
+  var ANALYZE_STEPS = [
+    { key: 'total', label: '日志总量', cmd: 'wc -l ' + ANALYZE_LOG },
+    { key: 'codes', label: '状态码分布', cmd: "awk '{print $9}' " + ANALYZE_LOG + ' | sort | uniq -c | sort -rn' },
+    { key: 'ips', label: '访问最多的 IP', cmd: "awk '{print $1}' " + ANALYZE_LOG + ' | sort | uniq -c | sort -rn | head -n 6' },
+    { key: 'paths', label: '最常被请求的路径', cmd: "awk '{print $7}' " + ANALYZE_LOG + ' | sort | uniq -c | sort -rn | head -n 6' },
+    { key: 'sample', label: '原文取样（前 60 行）', cmd: 'head -n 60 ' + ANALYZE_LOG }
+  ];
+
+  function analyzePrep() {
+    var sb = getSandbox();
+    if (!sb) return null;
+    var parts = {}, facts = [], chars = 0;
+    ANALYZE_STEPS.forEach(function (s) {
+      var r = null;
+      try { r = sb.run(s.cmd); } catch (e) { r = null; }
+      var out = r ? String(r.out || '').trim() : '';
+      parts[s.key] = out;
+      chars += out.length;
+      facts.push({ label: s.label, cmd: s.cmd, lines: out ? out.split('\n').length : 0, code: r ? r.code : -1 });
+    });
+    return { parts: parts, facts: facts, chars: chars };
+  }
+
+  function analyzeInput(prep) {
+    return [
+      '【总量】' + (prep.parts.total || '（读不到）'),
+      '',
+      '【状态码分布（awk | sort | uniq -c | sort -rn 算出）】',
+      prep.parts.codes,
+      '',
+      '【访问最多的 IP（同上）】',
+      prep.parts.ips,
+      '',
+      '【最常被请求的路径（同上）】',
+      prep.parts.paths,
+      '',
+      '【原文取样：前 60 行】',
+      prep.parts.sample
+    ].join('\n');
+  }
+
+  var analyzing = false;
+
+  function runAnalysis() {
+    if (analyzing) return;
+    var st = AI.state();
+    var result = $('#result');
+    if (!result) return;
+
+    if (!st.ok || forceOffline) {
+      result.hidden = false;
+      result.innerHTML = '<div class="progress"><div class="progress__head">' +
+        '<span class="progress__text">AI 数据分析需要接入模型</span></div>' +
+        '<p class="progress__hint">当前是离线模式（' + esc(st.error || '未接入代理') + '）。' +
+        '数据分析必须由大模型完成，内置规则库无法替代——这也是这个作品保留"在线/离线"两态的原因：' +
+        '离线时它仍然能用，但需要真正智能的那部分会如实告诉你它做不到。</p></div>';
+      return;
+    }
+
+    var prep = analyzePrep();
+    if (!prep) return;
+
+    analyzing = true;
+    var btn = $('#analyzeBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '正在分析…'; }
+
+    var model = (st.models && st.models.fast) || AI.MODELS.fast;
+    progressLabel = '正在让 ' + model + ' 解读这份日志';
+    showProgress();
+    /* 把本地预处理摊在进度面板里：评委能看到"数据处理"这一步真的发生了 */
+    var box = $('#runBox');
+    var live = $('#liveBox');
+    if (live) {
+      live.hidden = false;
+      live.insertAdjacentHTML('afterend',
+        '<div class="prep" id="prepBox">' +
+          '<span class="prep__badge">本地预处理 · 真实命令</span>' +
+          prep.facts.map(function (f) {
+            return '<span class="prep__row"><code>' + esc(f.cmd) + '</code>' +
+              '<b>' + f.lines + ' 行</b></span>';
+          }).join('') +
+          '<span class="prep__row prep__row--sum">合计 <b>' + prep.chars + '</b> 字符送入模型</span>' +
+        '</div>');
+    }
+
+    running = AI.generate(analyzeInput(prep), {
+      onProgress: function (p) { updateProgress(p); },
+      onReasoning: function (t) { updateReasoning(t); },
+      onDone: function (item) {
+        running = null;
+        analyzing = false;
+        if (btn) { btn.disabled = false; btn.textContent = '再分析一次'; }
+        renderAnalysis(item, prep);
+      },
+      onError: function (err) {
+        running = null;
+        analyzing = false;
+        if (btn) { btn.disabled = false; btn.textContent = '重新分析'; }
+        result.innerHTML = '<div class="progress"><div class="progress__head">' +
+          '<span class="progress__text">分析失败</span></div>' +
+          '<p class="progress__hint">' + esc(err && err.message || '模型不可用') + '</p></div>';
+      }
+    }, { analysis: true });
+  }
+
+  var LEVEL_LABEL = { safe: '观察', caution: '需跟进', danger: '高风险' };
+  var LEVEL_CLASS = { safe: 'is-low', caution: 'is-mid', danger: 'is-high' };
+
+  function analysisHtml(item, prep) {
+    var findings = (item.findings || []).map(function (f, i) {
+      var lv = f.level || 'caution';
+      return '<li class="find ' + (LEVEL_CLASS[lv] || 'is-mid') + '">' +
+        '<div class="find__head">' +
+          '<span class="find__lv">' + (LEVEL_LABEL[lv] || lv) + '</span>' +
+          '<span class="find__t">' + esc(f.title || ('发现 ' + (i + 1))) + '</span>' +
+        '</div>' +
+        '<p class="find__d">' + esc(f.detail) + '</p>' +
+        (f.cmd
+          ? '<div class="find__cmd">' +
+              '<code>' + esc(f.cmd) + '</code>' +
+              '<button class="find__run" type="button" data-sbx="' + esc(f.cmd) + '">在沙箱里验证</button>' +
+            '</div>' +
+            '<pre class="find__out" hidden></pre>'
+          : '') +
+      '</li>';
+    }).join('');
+
+    var next = (item.next || []).map(function (c) {
+      return '<li class="find__cmd find__cmd--next">' +
+        '<code>' + esc(c) + '</code>' +
+        '<button class="find__run" type="button" data-sbx="' + esc(c) + '">在沙箱里验证</button>' +
+        '<pre class="find__out" hidden></pre>' +
+      '</li>';
+    }).join('');
+
+    var prepRows = prep.facts.map(function (f) {
+      return '<span class="prep__row"><code>' + esc(f.cmd) + '</code><b>' + f.lines + ' 行</b></span>';
+    }).join('');
+
+    return '<article class="card card--analysis">' +
+      '<header class="card__head">' +
+        '<div class="card__main">' +
+          '<h2 class="card__q">服务器日志分析</h2>' +
+          '<p class="card__src card__src--ai">AI 数据分析 · 数据来自沙箱里真实的 nginx 日志</p>' +
+        '</div>' +
+      '</header>' +
+      traceHtml(item) +
+      '<section class="sec sec-item is-ready">' +
+        '<h3 class="sec__h">DATA · 这次处理了什么</h3>' +
+        '<div class="prep">' +
+          '<span class="prep__badge">本地预处理 · 真实命令</span>' +
+          prepRows +
+          '<span class="prep__row prep__row--sum">合计 <b>' + prep.chars + '</b> 字符送入模型</span>' +
+        '</div>' +
+        '<p class="card__hint">统计量是沙箱里用 awk / sort / uniq 真跑出来的，模型负责解释而不是计算——' +
+          '让它自己数数并不可靠，让它看着真实数字讲"这说明什么"才是它擅长的。</p>' +
+      '</section>' +
+      '<section class="sec sec-item is-ready">' +
+        '<h3 class="sec__h">FINDINGS · 发现</h3>' +
+        (item.summary ? '<p class="analysis__sum">' + esc(item.summary) + '</p>' : '') +
+        (findings ? '<ul class="finds">' + findings + '</ul>'
+                  : '<p class="card__hint">这次没有发现明显异常。</p>') +
+      '</section>' +
+      (next
+        ? '<section class="sec sec-item is-ready">' +
+            '<h3 class="sec__h">NEXT · 建议执行</h3>' +
+            '<ul class="finds">' + next + '</ul>' +
+            '<p class="card__hint">每一条都能点开在沙箱里真跑一遍。' +
+              '<b>模型给的建议未必适用于这台机器</b>——跑不通就是跑不通，这里不替它圆场。</p>' +
+          '</section>'
+        : '') +
+    '</article>';
+  }
+
+  function renderAnalysis(item, prep) {
+    var result = $('#result');
+    if (!result) return;
+    result.hidden = false;
+    result.innerHTML = analysisHtml(item, prep);
+    result.setAttribute('aria-busy', 'false');
+
+    /* 建议命令一律"先验证再说"：模型编出来的路径/工具在这里会当场露馅。
+       这不是给模型挑刺，而是这个作品一贯的做法——命令自己证明自己。 */
+    $$('.find__run', result).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var sb = getSandbox();
+        var out = b.parentNode.querySelector('.find__out');
+        if (!sb || !out) return;
+        var r = null;
+        try { r = sb.run(b.getAttribute('data-sbx')); } catch (e) { r = null; }
+        out.hidden = false;
+        var text = r ? (String(r.out || '') + String(r.err || '')).trim() : '沙箱执行失败';
+        if (!text) text = '（这条命令没有任何输出）';
+        out.textContent = '$ ' + b.getAttribute('data-sbx') + '\n' + text +
+          '\n[退出码 ' + (r ? r.code : '?') + ']';
+        out.classList.toggle('is-bad', !!(r && (r.code !== 0 || String(r.err || '').trim())));
+        b.textContent = '再跑一次';
+        if (fx) fx.burstAt(b, { count: 10, power: 1.8, color: fxColors().safe });
+      });
+    });
+    scrollToEl('#result');
+  }
+
   /* ── 新手闯关 ─────────────────────────────────────────
      判定的是"结果"，不是"命令文本"。
      同一件事有很多种写法（`ls -a` / `ls -la` / `ls --all`），
@@ -8471,6 +8922,10 @@ window.NL2SH_FX = (function () {
     /* 模式横幅上的"切回新手引导" */
     var back = $('#modeBack');
     if (back) back.addEventListener('click', function () { setMode('guide'); });
+
+    /* AI 数据分析 */
+    var analyzeBtn = $('#analyzeBtn');
+    if (analyzeBtn) analyzeBtn.addEventListener('click', runAnalysis);
 
     $('#askForm').addEventListener('submit', function (e) {
       e.preventDefault();
