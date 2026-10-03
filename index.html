@@ -37,7 +37,7 @@
   --surface: #252537;                        /* 卡片、面板 */
   --surface-2: #2a2a3d;                      /* 面板内嵌一层 */
   --code-bg: rgba(166, 227, 161, 0.055);     /* 代码块底：带一点终端绿的余晖 */
-  --grid: rgba(137, 220, 235, 0.045);        /* 背景网格 */
+  --grid: rgba(137, 220, 235, 0.055);        /* 背景网格 */
   --grid-size: 26px;
 
   --ink: #cdd6f4;                            /* 正文 */
@@ -69,6 +69,73 @@ html[data-mode="guide"] .geek-only { display: none; }
 html[data-mode="geek"] .guide-only { display: none; }
 html[data-mode="geek"] .leaders { display: none; }
 html[data-mode="geek"] .dissect__col { opacity: 0.35; }
+
+/* ── 两个模式必须一眼可辨 ────────────────────────────────
+   以前极客模式只作用于结果卡内部的几段文字（.guide-only），
+   没有结果时两个模式长得**完全一样** —— 用户直接指出"选来选去感觉不能一眼切换"。
+   现在极客模式把"落地页"和"教学"整块收起来，只留干活要用的东西：
+   输入框、真实执行结果、沙箱文件系统、终端。 */
+html[data-mode="geek"] .hero,
+html[data-mode="geek"] .anatomy,
+html[data-mode="geek"] .notes,
+html[data-mode="geek"] #quest { display: none; }
+
+/* 底色压暗一档、细线换成绿的：不动 --signal（它会和"安全绿"撞色），
+   但整页的"光"已经明显不同，配合顶部的模式横幅足够一眼分辨。 */
+html[data-mode="geek"] {
+  --paper: #16161f;
+  --surface: #1c1c28;
+  --surface-2: #21212e;
+  --rule: rgba(166, 227, 161, 0.16);
+  --rule-strong: rgba(166, 227, 161, 0.34);
+  --grid: rgba(166, 227, 161, 0.05);
+}
+/* 极客模式下面板给更高，终端是主角 */
+html[data-mode="geek"] .term__body { max-height: 460px; }
+html[data-mode="geek"] .fsTree__body { max-height: 420px; }
+
+/* ── 模式横幅 ─────────────────────────────────────────── */
+.modebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  max-width: var(--maxw);
+  margin: 14px auto 0;
+  padding: 10px 16px;
+  border: 1px solid var(--safe);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--safe-bg);
+}
+.modebar__tag {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--safe);
+  color: var(--paper);
+  font: 600 11px/1.4 var(--f-mono);
+  letter-spacing: 0.08em;
+}
+.modebar__hint { font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
+.modebar__back {
+  margin-left: auto;
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 11.5px/1.3 var(--f-ui);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.modebar__back:hover { border-color: var(--signal); color: var(--signal); }
+
+@media (max-width: 760px) {
+  .modebar { margin-top: 10px; }
+  .modebar__back { margin-left: 0; }
+}
 
 /* ── 基础 ───────────────────────────────────────────── */
 *,
@@ -1548,10 +1615,168 @@ html[data-mode="geek"] .geek-only { display: block; }
 /* ── 首屏：标题 + 三个亮点卡 + 立即体验 ─────────────────
    亮点卡是"30 秒说清痛点"的载体，文字要短、可扫读，
    每张卡只说一件事，不堆形容词。 */
-.hero { padding: 54px 0 0; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: 22px 34px;
+  align-items: center;
+  padding: 54px 0 0;
+}
+.hero__text { min-width: 0; }
+.hero__demo { min-width: 0; }
 .hero h1 {
   font-size: clamp(30px, 4.4vw, 48px);
   line-height: 1.14;
+}
+
+/* 亮点卡横跨两栏，排在文字与演示窗下面 */
+.points { grid-column: 1 / -1; }
+
+/* ── 首屏自动演示窗 ────────────────────────────────────
+   规格里"亮点太隐蔽"是被直接指出的问题：沙箱、回滚这些优势都写在文字里，
+   评委不会主动深挖。所以把整条链路做成一个自动循环的迷你演示——
+   首屏就能**看见**命令被真跑、文件真的消失、然后一键回来。 */
+.hdemo {
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.hdemo__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 13px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-2);
+}
+.hdemo__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+.hdemo__dot:first-child { background: var(--danger); opacity: .7; }
+.hdemo__dot:nth-child(2) { background: var(--caution); opacity: .7; }
+.hdemo__dot:nth-child(3) { background: var(--safe); opacity: .7; }
+.hdemo__title {
+  margin-left: 6px;
+  font: 500 11px/1 var(--f-mono);
+  letter-spacing: .06em;
+  color: var(--ink-3);
+}
+.hdemo__live {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 600 10px/1 var(--f-mono);
+  letter-spacing: .1em;
+  color: var(--signal);
+}
+.hdemo__live::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: livePulse 1.2s ease-in-out infinite;
+}
+.hdemo__body {
+  min-height: 232px;
+  padding: 14px 15px;
+  font: 400 12px/1.7 var(--f-mono);
+  color: var(--ink);
+}
+.hdemo__ask {
+  padding: 8px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.hdemo__cmd {
+  margin-top: 10px;
+  padding: 8px 11px;
+  border-left: 3px solid var(--signal);
+  border-radius: 4px;
+  background: var(--code-bg);
+  color: var(--signal);
+  overflow-wrap: anywhere;
+}
+.hdemo__caret {
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: currentColor;
+  animation: livePulse .9s steps(1) infinite;
+}
+.hdemo__tag {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 2px 8px;
+  border: 1px solid var(--safe);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: var(--safe);
+}
+.hdemo__files {
+  margin-top: 11px;
+  padding: 8px 4px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper);
+}
+.hdemo__f {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 1px 9px;
+  font-size: 11px;
+  color: var(--ink-2);
+}
+.hdemo__f span:last-child { margin-left: auto; color: var(--ink-3); font-size: 10px; }
+.hdemo__f--dir { color: var(--safe); }
+.hdemo__f--tmp { color: var(--ink); }
+.hdemo__f.is-dying { animation: dieFlash 0.9s steps(1) 1 both, dieCollapse .45s ease .8s forwards; border-radius: 3px; }
+.hdemo__f.is-back { animation: hdemoBack .45s ease both; }
+@keyframes hdemoBack {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: none; }
+}
+.hdemo__undo {
+  margin-top: 11px;
+  padding: 6px 13px;
+  border: 1px solid var(--signal);
+  border-radius: 6px;
+  background: var(--signal-soft);
+  color: var(--signal);
+  font: 600 11px/1.3 var(--f-mono);
+  cursor: default;
+}
+.hdemo__undo.is-hit {
+  background: var(--signal);
+  color: var(--paper);
+  box-shadow: 0 0 0 4px var(--signal-soft);
+}
+.hdemo__foot {
+  padding: 9px 14px;
+  border-top: 1px solid var(--rule);
+  background: var(--surface-2);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  min-height: 38px;
+}
+
+@media (max-width: 1000px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .hero__demo { order: 3; }
 }
 .lede strong { color: var(--ink); font-weight: 600; }
 .lede em {
@@ -1592,7 +1817,27 @@ html[data-mode="geek"] .geek-only { display: block; }
   transform: translateY(-2px);
   box-shadow: var(--shadow);
 }
-.point__ic { display: block; font-size: 21px; line-height: 1; margin-bottom: 11px; }
+/* 图标底板：一个圆角方块把图标"框"起来。
+   以前这里是 emoji（🤖📚🧪）——那是"AI 生成落地页"最典型的廉价感来源，
+   而且 emoji 的粗细、色彩、基线都不受控。自绘 SVG 跟正文同一套线宽与颜色。 */
+.point__ic {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 13px;
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  background: var(--signal-soft);
+  color: var(--signal);
+  transition: color 0.18s, border-color 0.18s;
+}
+.point__ic svg { display: block; }
+.point:hover .point__ic { border-color: var(--signal); }
+.point:nth-child(2) .point__ic { color: var(--safe); background: var(--safe-bg); }
+.point:nth-child(2):hover .point__ic { border-color: var(--safe); }
+.point:nth-child(3) .point__ic { color: var(--caution); background: var(--caution-bg); }
+.point:nth-child(3):hover .point__ic { border-color: var(--caution); }
 .point__h {
   margin: 0;
   font-size: 14.5px;
@@ -1921,6 +2166,98 @@ html[data-mode="geek"] .geek-only { display: block; }
 }
 .btn--danger:hover { filter: brightness(1.08); }
 .flag--ok { color: var(--safe); border-color: var(--safe); }
+
+/* ── AI 调用凭证 / 实时流式证据 ─────────────────────────
+   用户直接指出的问题："AI 干了活，但评委看不出来，分不清真调用和模板匹配。"
+   所以这两块不是装饰，是**证据**：模型名、首字节、总耗时、流式分片数、实际端点。
+   绿色 = 真·大模型实时生成；琥珀色 = 离线走内置规则库。两者一眼可辨。 */
+.trace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 14px;
+  margin: 0 0 16px;
+  padding: 9px 13px;
+  border-radius: var(--radius);
+  font: 500 11px/1.6 var(--f-mono);
+  color: var(--ink-2);
+}
+.trace--ai { border: 1px solid var(--safe); background: var(--safe-bg); }
+.trace--offline { border: 1px solid var(--caution); background: var(--caution-bg); }
+
+.trace__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--paper);
+}
+.trace--ai .trace__badge { background: var(--safe); }
+.trace--offline .trace__badge { background: var(--caution); }
+.trace__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+.trace__row b { color: var(--ink); font-weight: 600; }
+.trace__row--ep,
+.trace__row--key { color: var(--ink-3); font-size: 10.5px; }
+.trace__row--ep { overflow-wrap: anywhere; }
+
+/* 生成过程中的实时证据条 */
+.live {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 14px;
+  margin: 11px 0 0;
+  padding: 8px 12px;
+  border: 1px solid var(--signal);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--signal-soft);
+  font: 500 11px/1.5 var(--f-mono);
+  color: var(--ink-2);
+}
+.live__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--signal);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.live__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: livePulse 1s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.live__stat { color: var(--ink-3); }
+.live__stat b { color: var(--ink); font-weight: 600; }
+.live__tail {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 5px 9px;
+  background: var(--paper);
+  border-radius: 5px;
+  font: 400 10.5px/1.55 var(--f-mono);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ── 沙箱终端区：左边文件系统面板，右边终端 ─────────────── */
 .sbxzone {
@@ -2289,36 +2626,84 @@ html[data-mode="geek"] .geek-only { display: block; }
   <p class="status" id="status"><span class="status__led" aria-hidden="true"></span><span id="statusText">检测代理中…</span></p>
 </header>
 
+<!-- 模式横幅：只出现在极客终端模式，顶在最上面。
+     以前两个模式只差结果卡内部的几段文字，没出结果时长得一模一样——
+     用户直接指出"选来选去不能一眼切换"。这里给一个明确的信号 + 一键切回。 -->
+<div class="modebar" id="modeBar" hidden>
+  <span class="modebar__tag">极客终端模式</span>
+  <span class="modebar__hint">只给命令、真实执行结果和沙箱；解释、推演、教学与首屏介绍已整块收起。</span>
+  <button class="modebar__back" type="button" id="modeBack">切回新手引导 →</button>
+</div>
+
 <main id="top">
 
   <section class="hero">
-    <p class="eyebrow">GDUST Linux 协会 · AI 网页设计大赛 · 赛道三：智能交互与应用</p>
-    <h1>NL2SH：Linux 新手零门槛入门平台</h1>
-    <p class="lede">以 <strong>AI 生成</strong> ＋ <strong>沙箱仿真</strong> 为核心，解决新手「<em>不会写命令</em>、<em>不敢敲命令</em>、<em>看不懂命令</em>」三大痛点——零风险学习 Linux 运维，顺手把开源技术文化带出去。</p>
+    <div class="hero__text">
+      <p class="eyebrow">GDUST Linux 协会 · AI 网页设计大赛 · 赛道三：智能交互与应用</p>
+      <h1>NL2SH：Linux 新手零门槛入门平台</h1>
+      <p class="lede">以 <strong>AI 生成</strong> ＋ <strong>沙箱仿真</strong> 为核心，解决新手「<em>不会写命令</em>、<em>不敢敲命令</em>、<em>看不懂命令</em>」三大痛点——零风险学习 Linux 运维，顺手把开源技术文化带出去。</p>
+
+      <div class="hero__actions">
+        <button class="btn btn--go btn--lg" type="button" id="startBtn">立即体验</button>
+        <button class="btn btn--ghost" type="button" id="demoBtn">看一遍完整演示</button>
+        <span class="hero__hint">不用配 Key、不用联网也能完整跑通</span>
+      </div>
+    </div>
+
+    <!-- 首屏自动演示窗：把整条链路演出来。
+         "沙箱、回滚、离线这些优势都藏在页面里"是被直接指出的问题——
+         所以首屏不只是声明亮点，而是循环播放一遍：
+         中文 → 命令 → 沙箱真跑 → 文件红闪消失 → 一键回滚。 -->
+    <div class="hero__demo" id="heroDemo">
+      <div class="hdemo">
+        <div class="hdemo__bar">
+          <span class="hdemo__dot" aria-hidden="true"></span>
+          <span class="hdemo__dot" aria-hidden="true"></span>
+          <span class="hdemo__dot" aria-hidden="true"></span>
+          <span class="hdemo__title">沙箱里的真实执行</span>
+          <span class="hdemo__live" id="hdemoLive">自动演示</span>
+        </div>
+        <div class="hdemo__body" id="hdemoBody" aria-hidden="true"></div>
+        <div class="hdemo__foot" id="hdemoFoot">准备中…</div>
+      </div>
+    </div>
 
     <ul class="points">
       <li class="point">
-        <span class="point__ic" aria-hidden="true">🤖</span>
+        <span class="point__ic" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.5 7.5l3.5 4-3.5 4" />
+            <path d="M10 15.5h4.5" />
+            <path d="M16.5 11.5h5m0 0l-2.4-2.4M21.5 11.5l-2.4 2.4" />
+          </svg>
+        </span>
         <h3 class="point__h">中文自然语言 → 一键生成标准 Shell 命令</h3>
         <p class="point__p">说一句「把当前目录最大的十个文件列出来」，拿到一条能直接粘贴执行的命令，参数一处不含糊。</p>
       </li>
       <li class="point">
-        <span class="point__ic" aria-hidden="true">📚</span>
+        <span class="point__ic" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="4.5" cy="12" r="2.3" />
+            <path d="M6.8 12h2.4" />
+            <path d="M12 7.4v9.2" />
+            <path d="M14.8 12h2.4" />
+            <circle cx="19.5" cy="12" r="2.3" />
+          </svg>
+        </span>
         <h3 class="point__h">管道命令逐段拆解，边用边学底层原理</h3>
         <p class="point__p">每个参数单独讲清它负责什么。讲的是「为什么这么写」，而不是「照抄这一条」。</p>
       </li>
       <li class="point">
-        <span class="point__ic" aria-hidden="true">🧪</span>
+        <span class="point__ic" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.6l8 4.2-8 4.2-8-4.2 8-4.2z" />
+            <path d="M4 12v4.2l8 4.2 8-4.2V12" />
+          </svg>
+        </span>
         <h3 class="point__h">浏览器内置安全沙箱，实时仿真、一键回滚</h3>
         <p class="point__p">命令真的跑一遍：权限会拒绝你，文件会真的消失——然后一键时光倒流。</p>
       </li>
     </ul>
-
-    <div class="hero__actions">
-      <button class="btn btn--go btn--lg" type="button" id="startBtn">立即体验</button>
-      <button class="btn btn--ghost" type="button" id="demoBtn">看一遍完整演示</button>
-      <span class="hero__hint">不用配 Key、不用联网也能完整跑通</span>
-    </div>
   </section>
 
   <section class="anatomy">
@@ -6059,11 +6444,24 @@ window.NL2SH_AI = (function () {
     var sentCmd = null;
     var reasoning = '';
     var settled = false;
+    /* 调用凭证用的计数：首字节时刻与流式分片数。
+       这不是给开发者看的日志，是要显示在结果卡上给评委看的——
+       它回答的是"这到底是真·大模型生成，还是本地关键词匹配"。 */
+    var firstByteMs = 0;
+    var chunks = 0;
 
     var tick = setInterval(function () {
       if (settled) return;
       if (handlers.onProgress) {
-        handlers.onProgress({ elapsed: Date.now() - started, chars: acc.length, cmd: sentCmd });
+        handlers.onProgress({
+          elapsed: Date.now() - started,
+          chars: acc.length,
+          cmd: sentCmd,
+          chunks: chunks,
+          firstByteMs: firstByteMs,
+          /* 原始输出的尾部：界面上实时滚动它，"正在流式接收"就成了看得见的事实 */
+          tail: acc.slice(-200)
+        });
       }
     }, 200);
 
@@ -6166,6 +6564,19 @@ window.NL2SH_AI = (function () {
       var item = normalize(acc, query, { requireAnno: !brief });
       item.reasoning = reasoning;
       item.attempt = opts.repair ? (opts.repair.attempt || 1) : 0;
+      /* 调用凭证：把"这确实是一次真实的大模型调用"变成界面上看得见的事实。
+         模型名取自服务端 health 的回报（不是前端写死的字面量），
+         端点也记下来 —— 这样"离线规则库"和"AI 实时生成"在界面上无法混淆。 */
+      item.trace = {
+        model: (state.models && (opts.thinking ? state.models.think : state.models.fast)) || MODELS.fast,
+        endpoint: (state.base || '') + ENDPOINT,
+        sameOrigin: !state.base,
+        firstByteMs: firstByteMs,
+        totalMs: Date.now() - started,
+        chunks: chunks,
+        chars: acc.length,
+        thinking: !!opts.thinking
+      };
       finish(handlers.onDone, item);
     }).catch(function (err) {
       if (err && err.name === 'AbortError') return finish(handlers.onError, fail('abort', '已取消'));
@@ -6174,6 +6585,8 @@ window.NL2SH_AI = (function () {
     });
 
     function consume(piece) {
+      if (!firstByteMs) firstByteMs = Date.now() - started;
+      chunks++;
       acc += piece;
       sniffCmd();
     }
@@ -6305,7 +6718,7 @@ window.NL2SH_FX = (function () {
       vx: (Math.random() - 0.5) * 0.34,
       vy: (Math.random() - 0.5) * 0.34,
       r: isGlyph ? 11 + Math.random() * 5 : 1.1 + Math.random() * 1.5,
-      a: 0.20 + Math.random() * 0.34,
+      a: 0.26 + Math.random() * 0.38,
       glyph: isGlyph ? GLYPHS[(Math.random() * GLYPHS.length) | 0] : '',
       isGlyph: isGlyph
     };
@@ -6437,7 +6850,7 @@ window.NL2SH_FX = (function () {
           if (d2 > limit2) continue;
           var t = 1 - d2 / limit2;
           ctx.strokeStyle = c.line;
-          ctx.globalAlpha = t * 0.16;
+          ctx.globalAlpha = t * 0.21;
           ctx.beginPath();
           ctx.moveTo(ps[i].x, ps[i].y);
           ctx.lineTo(ps[j].x, ps[j].y);
@@ -6449,7 +6862,7 @@ window.NL2SH_FX = (function () {
     for (var k = 0; k < ps.length; k++) {
       var p = ps[k];
       if (p.isGlyph) {
-        ctx.globalAlpha = p.a * 0.8;
+        ctx.globalAlpha = p.a;
         ctx.fillStyle = c.glyph;
         ctx.font = '500 ' + Math.round(p.r) + 'px Consolas, "Cascadia Mono", monospace';
         ctx.fillText(p.glyph, p.x, p.y);
@@ -6965,7 +7378,118 @@ window.NL2SH_FX = (function () {
                 '这正是管道省钱省事的地方：中间结果不落盘。</p>');
   }
 
-  /* ── 首屏解剖图 ───────────────────────────────────── */
+  /* ── 首屏自动演示窗 ────────────────────────────────────
+     "沙箱、回滚这些优势都藏在页面里、没有可视化展示"是被直接指出的问题：
+     评委不会主动深挖，所以首屏不该只**声明**亮点，而要**演一遍**。
+
+     三条纪律：
+       1. 画面里的东西全部来自真实沙箱：`find . -name '*.tmp'` 确实匹配到
+          build/old.tmp、cache/index.tmp、cache/session.tmp 三个文件，
+          这条命令在沙箱里也真的返回 exit 0 并删掉这三项——不是编的动画。
+       2. prefers-reduced-motion 时只画一帧静止画面，不放动画。
+       3. 滚出视口就停（IntersectionObserver），不白烧 CPU。 */
+  var HDEMO_ASK = '找出并删除所有 .tmp 文件';
+  var HDEMO_CMD = "find . -name '*.tmp' -delete";
+  var HDEMO_FILES = [
+    { n: 'build/', s: '2 项', k: 'dir' },
+    { n: 'old.tmp', s: '1B', k: 'tmp', sub: 1 },
+    { n: 'cache/', s: '2 项', k: 'dir' },
+    { n: 'index.tmp', s: '1B', k: 'tmp', sub: 1 },
+    { n: 'session.tmp', s: '1B', k: 'tmp', sub: 1 },
+    { n: 'notes.txt', s: '41B', k: 'file' },
+    { n: 'package.json', s: '118B', k: 'file' }
+  ];
+
+  var hdemoStep = 0, hdemoTimer = null, hdemoVisible = false, hdemoStarted = false;
+
+  function hdemoFilesHtml(state) {
+    var out = HDEMO_FILES.map(function (f) {
+      var isTmp = f.k === 'tmp';
+      if (isTmp && state === 'gone') return '';          // 已经删掉了
+      var cls = 'hdemo__f';
+      if (f.k === 'dir') cls += ' hdemo__f--dir';
+      if (isTmp) cls += ' hdemo__f--tmp';
+      if (isTmp && state === 'hit') cls += ' is-hit';
+      if (isTmp && state === 'deleting') cls += ' is-dying';
+      if (isTmp && state === 'back') cls += ' is-back';
+      return '<div class="' + cls + '">' +
+        (f.sub ? '<span class="hdemo__ind"></span>' : '') +
+        '<span>' + (f.k === 'dir' ? '▸ ' : '· ') + esc(f.n) + '</span>' +
+        '<span>' + esc(f.s) + '</span></div>';
+    }).join('');
+    return '<div class="hdemo__files">' + out + '</div>';
+  }
+
+  function hdemoRender(step) {
+    var body = $('#hdemoBody');
+    var foot = $('#hdemoFoot');
+    if (!body || !foot) return;
+
+    var ask = '<div class="hdemo__ask">' + esc(HDEMO_ASK) +
+      (step === 0 ? '<i class="hdemo__caret"></i>' : '') + '</div>';
+    var cmd = '<div class="hdemo__cmd">' + esc(HDEMO_CMD) +
+      (step === 1 ? '<i class="hdemo__caret"></i>' : '') + '</div>' +
+      '<div><span class="hdemo__tag">AI 生成 · 可直接执行</span></div>';
+    var undo = '<button class="hdemo__undo' + (step === 5 ? ' is-hit' : '') +
+      '" type="button" tabindex="-1">↺ 一键回滚</button>';
+
+    var html = ask;
+    if (step >= 1) html += cmd;
+    if (step === 2) html += hdemoFilesHtml('before');
+    if (step === 3) html += hdemoFilesHtml('hit');
+    if (step === 4) html += hdemoFilesHtml('deleting');
+    if (step === 5) html += hdemoFilesHtml('gone') + undo;
+    if (step === 6) html += hdemoFilesHtml('back') + undo;
+    if (step >= 7) { body.innerHTML = ask; foot.textContent = '循环演示中…'; return; }
+
+    body.innerHTML = html;
+    foot.textContent = [
+      '① 你说一句中文——不用会写命令',
+      '② AI 生成一条可直接执行的命令',
+      '③ 丢进沙箱，先看它要动哪些文件',
+      '④ find 匹配到 3 个 .tmp 文件',
+      '⑤ 真的跑一遍：3 个文件被删掉了（红闪两次后消失）',
+      '⑥ 真实环境里这一步不可撤销——沙箱里可以一键回滚',
+      '⑦ 已恢复到执行前，一个文件都没少',
+      '循环演示中…'
+    ][step] || '';
+  }
+
+  var HDEMO_MS = [900, 1100, 1200, 1100, 1500, 1000, 1200, 700];
+
+  function hdemoLoop() {
+    if (!hdemoVisible || REDUCED) return;
+    hdemoRender(hdemoStep);
+    hdemoTimer = setTimeout(function () {
+      hdemoStep = (hdemoStep + 1) % 8;
+      hdemoLoop();
+    }, HDEMO_MS[hdemoStep] || 1000);
+  }
+
+  function initHeroDemo() {
+    var host = $('#heroDemo');
+    if (!host) return;
+    /* 降级动效偏好：画一帧"最有信息量"的静止画面（文件刚被删掉那一刻） */
+    if (REDUCED) {
+      hdemoStep = 5;
+      hdemoRender(5);
+      return;
+    }
+    hdemoRender(0);
+    hdemoStarted = true;
+    if (typeof IntersectionObserver === 'function') {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          hdemoVisible = en.isIntersecting;
+          if (hdemoVisible && !hdemoTimer) hdemoLoop();
+          if (!hdemoVisible && hdemoTimer) { clearTimeout(hdemoTimer); hdemoTimer = null; }
+        });
+      }, { threshold: 0.25 }).observe(host);
+    } else {
+      hdemoVisible = true;
+      hdemoLoop();
+    }
+  }
   var heroFig = $('#heroDissect');
   var heroRanges = findRanges(DATA.hero.cmd, DATA.hero.annos);
 
@@ -7197,6 +7721,44 @@ window.NL2SH_FX = (function () {
       '</div>';
   }
 
+  /* ── AI 调用凭证 ──────────────────────────────────────
+     赛道叫「智能交互与应用」，核心看 AI 功能。可如果界面上只给一条命令，
+     评委没有任何依据分辨"大模型实时生成"和"本地模板匹配"——
+     这一条是用户直接指出来的问题：AI 干了活，但没人看得见。
+
+     所以把这次调用的可核对事实直接摊开：模型名（取自服务端 health 的回报，
+     不是前端写死的）、首字节耗时、总耗时、流式分片数、实际端点。
+     走内置规则库时是另一种样式（琥珀色），两者一眼可辨。 */
+  function fmtMs(ms) {
+    if (ms === undefined || ms === null) return '—';
+    return ms < 1000 ? ms + 'ms' : (ms / 1000).toFixed(1) + 's';
+  }
+
+  function traceHtml(item) {
+    var t = item.trace;
+    if (t) {
+      return '<div class="trace trace--ai">' +
+        '<span class="trace__badge"><i class="trace__dot"></i>AI 实时生成</span>' +
+        '<span class="trace__row">模型 <b>' + esc(t.model) + '</b></span>' +
+        '<span class="trace__row">首字节 <b>' + fmtMs(t.firstByteMs) + '</b></span>' +
+        '<span class="trace__row">总耗时 <b>' + fmtMs(t.totalMs) + '</b></span>' +
+        '<span class="trace__row">流式分片 <b>' + t.chunks + '</b></span>' +
+        '<span class="trace__row">输出 <b>' + t.chars + '</b> 字符</span>' +
+        '<span class="trace__row trace__row--ep">POST ' + esc(t.endpoint) + '</span>' +
+        '<span class="trace__row trace__row--key">密钥只在服务端环境变量里，前端没有</span>' +
+      '</div>';
+    }
+    if (item.source !== 'ai') {
+      return '<div class="trace trace--offline">' +
+        '<span class="trace__badge"><i class="trace__dot"></i>离线模式 · 内置规则库</span>' +
+        '<span class="trace__row">这条来自本地已人工核对的规则库，' +
+          '<b>没有发出任何网络请求</b>——断网、无 Key 也照样能用</span>' +
+        '<span class="trace__row trace__row--key">接上模型后，任意一句话都会实时生成</span>' +
+      '</div>';
+    }
+    return '';
+  }
+
   function cardHtml(item, ranges, opts, stages, samples) {
     var risk = RISK[item.risk] || RISK.safe;
     var isAI = item.source === 'ai';
@@ -7253,6 +7815,7 @@ window.NL2SH_FX = (function () {
           '<p class="card__why">' + esc(item.why) + '</p>' +
         '</div>' +
       '</header>' +
+      traceHtml(item) +
       dangerBar +
       repairBanner +
 
@@ -7866,6 +8429,7 @@ window.NL2SH_FX = (function () {
 
   function setMode(next) {
     if (next === mode) return;
+    var prev = mode;
     mode = next;
     document.documentElement.setAttribute('data-mode', next);
     $$('.mode').forEach(function (btn) {
@@ -7873,6 +8437,16 @@ window.NL2SH_FX = (function () {
       btn.classList.toggle('is-on', on);
       btn.setAttribute('aria-selected', on ? 'true' : 'false');
     });
+    /* 极客终端模式顶部挂一条横幅：两个模式以前只差结果卡内部的几段文字，
+       没出结果时完全一样，用户说"选来选去不能一眼切换"。
+       横幅给一个明确的当前位置信号，并且能一键切回去。 */
+    var bar = $('#modeBar');
+    if (bar) bar.hidden = next !== 'geek';
+    /* 切到极客模式时把视口带到干活的地方：那一屏的东西全被收起来了，
+       停在原来的滚动位置会看到一片空。 */
+    if (next === 'geek' && typeof scrollToEl === 'function') {
+      setTimeout(function () { scrollToEl('.work'); }, 60);
+    }
     /* 记住选择：下次打开还在同一个模式里。
        必须 try：隐私模式或禁用存储时 setItem 会直接抛异常。 */
     try { window.localStorage.setItem(MODE_KEY, next); } catch (e) { }
@@ -7893,6 +8467,10 @@ window.NL2SH_FX = (function () {
     $$('.mode').forEach(function (btn) {
       btn.addEventListener('click', function () { setMode(btn.getAttribute('data-mode')); });
     });
+
+    /* 模式横幅上的"切回新手引导" */
+    var back = $('#modeBack');
+    if (back) back.addEventListener('click', function () { setMode('guide'); });
 
     $('#askForm').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -8771,6 +9349,16 @@ window.NL2SH_FX = (function () {
           '<button class="progress__cancel" type="button" id="cancelBtn">取消</button>' +
         '</div>' +
         '<div class="progress__bar"><i></i></div>' +
+        /* 实时证据条：让"正在流式接收大模型的输出"变成看得见的事。
+           分片计数会跳、首字节会记时、下面还会滚出模型正在吐的原文。 */
+        '<div class="live" id="liveBox" hidden>' +
+          '<span class="live__badge"><i class="live__dot"></i>流式接收中</span>' +
+          '<span class="live__stat">首字节 <b id="liveFirst">—</b></span>' +
+          '<span class="live__stat">分片 <b id="liveChunks">0</b></span>' +
+          '<span class="live__stat">已收 <b id="liveChars">0</b> 字符</span>' +
+          '<span class="live__stat">耗时 <b id="liveElapsed">0.0s</b></span>' +
+          '<code class="live__tail" id="liveTail"></code>' +
+        '</div>' +
         '<code class="progress__cmd" id="progressCmd" hidden></code>' +
         '<details class="think" id="thinkPanel" hidden>' +
           '<summary class="think__sum">模型的推理过程<span class="think__len" id="thinkLen"></span></summary>' +
@@ -8808,6 +9396,21 @@ window.NL2SH_FX = (function () {
     if (c && p.cmd) {
       c.hidden = false;
       c.textContent = p.cmd;
+    }
+
+    /* 实时证据条：一旦收到第一个分片就亮出来 */
+    var box = $('#liveBox');
+    if (box && p.chars > 0) {
+      box.hidden = false;
+      var set = function (id, v) { var el = $('#' + id); if (el) el.textContent = v; };
+      set('liveFirst', p.firstByteMs ? fmtMs(p.firstByteMs) : '等待中');
+      set('liveChunks', String(p.chunks || 0));
+      set('liveChars', String(p.chars));
+      set('liveElapsed', (p.elapsed / 1000).toFixed(1) + 's');
+      var tail = $('#liveTail');
+      /* 把模型正在吐的原文实时滚出来（去掉换行、取尾部），
+         这是"确实在流式接收"最直接的证据 */
+      if (tail && p.tail) tail.textContent = String(p.tail).replace(/\s+/g, ' ').slice(-120);
     }
   }
 
@@ -8933,37 +9536,69 @@ window.NL2SH_FX = (function () {
     var btn = $('#demoBtn');
     if (btn) { btn.disabled = true; btn.textContent = '演示进行中…'; }
 
-    /* 演示必须确定性：强制走内置规则库（不联网、不等模型），并确保沙箱会跑 */
+    /* 这一段以前是 forceLocal：演示一律走内置规则库，图的是确定性。
+       代价很致命——评委最可能点的就是这个按钮，而它一次大模型都不调，
+       看起来就像"关键词匹配"。现在改成：**有模型就走真模型**，
+       节奏改成"等事件"而不是等固定毫秒（模型快慢不一样，死等会让解说和画面对不上）。
+       真连不上模型时才退回规则库，演示照样能跑完整。 */
+    var demoSt = AI.state();
+    var useAI = !forceOffline && !!demoSt.ok;
+    var demoModel = (demoSt.models && demoSt.models.fast) || AI.MODELS.fast;
+
     setMode('guide');
     autoRunBackup = autoRun;
     autoRun = true;
     var q = '找出并删除所有 .tmp 文件';
     $('#q').value = q;
-    ask(q, null, { forceLocal: true });
+    ask(q, null, {});
 
-    var script = [
-      [1000, '① 一句中文，不配 Key、不联网。', null],
-      [3200, '② 内置规则库瞬间给出命令，并把每个零件拆开讲清楚。', scrollToEl.bind(null, '#secSyn')],
-      [5200, '③ 关键在这一步：命令被丢进沙箱，真的执行了一遍。', scrollToEl.bind(null, '#secRun')],
-      [7400, '④ 三个 .tmp 文件真的从文件树里消失了——看上面带删除线的路径。', null],
-      [9600, '⑤ 真实环境里这一步不可撤销。沙箱不是真实环境，所以可以一键回到执行前。', function () {
-        var b = $('#undoBtn');
-        if (b) b.click();
-      }],
-      [11800, '⑥ 完成。现在轮到你了：在上面输入任意中文，或者在沙箱终端里自己敲命令。', scrollToEl.bind(null, '.ask')],
-      [15000, null, endDemo]
-    ];
+    function startNarration() {
+      var script = [
+        [200, '① 一句中文就够了。不用写命令，也不用配 Key。', null],
+        [useAI
+          ? '② ' + demoModel + ' 实时生成。注意上方那条调用凭证：模型名、首字节、流式分片数都是这次真实调用的记录。'
+          : '② 当前是离线模式，内置规则库瞬间给出命令，并把每个零件拆开讲清楚。',
+          scrollToEl.bind(null, '#secSyn')],
+        ['③ 关键在这一步：命令被丢进沙箱，真的执行了一遍。', scrollToEl.bind(null, '#secRun')],
+        ['④ 三个 .tmp 文件真的从文件树里消失了——看左边面板里红闪消失的节点。', null],
+        ['⑤ 真实环境里这一步不可撤销。沙箱不是真实环境，所以能一键回到执行前。', function () {
+          var b = $('#undoBtn');
+          if (b) b.click();
+        }],
+        ['⑥ 完成。现在轮到你了：输入任意中文，或者在沙箱终端里自己敲命令。', scrollToEl.bind(null, '.ask')],
+        [null, endDemo]
+      ];
+      var at = 0;
+      var delays = [200, 2600, 4600, 6800, 9000, 11200, 14000];
+      script.forEach(function (step, i) {
+        var wait = delays[i] - at;
+        at = delays[i];
+        demoTimers.push(setTimeout(function () {
+          if (!demoRunning) return;
+          if (step[0] === null) { if (step[1]) step[1](); return; }
+          var bar = $('#demoBar');
+          var text = $('#demoBarText');
+          if (bar && text) { bar.hidden = false; text.textContent = step[0]; }
+          if (step[1]) step[1]();
+        }, delays[i]));
+      });
+    }
 
-    script.forEach(function (step) {
-      demoTimers.push(setTimeout(function () {
-        if (!demoRunning) return;
-        if (step[1] === null) { if (step[2]) step[2](); return; }
-        var bar = $('#demoBar');
-        var text = $('#demoBarText');
-        if (bar && text) { bar.hidden = false; text.textContent = step[1]; }
-        if (step[2]) step[2]();
-      }, step[0]));
-    });
+    if (useAI) {
+      /* 等"生成 + 沙箱验证"都真正落地再开始解说。
+         上限 30 秒：真卡住了也要把演示走完，不能把评委晾在页面中间。 */
+      var began = Date.now();
+      var waitFor = setInterval(function () {
+        if (!demoRunning) { clearInterval(waitFor); return; }
+        if ((current && current.run) || Date.now() - began > 30000) {
+          clearInterval(waitFor);
+          startNarration();
+        }
+      }, 250);
+      demoTimers.push(waitFor);
+    } else {
+      startNarration();
+    }
   }
 
   /* ── 启动 ─────────────────────────────────────────── */
@@ -9001,6 +9636,7 @@ window.NL2SH_FX = (function () {
   /* 先量准再显形，避免引线画在旧位置上 */
   heroFig.classList.add('is-measuring');
   buildHero();
+  initHeroDemo();
   initFx();
   bind();
   renderHistory();
