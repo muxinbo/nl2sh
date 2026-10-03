@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-mode="learn">
+<html lang="zh-CN" data-mode="guide">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,8 +14,10 @@
 <style>
 /* assets/styles.css */
 /* nl2sh · 说人话，出命令
- * 视觉方向：工程图纸（学习模式）与琥珀磷光终端（应急模式）
- * 两套模式共用同一套结构，只换配色、密度与语气。
+ * 视觉方向：深色 Linux 终端。
+ *   底 #1e1e2e ＋ 终端绿 #a6e3a1 ＋ 高亮青 #89dceb，统一圆角 8px。
+ * 两个模式（新手引导 / 极客终端）共用同一套配色，只靠「信息密度」区分：
+ * 引导模式把解释、推演、节点都摊开；极客模式只留终端与命令本身。
  */
 
 /* ── 令牌 ───────────────────────────────────────────── */
@@ -26,54 +28,47 @@
   --side: 232px;
   --gap: 34px;
   --maxw: 1240px;
-  --radius: 0;
+  --radius: 8px;
+
+  /* ── 配色（深色终端）──────────────────────────────
+     正文用偏冷的浅灰而不是纯白：纯白配深底在长时间阅读下会发涩。
+     语义色沿用同一色系（Mocha），保证一整页只有一种"光"的来源。 */
+  --paper: #1e1e2e;                          /* 页面底 */
+  --surface: #252537;                        /* 卡片、面板 */
+  --surface-2: #2a2a3d;                      /* 面板内嵌一层 */
+  --code-bg: rgba(166, 227, 161, 0.055);     /* 代码块底：带一点终端绿的余晖 */
+  --grid: rgba(137, 220, 235, 0.045);        /* 背景网格 */
+  --grid-size: 26px;
+
+  --ink: #cdd6f4;                            /* 正文 */
+  --ink-2: #a6adc8;                          /* 次级 */
+  --ink-3: #6c7086;                          /* 三级 / 注释 */
+
+  --rule: rgba(137, 220, 235, 0.14);         /* 细线 */
+  --rule-strong: rgba(137, 220, 235, 0.30);
+
+  --signal: #89dceb;                         /* 高亮青：强调、链接、当前项 */
+  --signal-soft: rgba(137, 220, 235, 0.12);
+
+  --safe: #a6e3a1;                           /* 终端绿：安全 */
+  --safe-bg: rgba(166, 227, 161, 0.10);
+  --caution: #f9e2af;
+  --caution-bg: rgba(249, 226, 175, 0.10);
+  --danger: #f38ba8;
+  --danger-bg: rgba(243, 139, 168, 0.12);
+
+  --glow: 0 0 14px rgba(137, 220, 235, 0.26);
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
-/* 学习模式：冷调工程图纸。刻意避开"米色纸 + 衬线 + 陶土色"的默认搭配。 */
-html[data-mode="learn"] {
-  --paper: #e8edf2;
-  --surface: #f3f6f9;
-  --code-bg: rgba(17, 48, 74, 0.04);
-  --grid: rgba(17, 48, 74, 0.055);
-  --grid-size: 26px;
-  --ink: #0e2b44;
-  --ink-2: #46688a;
-  --ink-3: #7e97ad;
-  --rule: #c6d3de;
-  --rule-strong: #93aabd;
-  --signal: #0b6ba8;
-  --signal-soft: rgba(11, 107, 168, 0.09);
-  --safe: #0d7466;
-  --safe-bg: rgba(13, 116, 102, 0.07);
-  --caution: #a8640a;
-  --caution-bg: rgba(168, 100, 10, 0.08);
-  --danger: #b33325;
-  --danger-bg: rgba(179, 51, 37, 0.08);
-  --glow: none;
-}
-
-/* 应急模式：琥珀磷光。不是满大街的"黑底酸绿"。 */
-html[data-mode="rescue"] {
-  --paper: #0a0806;
-  --surface: #120f0a;
-  --code-bg: rgba(255, 194, 75, 0.05);
-  --grid: rgba(255, 194, 75, 0.045);
-  --grid-size: 26px;
-  --ink: #ffc24b;
-  --ink-2: #c69a44;
-  --ink-3: #8a6c2e;
-  --rule: rgba(255, 194, 75, 0.2);
-  --rule-strong: rgba(255, 194, 75, 0.42);
-  --signal: #ff8a3d;
-  --signal-soft: rgba(255, 138, 61, 0.13);
-  --safe: #5fd6a8;
-  --safe-bg: rgba(95, 214, 168, 0.1);
-  --caution: #ffc24b;
-  --caution-bg: rgba(255, 194, 75, 0.1);
-  --danger: #ff5c4d;
-  --danger-bg: rgba(255, 92, 77, 0.12);
-  --glow: 0 0 14px rgba(255, 194, 75, 0.35);
-}
+/* ── 两个模式的区别只在信息密度，不在配色 ───────────────
+   新手引导（guide）：解释、推演、节点、示例都摊开，面向"不知道该敲什么"的人。
+   极客终端（geek）：只留终端与命令本身，面向"只想快点拿到命令"的人。
+   配色由上面的 :root 统一提供，这里不再覆盖任何颜色令牌。 */
+html[data-mode="guide"] .geek-only { display: none; }
+html[data-mode="geek"] .guide-only { display: none; }
+html[data-mode="geek"] .leaders { display: none; }
+html[data-mode="geek"] .dissect__col { opacity: 0.35; }
 
 /* ── 基础 ───────────────────────────────────────────── */
 *,
@@ -122,10 +117,13 @@ a:hover { text-decoration: underline; }
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: var(--grid-size) var(--grid-size);
 }
-html[data-mode="rescue"] .plate {
+/* 背景板统一：网格 + 极淡扫描线 + 顶部一层青辉。
+   扫描线是 CRT 的痕迹，也是"这是终端"最省事的视觉暗示；
+   透明度压到 0.022，只在纯色区域隐约可见，绝不干扰读字。 */
+.plate {
   background-image:
-    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 3px),
-    radial-gradient(120% 80% at 50% -10%, rgba(255, 194, 75, 0.07), transparent 62%),
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 80% at 50% -10%, rgba(137, 220, 235, 0.07), transparent 62%),
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: auto, auto, var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
@@ -510,7 +508,39 @@ main {
   font-size: 12.5px;
   color: var(--ink-3);
 }
-.samples { display: flex; flex-wrap: wrap; gap: 8px; }
+/* 8 个示例：2 行 4 列。
+   媒体查询紧跟基础规则之后——媒体查询不提升优先级，同优先级靠书写顺序决胜。 */
+.samples {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 1000px) {
+  .samples { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .samples { grid-template-columns: minmax(0, 1fr); }
+}
+.chip--card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 12px;
+  text-align: left;
+  min-width: 0;
+}
+.chip__t { font-size: 12.5px; line-height: 1.45; color: var(--ink); }
+.chip__c {
+  display: block;
+  width: 100%;
+  font: 400 10.5px/1.4 var(--f-mono);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chip--card:hover .chip__c { color: var(--signal); }
 .chip {
   padding: 9px 13px;
   border: 1px dashed var(--rule-strong);
@@ -807,17 +837,17 @@ main {
 .see__btn:hover { color: var(--signal); border-color: var(--signal); }
 
 /* 应急模式：只有命令、风险与复制 */
-.rescue-only { display: none; }
-html[data-mode="rescue"] .learn-only { display: none; }
-html[data-mode="rescue"] .rescue-only { display: block; }
-.rescue__big .cmd { font-size: clamp(14px, 1.5vw, 19px); }
-.rescue__lead {
+.geek-only { display: none; }
+html[data-mode="geek"] .guide-only { display: none; }
+html[data-mode="geek"] .geek-only { display: block; }
+.geek__big .cmd { font-size: clamp(14px, 1.5vw, 19px); }
+.geek__lead {
   font-size: 13.5px;
   line-height: 1.8;
   color: var(--ink-2);
   margin-bottom: 16px;
 }
-.rescue__switch {
+.geek__switch {
   margin-top: 16px;
   padding: 8px 0;
   border: 0;
@@ -921,6 +951,56 @@ html[data-mode="rescue"] .rescue-only { display: block; }
 .term__body .t-err { color: var(--danger); }
 .term__body .t-note { color: var(--ink-3); }
 .term__body .t-sim { color: var(--caution); }
+
+/* 逐行显形：终端输出一行一行出现，而不是一整块糊上来。
+   延迟由行号 --n 决定，JS 那边已经把上限压到 22 行。 */
+.term__body .tl {
+  animation: termLine 0.2s ease-out both;
+  animation-delay: calc(var(--n, 0) * 26ms);
+}
+@keyframes termLine {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: none; }
+}
+
+.term__acts { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.term__btn {
+  padding: 3px 9px;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-3);
+  font: 500 10.5px/1.2 var(--f-mono);
+  cursor: pointer;
+  transition: color 0.14s, border-color 0.14s;
+}
+.term__btn:hover { color: var(--signal); border-color: var(--signal); }
+
+/* 收藏 */
+.btn--fav { padding: 9px 14px; }
+.btn--fav.is-on { color: var(--caution); border-color: var(--caution); }
+.index__sub {
+  margin: 16px 0 6px;
+  font: 600 10.5px/1 var(--f-mono);
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+}
+.index__list--fav .fav { display: flex; align-items: stretch; gap: 4px; }
+.index__list--fav .index__item { flex: 1 1 auto; min-width: 0; }
+.fav__del {
+  flex: 0 0 auto;
+  width: 24px;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  transition: color 0.14s, border-color 0.14s;
+}
+.fav__del:hover { color: var(--danger); border-color: var(--danger); }
+
 .term--manual { margin-top: 16px; }
 .term__input {
   display: flex;
@@ -1345,6 +1425,832 @@ html[data-mode="rescue"] .rescue-only { display: block; }
   .hero { padding: 44px 0 8px; }
 }
 
+/* ── 沙箱自验证闭环的轨迹 ───────────────────────────────
+   这是整个作品最该被看见的一段过程：模型给的命令在沙箱里真跑，
+   失败了就把真实 stderr 喂回去让它自己修，每一次尝试都留痕。 */
+.loop {
+  margin: 0 0 18px;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--signal);
+  border-radius: 8px;
+  background: var(--code-bg);
+  padding: 14px 16px 6px;
+}
+.loop__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.loop__title {
+  font: 600 13px/1 var(--f-mono);
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.loop__badge {
+  font: 500 11px/1 var(--f-mono);
+  letter-spacing: 0.06em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.loop__badge--ok { color: var(--safe); }
+.loop__badge--bad { color: var(--danger); }
+
+.loop__step {
+  border-top: 1px dashed var(--rule);
+  padding: 10px 0 12px;
+}
+.loop__step:first-of-type { border-top: 0; }
+.loop__n {
+  display: inline-block;
+  min-width: 62px;
+  font: 600 12px/1 var(--f-mono);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.loop__step.is-ok .loop__n { color: var(--safe); }
+.loop__step.is-bad .loop__n { color: var(--danger); }
+.loop__cmd {
+  display: block;
+  margin: 6px 0 6px 0;
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font: 500 12.5px/1.5 var(--f-mono);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.loop__verdict {
+  font: 500 12px/1 var(--f-mono);
+  color: var(--ink-2);
+}
+.loop__step.is-ok .loop__verdict { color: var(--safe); }
+.loop__step.is-bad .loop__verdict { color: var(--danger); }
+.loop__err {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  max-height: 132px;
+  overflow: auto;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  font: 500 12px/1.55 var(--f-mono);
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.loop__arrow {
+  display: block;
+  margin-top: 10px;
+  font: 500 11.5px/1.4 var(--f-mono);
+  letter-spacing: 0.04em;
+  color: var(--signal);
+}
+
+/* ── 深度思考模式的推理面板 ─────────────────────────────
+   只有显式切到 glm-4.7 才会出现：glm-4-flash 不产生 reasoning_content。 */
+.think {
+  margin: 10px 0 0;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.think__sum {
+  cursor: pointer;
+  padding: 9px 12px;
+  font: 500 12px/1 var(--f-mono);
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+  list-style: none;
+}
+.think__sum::-webkit-details-marker { display: none; }
+.think__sum::before {
+  content: '▸ ';
+  color: var(--signal);
+}
+.think[open] .think__sum::before { content: '▾ '; }
+.think__len { color: var(--ink-3); margin-left: 6px; }
+.think__body {
+  margin: 0;
+  padding: 0 12px 12px;
+  max-height: 220px;
+  overflow: auto;
+  font: 400 12px/1.6 var(--f-mono);
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ── 首屏：标题 + 三个亮点卡 + 立即体验 ─────────────────
+   亮点卡是"30 秒说清痛点"的载体，文字要短、可扫读，
+   每张卡只说一件事，不堆形容词。 */
+.hero { padding: 54px 0 0; }
+.hero h1 {
+  font-size: clamp(30px, 4.4vw, 48px);
+  line-height: 1.14;
+}
+.lede strong { color: var(--ink); font-weight: 600; }
+.lede em {
+  font-style: normal;
+  color: var(--signal);
+  border-bottom: 1px dashed var(--rule-strong);
+}
+
+.points {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 34px 0 0;
+  padding: 0;
+}
+.point {
+  position: relative;
+  padding: 18px 18px 16px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+/* 顶部一道青色 hairline：三张卡共用同一条"光"，不是各写各的装饰 */
+.point::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--signal), transparent);
+  opacity: 0.55;
+}
+.point:hover {
+  border-color: var(--rule-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.point__ic { display: block; font-size: 21px; line-height: 1; margin-bottom: 11px; }
+.point__h {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.point__p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.68;
+  color: var(--ink-2);
+}
+
+.btn--lg { padding: 14px 26px; font-size: 14px; }
+
+/* 命令解剖作为首屏的第二段：先讲"这个产品是什么"，再演示"它长什么样" */
+.anatomy {
+  margin-top: 74px;
+  padding-top: 30px;
+  border-top: 1px solid var(--rule);
+}
+.anatomy__h {
+  margin: 14px 0 0;
+  font-size: clamp(25px, 3.2vw, 36px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ── 项目背景 ─────────────────────────────────────────── */
+.notes__h {
+  margin: 12px 0 0;
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+.note {
+  padding-left: 16px;
+  border-left: 1px solid var(--rule);
+}
+.note h3 {
+  margin: 0 0 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.note p { margin: 0; font-size: 13.5px; line-height: 1.8; color: var(--ink-2); }
+.note strong { color: var(--ink); font-weight: 600; }
+.note code {
+  font: 500 12.5px/1 var(--f-mono);
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* ── 页脚：三栏（协会与大赛 · 仓库与协议 · 部署方式）────── */
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 28px;
+}
+.foot__left { flex: 1 1 320px; }
+.foot__mid { flex: 0 0 auto; }
+.foot__right { flex: 0 0 auto; }
+.foot a {
+  color: var(--signal);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.foot a:hover { border-bottom-color: var(--signal); }
+.foot__sep { margin: 0 6px; color: var(--ink-3); }
+.foot__lic { color: var(--ink-2); }
+.foot strong { color: var(--ink-2); font-weight: 600; }
+
+/* ── 管道可视化节点 ─────────────────────────────────────
+   完整命令上方横向排开，箭头方向就是数据流方向。
+   | 与 && 用不同颜色区分语义：一个是"数据流过去"，一个是"成功了再继续"。 */
+.pipe { margin: 0 0 14px; }
+.pipe__lead {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+.pipe__lead strong { color: var(--signal); font-weight: 600; }
+
+.pipe__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px 6px;
+}
+.pnode {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  max-width: 260px;
+  padding: 11px 13px 10px 30px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.16s, transform 0.16s, background 0.16s;
+  /* 按执行顺序依次淡入：延迟由内联的 --i 决定 */
+  animation: pnodeIn 0.34s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+  animation-delay: calc(var(--i) * 90ms);
+}
+@keyframes pnodeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.pnode__n {
+  position: absolute;
+  left: 10px;
+  top: 11px;
+  font: 600 11px/1 var(--f-mono);
+  color: var(--signal);
+}
+.pnode__c {
+  font: 500 12.5px/1.45 var(--f-mono);
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.pnode__o {
+  font: 500 10.5px/1 var(--f-mono);
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.pnode:hover,
+.pnode:focus-visible,
+.pnode.is-lit {
+  border-color: var(--signal);
+  transform: translateY(-2px);
+}
+.pnode.is-open {
+  border-color: var(--signal);
+  background: var(--signal-soft);
+}
+
+.parrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 62px;
+  padding: 0 2px;
+}
+.parrow i {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rule-strong), transparent);
+  position: relative;
+}
+.parrow i::after {
+  content: '▸';
+  position: absolute;
+  right: -2px;
+  top: -7px;
+  font-size: 10px;
+  color: var(--ink-3);
+}
+.parrow em {
+  font: 500 9.5px/1 var(--f-mono);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  font-style: normal;
+  white-space: nowrap;
+}
+.parrow--pipe i { background: linear-gradient(90deg, transparent, var(--signal), transparent); }
+.parrow--pipe i::after { color: var(--signal); }
+.parrow--pipe em { color: var(--signal); }
+.parrow--and i::after { content: '▶'; }
+
+/* 点击节点展开的详情：用法、输入、输出全部来自沙箱真实的执行 */
+.pdetail {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+}
+.pdetail__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.pdetail__idx { font: 600 12px/1 var(--f-mono); color: var(--signal); letter-spacing: 0.06em; }
+.pdetail__conn { font-size: 12px; color: var(--ink-3); }
+.pdetail__cmd {
+  display: block;
+  padding: 8px 11px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font: 500 13px/1.5 var(--f-mono);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.pdetail__n { margin: 10px 0 0; font-size: 13.5px; line-height: 1.75; color: var(--ink-2); }
+.pdetail__usage,
+.pdetail__hint { margin: 8px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--ink-3); }
+.pdetail__usage { font-family: var(--f-mono); }
+.pdetail__io {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.pdetail__tag {
+  display: block;
+  margin-bottom: 6px;
+  font: 500 10.5px/1 var(--f-mono);
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+}
+.pdetail__pre {
+  margin: 0;
+  padding: 8px 10px;
+  max-height: 120px;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font: 400 11.5px/1.6 var(--f-mono);
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.pdetail__none { font-size: 12px; color: var(--ink-3); font-style: normal; }
+
+/* 命令里被管道分段包裹的片段：悬浮节点时整体亮起 */
+.stg { border-radius: 3px; transition: background 0.16s, box-shadow 0.16s; }
+.stg.is-lit {
+  background: var(--signal-soft);
+  box-shadow: 0 0 0 2px var(--signal-soft);
+}
+
+/* ── 高危命令警告条（生成后、执行前）─────────────────── */
+.card--danger .cmdwrap { border-color: var(--danger); }
+.card--danger .cmd { color: var(--danger); }
+.dangerbar {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+  padding: 13px 16px;
+  border: 1px solid var(--danger);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--danger-bg);
+}
+.dangerbar__ic { font-size: 17px; line-height: 1.2; color: var(--danger); }
+.dangerbar__t { margin: 0; font-size: 13.5px; font-weight: 600; line-height: 1.6; color: var(--ink); }
+.dangerbar__s { margin: 4px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
+
+/* ── 复制闸门 ─────────────────────────────────────────── */
+.cmdwrap__copy.is-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+.cmdwrap__copy.is-locked::after { content: ' 🔒'; }
+.cmdwrap__copy.is-unlocked {
+  border-color: var(--safe);
+  color: var(--safe);
+  animation: unlockPulse 0.7s ease-out 1;
+}
+@keyframes unlockPulse {
+  0% { box-shadow: 0 0 0 0 var(--safe-bg); }
+  60% { box-shadow: 0 0 0 6px transparent; }
+  100% { box-shadow: none; }
+}
+.cmdwrap__copy.is-locked-shake { animation: shakeX 0.4s ease-in-out 1; }
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  80% { transform: translateX(-2px); }
+}
+.copylock {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+/* ── 高危命令的二次确认 ───────────────────────────────── */
+.ask2 {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  background: var(--danger-bg);
+}
+.ask2__t { margin: 0 0 10px; font-size: 13px; line-height: 1.7; color: var(--ink); }
+.ask2__t strong { color: var(--danger); }
+.ask2__c {
+  display: block;
+  padding: 8px 11px;
+  margin-bottom: 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font: 500 12.5px/1.5 var(--f-mono);
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+.ask2__b { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn--danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--paper);
+}
+.btn--danger:hover { filter: brightness(1.08); }
+.flag--ok { color: var(--safe); border-color: var(--safe); }
+
+/* ── 沙箱终端区：左边文件系统面板，右边终端 ─────────────── */
+.sbxzone {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);   /* 30% / 70% */
+  gap: 14px;
+  align-items: start;
+  margin-top: 14px;
+}
+.sbxzone__main { min-width: 0; }
+
+.fsTree {
+  position: relative;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.fsTree__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 11px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-2);
+}
+.fsTree__title {
+  font: 600 11.5px/1 var(--f-mono);
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+}
+/* 一键回滚放在面板最显眼的位置：它是这个沙箱最该被点到的按钮 */
+.fsTree__undo {
+  font: 600 11px/1 var(--f-mono);
+  letter-spacing: 0.06em;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--signal);
+  background: var(--signal-soft);
+  color: var(--signal);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s, color 0.16s, transform 0.16s;
+}
+.fsTree__undo:hover { background: var(--signal); color: var(--paper); transform: translateY(-1px); }
+.fsTree__undo:active { transform: none; }
+
+.fsTree__cwd {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  overflow: hidden;
+}
+.fsTree__cwd code {
+  font: 500 11.5px/1 var(--f-mono);
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fsTree__led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--safe);
+  box-shadow: 0 0 6px var(--safe);
+  flex: 0 0 auto;
+}
+.fsTree__count { margin-left: auto; white-space: nowrap; }
+
+.fsTree__body {
+  position: relative;
+  max-height: 320px;
+  overflow: auto;
+  padding: 6px 0;
+  font: 400 12px/1.75 var(--f-mono);
+}
+.fsn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 10px 1px 8px;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  border-left: 2px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+.fsn:hover, .fsn:focus-visible { background: var(--signal-soft); outline: none; }
+.fsn--dir { cursor: pointer; }
+.fsn__tw { width: 11px; flex: 0 0 auto; color: var(--ink-3); font-size: 10px; }
+.fsn__ic { width: 13px; flex: 0 0 auto; text-align: center; color: var(--ink-3); }
+.fsn__n { overflow: hidden; text-overflow: ellipsis; }
+.fsn__s, .fsn__c { margin-left: auto; color: var(--ink-3); font-size: 10.5px; padding-left: 10px; }
+
+/* 权限三色：可执行=绿、可写=黄、只读=灰、无权限=红 */
+.fsn.is-r .fsn__n { color: var(--ink-2); }
+.fsn.is-w .fsn__n { color: var(--caution); }
+.fsn.is-x .fsn__n { color: var(--safe); }
+.fsn.is-none .fsn__n { color: var(--danger); text-decoration: underline dotted; }
+.fsn.is-w .fsn__ic { color: var(--caution); }
+.fsn.is-x .fsn__ic { color: var(--safe); }
+.fsn.is-none .fsn__ic { color: var(--danger); }
+
+.fsn__kids { overflow: hidden; }
+.fsn__kids.is-in { animation: treeIn 0.18s ease-out 1; }
+@keyframes treeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 删除的节点：红闪两次 → 塌缩消失。
+   直接让它消失的话，用户只会看到"少了一行"，根本注意不到删了什么。 */
+.fsn.is-dying {
+  animation: dieFlash 1.1s steps(1) 1 both, dieCollapse 0.5s ease 0.95s forwards;
+  border-left-color: var(--danger);
+}
+@keyframes dieFlash {
+  0%, 22% { background: var(--danger-bg); color: var(--danger); }
+  23%, 45% { background: transparent; }
+  46%, 68% { background: var(--danger-bg); color: var(--danger); }
+  69%, 100% { background: transparent; }
+}
+@keyframes dieCollapse {
+  to { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; transform: translateX(12px); }
+}
+
+/* 一键回滚：整面板一次青色扫过，让"时光倒流"看得见 */
+.fsTree.is-rolling { border-color: var(--signal); }
+.fsTree.is-rolling::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--signal), transparent);
+  animation: rollSweep 0.9s ease-in-out 1;
+}
+@keyframes rollSweep {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(340px); opacity: 0; }
+}
+.fsTree.is-rolling .fsn { animation: rollBack 0.5s ease both; }
+@keyframes rollBack {
+  from { opacity: 0.3; transform: translateX(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 悬浮详情浮层 */
+.fsTree__tip {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  z-index: 5;
+  padding: 9px 11px;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--signal);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  font-size: 11.5px;
+}
+.fsTree__tipp {
+  display: block;
+  margin-bottom: 6px;
+  font: 500 11px/1.4 var(--f-mono);
+  color: var(--signal);
+  overflow-wrap: anywhere;
+}
+.fsTree__tipr { display: flex; gap: 8px; line-height: 1.75; }
+.fsTree__tipr > span { flex: 0 0 40px; color: var(--ink-3); }
+.fsTree__tipr > code {
+  font: 500 11px/1.75 var(--f-mono);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+.fsTree__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  padding: 7px 11px;
+  border-top: 1px solid var(--rule);
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+.lg::before { content: '■ '; }
+.lg--r::before { color: var(--ink-2); }
+.lg--w::before { color: var(--caution); }
+.lg--x::before { color: var(--safe); }
+.lg--none::before { color: var(--danger); }
+.fsTree__none { padding: 10px 12px; font-size: 12px; color: var(--ink-3); margin: 0; }
+
+/* 窄屏：树折到终端上方，否则两边都挤得没法读。
+   注意这条必须紧跟在上面的基础规则之后——媒体查询不提升优先级，
+   同优先级靠书写顺序决胜，放前面会被后面的基础规则覆盖。 */
+@media (max-width: 900px) {
+  .sbxzone { grid-template-columns: minmax(0, 1fr); }
+  .fsTree__body { max-height: 220px; }
+}
+
+/* ── 新手闯关 ─────────────────────────────────────────── */
+.quest {
+  margin-top: 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.quest__sum {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  cursor: pointer;
+  list-style: none;
+}
+.quest__sum::-webkit-details-marker { display: none; }
+.quest__sum::before {
+  content: '▸';
+  color: var(--ink-3);
+  font-size: 10px;
+  transition: transform 0.18s;
+}
+.quest[open] .quest__sum::before { transform: rotate(90deg); }
+.quest__title {
+  font: 600 11.5px/1 var(--f-mono);
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+}
+.quest__badge {
+  padding: 3px 8px;
+  border: 1px solid var(--signal);
+  border-radius: 999px;
+  font: 600 10.5px/1.2 var(--f-mono);
+  color: var(--signal);
+}
+.quest__hintline { font-size: 12px; color: var(--ink-3); }
+.quest__body { padding: 0 13px 13px; }
+
+.quest__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.qstep {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.qstep__tick {
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font: 600 9.5px/1 var(--f-mono);
+}
+.qstep.is-done { color: var(--safe); border-color: var(--safe); }
+.qstep.is-cur { color: var(--signal); border-color: var(--signal); background: var(--signal-soft); }
+.qstep.is-cur .qstep__t { color: var(--ink); }
+
+.qcard {
+  padding: 13px 15px;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+}
+.qcard__no {
+  margin: 0 0 6px;
+  font: 600 10.5px/1 var(--f-mono);
+  letter-spacing: 0.12em;
+  color: var(--signal);
+}
+.qcard__t { margin: 0 0 6px; font-size: 14px; line-height: 1.6; color: var(--ink); font-weight: 600; }
+.qcard__h { margin: 0 0 11px; font-size: 12.5px; line-height: 1.7; color: var(--ink-3); }
+.qcard__in { display: flex; align-items: center; gap: 9px; }
+.qcard__in input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink);
+  font: 500 13px/1.4 var(--f-mono);
+}
+.qcard__in input:focus { outline: none; border-color: var(--signal); }
+.qcard__r { margin: 11px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--ink-3); }
+.qcard__r b { color: var(--ink-2); }
+.qcard__r.is-good { color: var(--safe); }
+.qcard__r.is-bad { color: var(--danger); }
+.qcard--all { border-left-color: var(--safe); }
+
+/* ── 首屏与页脚的响应式 ─────────────────────────────────
+   ⚠️ 必须放在上面这些基础规则"之后"：媒体查询不提升优先级，
+   同优先级下靠书写顺序决胜。放前面会被后面的基础规则覆盖掉。 */
+@media (max-width: 1100px) {
+  /* 三列会把每张卡压到读不下去，中等宽度先降到两列 */
+  .points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .points { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .hero { padding-top: 36px; }
+  .anatomy { margin-top: 52px; padding-top: 24px; }
+  /* 顶栏在窄屏必须能换行，否则状态文字会被挤出视口造成横向滚动 */
+  .topbar { flex-wrap: wrap; row-gap: 10px; }
+  .status { order: 3; width: 100%; }
+  .eyebrow { letter-spacing: 0.14em; }
+  .foot { display: block; }
+  .foot__mid, .foot__right { margin-top: 6px; }
+}
+
 /* ── 动效偏好 ───────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1370,31 +2276,56 @@ html[data-mode="rescue"] .rescue-only { display: block; }
   </a>
 
   <div class="modes" role="tablist" aria-label="输出模式">
-    <button class="mode is-on" type="button" role="tab" aria-selected="true" data-mode="learn">
-      <span class="mode__name">学习模式</span>
+    <button class="mode is-on" type="button" role="tab" aria-selected="true" data-mode="guide">
+      <span class="mode__name">新手引导</span>
       <span class="mode__sub">讲清楚</span>
     </button>
-    <button class="mode" type="button" role="tab" aria-selected="false" data-mode="rescue">
-      <span class="mode__name">应急模式</span>
+    <button class="mode" type="button" role="tab" aria-selected="false" data-mode="geek">
+      <span class="mode__name">极客终端</span>
       <span class="mode__sub">直接给</span>
     </button>
   </div>
 
-  <p class="status" id="status"><span class="status__led" aria-hidden="true"></span><span id="statusText">正在检查配置…</span></p>
+  <p class="status" id="status"><span class="status__led" aria-hidden="true"></span><span id="statusText">检测代理中…</span></p>
 </header>
 
 <main id="top">
 
   <section class="hero">
-    <p class="eyebrow">命令解剖 / PIPELINE</p>
-    <h1>一条命令，五个零件</h1>
-    <p class="lede">你不需要背命令。你需要知道它由哪些零件拼起来、每个零件负责什么。下面这条命令干的事是：让 nginx 重新读一遍配置，而不中断正在处理的请求。</p>
-    <figure class="dissect" id="heroDissect" aria-label="命令解剖示意图"></figure>
+    <p class="eyebrow">GDUST Linux 协会 · AI 网页设计大赛 · 赛道三：智能交互与应用</p>
+    <h1>NL2SH：Linux 新手零门槛入门平台</h1>
+    <p class="lede">以 <strong>AI 生成</strong> ＋ <strong>沙箱仿真</strong> 为核心，解决新手「<em>不会写命令</em>、<em>不敢敲命令</em>、<em>看不懂命令</em>」三大痛点——零风险学习 Linux 运维，顺手把开源技术文化带出去。</p>
+
+    <ul class="points">
+      <li class="point">
+        <span class="point__ic" aria-hidden="true">🤖</span>
+        <h3 class="point__h">中文自然语言 → 一键生成标准 Shell 命令</h3>
+        <p class="point__p">说一句「把当前目录最大的十个文件列出来」，拿到一条能直接粘贴执行的命令，参数一处不含糊。</p>
+      </li>
+      <li class="point">
+        <span class="point__ic" aria-hidden="true">📚</span>
+        <h3 class="point__h">管道命令逐段拆解，边用边学底层原理</h3>
+        <p class="point__p">每个参数单独讲清它负责什么。讲的是「为什么这么写」，而不是「照抄这一条」。</p>
+      </li>
+      <li class="point">
+        <span class="point__ic" aria-hidden="true">🧪</span>
+        <h3 class="point__h">浏览器内置安全沙箱，实时仿真、一键回滚</h3>
+        <p class="point__p">命令真的跑一遍：权限会拒绝你，文件会真的消失——然后一键时光倒流。</p>
+      </li>
+    </ul>
 
     <div class="hero__actions">
-      <button class="btn btn--go" type="button" id="demoBtn">看一遍完整演示</button>
-      <span class="hero__hint">不用配 Key、不用联网：生成 → 拆解 → 沙箱真跑 → 文件消失 → 一键回滚</span>
+      <button class="btn btn--go btn--lg" type="button" id="startBtn">立即体验</button>
+      <button class="btn btn--ghost" type="button" id="demoBtn">看一遍完整演示</button>
+      <span class="hero__hint">不用配 Key、不用联网也能完整跑通</span>
     </div>
+  </section>
+
+  <section class="anatomy">
+    <p class="eyebrow">命令解剖 / PIPELINE</p>
+    <h2 class="anatomy__h">一条命令，五个零件</h2>
+    <p class="lede">你不需要背命令。你需要知道它由哪些零件拼起来、每个零件负责什么。下面这条命令干的事是：让 nginx 重新读一遍配置，而不中断正在处理的请求。</p>
+    <figure class="dissect" id="heroDissect" aria-label="命令解剖示意图"></figure>
   </section>
 
   <section class="work">
@@ -1410,38 +2341,30 @@ html[data-mode="rescue"] .rescue-only { display: block; }
       <p class="ask__or">或者从这几个常见任务开始</p>
       <div class="samples" id="samples"></div>
 
+      <!-- 新手闯关：5 关，判定看沙箱里的真实结果 -->
+      <details class="quest" id="quest">
+        <summary class="quest__sum">
+          <span class="quest__title">新手闯关</span>
+          <span class="quest__badge" id="questBadge">0 / 5</span>
+          <span class="quest__hintline">五关，每关给你一个目标，判定看你做出来的<b>结果</b></span>
+        </summary>
+        <div class="quest__body" id="questBody"></div>
+      </details>
+
       <details class="setup" id="setup">
         <summary class="setup__sum">
-          <span class="setup__title">模型设置</span>
-          <span class="setup__state" id="setupState">未配置 Key · 当前用内置规则库</span>
+          <span class="setup__title">接入状态</span>
+          <span class="setup__state" id="setupState">正在检测代理…</span>
         </summary>
         <div class="setup__body">
-          <div class="setup__row">
-            <label class="setup__label" for="providerSel">服务商</label>
-            <select id="providerSel"></select>
-          </div>
-          <div class="setup__row">
-            <label class="setup__label" for="modelInput">模型</label>
-            <input id="modelInput" type="text" list="modelList" spellcheck="false" autocomplete="off">
-            <datalist id="modelList"></datalist>
-          </div>
-          <div class="setup__row" id="urlRow" hidden>
-            <label class="setup__label" for="urlInput">接口地址</label>
-            <input id="urlInput" type="url" spellcheck="false" autocomplete="off" placeholder="https://…/v1/chat/completions">
-          </div>
-          <div class="setup__row">
-            <label class="setup__label" for="keyInput">API Key</label>
-            <input id="keyInput" type="password" spellcheck="false" autocomplete="off" placeholder="粘贴你自己的 Key">
-          </div>
           <div class="setup__row setup__row--switch">
             <label class="setup__check" for="offlineInput">
               <input id="offlineInput" type="checkbox">
-              <span>离线模式：只用内置规则库，不发任何请求</span>
+              <span>只看内置规则库（离线模式，不发任何请求）</span>
             </label>
           </div>
           <div class="setup__actions">
-            <button class="btn btn--go" type="button" id="saveKeyBtn">保存并测试</button>
-            <button class="btn btn--ghost" type="button" id="clearKeyBtn">清除 Key</button>
+            <button class="btn btn--ghost" type="button" id="recheckBtn">重新检测</button>
           </div>
           <p class="setup__hint" id="setupHint"></p>
         </div>
@@ -1458,33 +2381,41 @@ html[data-mode="rescue"] .rescue-only { display: block; }
       <h2 class="index__title">本次会话</h2>
       <ol class="index__list" id="history"></ol>
       <p class="index__empty" id="historyEmpty">还没有记录。生成第一条命令后会出现在这里。</p>
+      <h3 class="index__sub" id="favTitle" hidden>收藏的命令</h3>
+      <ol class="index__list index__list--fav" id="favs" hidden></ol>
     </aside>
   </section>
 
   <section class="result" id="result" hidden aria-live="polite"></section>
 
-  <section class="notes">
-    <h2 class="eyebrow">关于这个页面</h2>
+  <section class="notes" id="about">
+    <p class="eyebrow">项目背景 / WHY</p>
+    <h2 class="notes__h">为什么做这个</h2>
     <div class="notes__grid">
-      <div>
-        <h3>它解决什么</h3>
-        <p>新手卡在两步：不知道该敲什么，以及不敢敲。这个工具先给命令，再把命令拆开讲清，最后让它在沙箱里真的跑一遍，让你看见后果再决定要不要用。</p>
+      <div class="note">
+        <h3>痛点分析</h3>
+        <p>Linux 入门门槛高、命令语法抽象，而新手往往<strong>直接在服务器上试错</strong>——一次 <code>rm -rf</code> 打错目录，就是不可逆的数据丢失。于是形成恶性循环：不敢敲 → 学不会 → 更不敢敲。</p>
       </div>
-      <div>
-        <h3>沙箱是什么</h3>
-        <p>一个用 JavaScript 写的迷你 shell 加内存文件系统，实现了 find、du、rm、chmod、grep、sort、xargs、awk、tar 等命令的真实语义：路径、管道、重定向、退出码，以及属主和权限检查。systemctl、journalctl、ss、ps 这些依赖 Linux 内核与 systemd 的命令走内置桩，输出会明确标注为模拟。</p>
+      <div class="note">
+        <h3>项目意义</h3>
+        <p>把「试错」这件事搬进浏览器：先给命令、再拆开讲清、最后让它在沙箱里<strong>真的跑一遍</strong>。面向计算机新生、运维入门者与 Linux 课程学习者，践行开源分享精神——本作品以 MIT 协议开源。</p>
       </div>
-      <div>
-        <h3>为什么敢点</h3>
-        <p>所有改动只发生在浏览器的内存里，不碰你的电脑，而且每次执行前都会自动打快照——不满意就一键时光倒流。真实环境里不可撤销的删除，在这里可以放心试。</p>
+      <div class="note">
+        <h3>技术说明</h3>
+        <p><strong>纯静态零后端架构</strong>：页面、沙箱、50 条规则库全部在浏览器本地运行；AI 生成经同源边缘函数代理调用大模型，密钥只存在服务端环境变量里。你的输入不经过第三方服务器，也不会留存在任何地方。</p>
       </div>
     </div>
   </section>
 </main>
 
 <footer class="foot">
-  <p>nl2sh · 原型 v0.1 · 纸面模式与应急模式共用同一套结构，只换密度与配色</p>
-  <p class="foot__dim">演示数据不联网；实际部署版本通过流式接口调用模型，接口不可用时自动降级到本地规则库。</p>
+  <p class="foot__left">本作品为 <strong>GDUST Linux 协会 AI 网页设计大赛</strong>参赛作品 · 赛道三：智能交互与应用</p>
+  <p class="foot__mid">
+    <a href="https://github.com/muxinbo/nl2sh" target="_blank" rel="noopener">GitHub 仓库</a>
+    <span class="foot__sep">·</span>
+    <span class="foot__lic">MIT 开源协议</span>
+  </p>
+  <p class="foot__right">支持 GitHub Pages 一键部署</p>
 </footer>
 
 <noscript>
@@ -1497,6 +2428,10 @@ html[data-mode="rescue"] .rescue-only { display: block; }
   <button class="demoBar__stop" type="button" id="demoBarStop">结束演示</button>
 </div>
 
+<!-- 脚本放在 body 末尾并显式 defer：解析不被阻塞，首屏先出内容再执行脚本。
+     gzip 后首屏合计约 86KB（指标 ≤200KB，余量 114KB），实测见 README。
+     这里刻意不拆分动态加载：本作品的交付产物是"单文件版"，
+     动态 <script src> 在单文件里必然 404，风险大于收益。 -->
 <script>
 /* assets/data.js */
 /* nl2sh · 演示数据
@@ -2527,7 +3462,12 @@ window.NL2SH_SBX_FIXTURES = (function () {
         file(nodes, full, '/* ' + name + ' ' + f + ' —— 沙箱里的占位内容 */\n', { uid: ME, mode: 0o644 });
         if (/typescript|application|lodash\.js/.test(f)) {
           var n = nodes[full];
-          n.size = 400000 + Math.floor(Math.random() * 400000);
+          /* ⚠️ 这里曾经是 400000 + Math.floor(Math.random() * 400000)，
+             后果是每次建会话的文件大小都不一样：du 的总量来回跳、
+             同一个命令的前缀输出互相矛盾、断言具体大小的测试随机失败。
+             "确定性、可复现"是这个沙箱的地基，所以尺寸必须是常量。
+             数值按包名区分，让 du 的输出仍然像真的 node_modules。 */
+          n.size = /typescript/.test(f) ? 782336 : (/application/.test(f) ? 706560 : 498688);
           n.data = null;
         }
       });
@@ -4719,7 +5659,10 @@ window.NL2SH_SANDBOX = (function () {
       var n = fs.get(p);
       var out = {
         path: p, name: p === '/' ? '/' : baseName(p), t: n.t,
-        size: n.size || 0, mode: n.mode, uid: n.uid
+        size: n.size || 0, mode: n.mode, uid: n.uid,
+        /* mtime 也要带出来：界面上的文件树悬浮详情要显示修改时间，
+           和 ls -l / stat 显示的是同一个字段，不能一个有一个没有。 */
+        mtime: n.mtime || 0
       };
       if (n.t === 'd') out.children = fs.children(p).map(rec);
       return out;
@@ -4736,87 +5679,91 @@ window.NL2SH_SANDBOX = (function () {
 </script>
 <script>
 /* assets/ai.js */
-/* nl2sh · 模型接入层
+/* nl2sh · 模型接入层（经同源边缘代理）
  *
- * 2026-10-02 实测结论（决定了"不需要后端"这个架构）：
- *   智谱 open.bigmodel.cn     预检 OPTIONS 通过，回显 Origin（连 file:// 的 "null" 也回显），
- *                             SSE 流式可用，GLM-4-Flash 免费；短提示首包 ~0.5s。
- *   硅基流动 api.siliconflow.cn 跨域头为 *，同样可以浏览器直连。
- * 所以纯静态页面就能调用模型，不需要任何代理或服务器。
+ * 架构：浏览器 ──POST /api/chat──▶ Cloudflare Worker ──▶ 智谱
+ *                                        ↑ 密钥只在这里
+ * 前端永远拿不到密钥，也永远不直连模型厂商。
  *
- * 已知取舍：glm-4.5-flash / glm-4.7-flash 是推理模型，实测 28s 且会把 JSON 包进
- * ```json 代码块，不适合本场景，默认不用。
+ * 2026-10-03 真实请求实测（决定的默认模型，别凭记忆改）：
+ *   glm-4.7-flash  500 / 75.9s  ✗ 这个 ID 不存在
+ *   glm-4-flash    200 /  0.5s  ✓ 默认模型
+ *   glm-5.3-flash  429 /  0.2s  ✗ 余额不足
+ *   glm-4.7        200 /  4.0s  ✓ 有 reasoning_content，用于"深度思考"开关
+ *   JSON mode 实测：glm-4-flash 流式从"带 ```json 围栏、首字节 2.31s"
+ *   变成"可直接 JSON.parse、首字节 0.43s"——所以 response_format 是强制的。
+ *
+ * 职责边界：
+ *   本文件负责  需求 → 命令 + 逐段解释 + 风险等级（模型该干的事）
+ *   不负责      影响推演（sim）。那是沙箱在影子会话里真跑一遍算出来的，
+ *               比让模型猜准确得多，也顺带让"执行前推演"从猜测变成事实。
  */
 window.NL2SH_AI = (function () {
   'use strict';
 
-  var STORAGE_KEY = 'nl2sh.config.v1';
+  var ENDPOINT = '/api/chat';
+  var HEALTH = '/api/health';
 
-  var PROVIDERS = {
-    zhipu: {
-      label: '智谱 GLM',
-      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
-      defaultModel: 'glm-4-flash',
-      models: ['glm-4-flash', 'glm-4-flash-250414'],
-      keyUrl: 'https://open.bigmodel.cn/',
-      note: 'GLM-4-Flash 免费，注册后在「API Keys」里创建一个即可。实测跨域直连可用。'
-    },
-    siliconflow: {
-      label: '硅基流动',
-      url: 'https://api.siliconflow.cn/v1/chat/completions',
-      defaultModel: 'Qwen/Qwen3-8B',
-      models: ['Qwen/Qwen3-8B', 'THUDM/GLM-4-9B-0414', 'Qwen/Qwen3-14B'],
-      keyUrl: 'https://cloud.siliconflow.cn/',
-      note: '平台上有若干 ¥0 的小模型，具体以官网模型列表为准；跨域直连可用。'
-    },
-    custom: {
-      label: '自定义（OpenAI 兼容）',
-      url: '',
-      defaultModel: '',
-      models: [],
-      keyUrl: '',
-      custom: true,
-      note: '任何 OpenAI 兼容的 /chat/completions 端点都行，需要对方允许浏览器跨域。'
-    }
-  };
+  /* ── 托管方式与代理地址 ──────────────────────────────
+     两种情况：
+       ① 静态站和 Worker 部署在同一处（Cloudflare Pages + Pages Function）
+          → 同源 /api/chat 直接可用，下面留空即可。
+       ② 静态站托管在 GitHub Pages 这类没有 /api 路由的纯静态主机
+          → 同源必然 404，必须填上 Worker 的地址，否则评委永远只看到离线模式。
+     所以策略是"同源优先，失败再走兜底"，并把最终生效的基址记在 state.base 上。
+     ⚠️ 只有这里留空且同源也不通时才会降级到离线模式。 */
+  var FALLBACK_ORIGIN = 'https://nl2sh-api.zibochen82.workers.dev';
+  /* 上面这个地址是已部署的 Cloudflare Worker（2026-10-03 部署并实测）：
+       · /api/health → {"ok":true,"hasKey":true,...}
+       · OPTIONS 预检 → 204 + Access-Control-Allow-Origin: *
+       · 真实 POST /api/chat → 200 + text/event-stream（glm-4-flash 流式）
+     因为作品托管在 GitHub Pages（没有 /api 路由），同源一定 404，
+     所以这一行是"AI 能不能用"的开关，删掉它就会永远停在离线模式。 */
 
-  /* 实测：免费额度大约 17 token/s，所以"少输出"就是"快"。
-     两个模式用两份提示词：应急模式只要命令（约 60 token，实测 3-5s），
-     学习模式要完整的逐行解释（约 200 token，实测 12-20s）。 */
+  /* 服务端会按 thinking 标志选模型，这两个值只用于界面上显示"当前用哪个" */
+  var MODELS = { fast: 'glm-4-flash', think: 'glm-4.7' };
+
   var SYSTEM_PROMPT = [
-    '你是 Linux 命令助手。用户用中文描述想做的事，你只返回严格的 JSON，不要解释文字，不要 markdown 代码块。',
+    '你是 Linux 命令专家，服务对象是刚学 Linux 的新手。',
+    '用户用中文描述想做的事，你只返回一个 JSON 对象，不要解释文字，不要 markdown 代码块。',
     '',
     'JSON 结构：',
-    '{"cmd":"可直接执行的单行命令",' +
-      '"flow":"只有命令分多个阶段时才填，用 → 连接，不要重复命令本身",' +
-      '"risk":"safe|caution|danger","why":"风险等级依据，20字以内",' +
-      '"anno":[{"t":"必须是 cmd 的连续子串，引号也要一致","short":"6字以内","n":"说明，30字以内"}],' +
-      '"sim":{"scope":"影响范围","sudo":false,"irreversible":false,"note":"执行后会发生什么，30字以内",' +
-      '"tree":[{"p":"会改动的路径","s":"read|add|edit|del"}]},' +
-      '"see":["最多2条，必须是完整可执行的命令"]}',
+    '{"command":"可直接执行的一条命令（单行）",',
+    '"segments":[{"part":"命令里的连续片段，必须和 command 逐字一致","label":"6 字以内的短标签","explanation":"这一段干什么、参数什么语义，40 字以内"}],',
+    '"risk_level":"low|medium|high",',
+    '"risk_note":"这个等级的依据，30 字以内",',
+    '"flow":"只有命令分多个阶段时才填，用 → 连接各阶段，不要重复命令本身",',
+    '"see":["最多 2 条，必须是完整可执行的命令"]}',
     '',
-    '要求：',
-    '1. anno 只给 2-4 条，覆盖关键参数；anno[].t 必须能在 cmd 中逐字找到。',
-    '2. 说明必须准确。不确定某个参数的语义时，宁可不给它生成 anno 条目，也不要猜。',
-    '3. cmd 必须单行、可直接粘贴执行。要用户自己填的地方用 <占位符>，并在 why 里提醒。',
-    '4. 删除、递归改权限、写块设备、从网络管道执行脚本，一律 risk=danger，并在 why 里写清后果。',
-    '5. 用户没说清环境时，选更安全、影响面更小的做法。'
+    '硬性要求：',
+    '1. segments 给 2-5 段，覆盖关键参数；每段的 part 必须能在 command 里逐字找到（连引号、空格都要一致），否则那一段会被丢弃。',
+    '2. 解释必须准确。不确定某个参数的语义时，宁可不给这一段，也不要猜。',
+    '3. command 必须单行、可直接粘贴执行；需要用户自己填的地方用 <占位符>，并在 risk_note 里提醒。',
+    '4. risk_level 判定：只读查询是 low；会写文件、改权限、重启服务是 medium；删除、递归改权限、写块设备、把网络内容管道给 shell 执行是 high。',
+    '5. 用户没说清环境时，选更安全、影响面更小的做法。',
+    /* 这一条是实测加的：模型会把 shell 正则里的 \( \) 直接写进 JSON 字符串，
+       而 JSON 不认这种转义，整条回答就解析不出来。
+       前端已经有一层修复兜底（repairJsonEscapes），但源头少犯一次更好。
+       另外 JSON 里 / 不需要转义、\/ 会被解析成一个正斜杠，
+       所以要表达"反斜杠 + 斜杠"必须写 \\/ —— 这条也说清楚，能少一轮自动修正。 */
+    '6. JSON 字符串里要表达反斜杠必须写两个：要表达 \\( 就写 \\\\(，要表达 \\d 就写 \\\\d。',
+    '7. JSON 里正斜杠 / 不需要转义；写 \\/ 会被解析成一个 /。要表达"反斜杠加斜杠"必须写 \\\\/。'
   ].join('\n');
 
+  /* 极客终端模式用：只要命令，输出越少越快（免费额度下"少输出"就是"快"） */
   var SYSTEM_PROMPT_SHORT = [
-    '你是 Linux 命令助手。只返回严格 JSON，不要解释文字，不要 markdown 代码块。',
+    '你是 Linux 命令专家。只返回一个 JSON 对象，不要解释文字，不要 markdown 代码块。',
     '',
     '结构：',
-    '{"cmd":"可直接执行的单行命令","risk":"safe|caution|danger","why":"风险依据，20字以内",' +
-      '"flow":"只有分多个阶段时才填，用 → 连接",' +
-      '"sim":{"scope":"影响范围","sudo":false,"irreversible":false,"note":"执行后会发生什么，30字以内"}}',
+    '{"command":"可直接执行的一条命令（单行）","segments":[{"part":"片段","label":"短标签","explanation":"一句话说明"}],' +
+      '"risk_level":"low|medium|high","risk_note":"风险依据，20 字以内"}',
     '',
-    '要求：cmd 必须单行可直接执行；要用户自己填的地方用 <占位符>；' +
-      '删除、递归改权限、写块设备一律 risk=danger 并在 why 写清后果；不确定环境时选影响面更小的做法。'
+    '要求：command 必须单行可直接执行；需要用户自己填的地方用 <占位符>；' +
+      '删除、递归改权限、写块设备一律 risk_level=high；不确定环境时选影响面更小的做法。'
   ].join('\n');
 
-  /* 危险命令兜底：不依赖模型自述，命中就强制升级风险等级。
-     能用一条短正则说清的就用 re，说不清的（比如"rm 带了递归开关、目标是根"）
+  /* 危险命令兜底：不采信模型自述，命中就强制升级等级。
+     能用一条短正则说清的就用 re；说不清的（比如"rm 带了递归开关、目标是根"）
      用 test 函数，拆开判断比写一条又长又难维护的正则更可靠。 */
   function stripQuotes(s) { return String(s || '').replace(/^['"]|['"]$/g, ''); }
 
@@ -4850,43 +5797,97 @@ window.NL2SH_AI = (function () {
     { re: /\b(curl|wget)\b[^|]*\|\s*(sudo\s+)?(ba|z|d|k)?sh\b/, why: '把网络内容直接管道给 shell 执行' }
   ];
 
-  function env() { return window.NL2SH_ENV || {}; }
+  /* ── 连接状态 ─────────────────────────────────────────
+     没有"用户自己的 Key"这个概念了：密钥在 Worker 里。
+     前端只需要知道"代理通不通、用的是哪个模型"。 */
+  var state = {
+    checked: false,
+    ok: false,          // 代理可用且有密钥
+    hasKey: false,
+    base: '',           // 生效的代理基址：'' 表示同源，否则是 Worker 的 origin
+    models: { fast: MODELS.fast, think: MODELS.think },
+    error: ''
+  };
 
-  /* ── 配置读写 ─────────────────────────────────────── */
-  function loadConfig() {
-    var cfg = { provider: 'zhipu', model: '', url: '', key: '', offline: false };
-    try {
-      var raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        var saved = JSON.parse(raw);
-        for (var k in cfg) { if (saved[k] !== undefined) cfg[k] = saved[k]; }
+  function stateOf() { return state; }
+
+  function urlFor(path, base) {
+    return (base === undefined ? state.base : base) + path;
+  }
+
+  /* 探一个基址的健康检查；成功返回解析后的 json，失败抛错 */
+  function probe(base) {
+    return fetch(urlFor(HEALTH, base), { method: 'GET' })
+      .then(function (res) {
+        if (!res.ok) throw fail('proxy', '代理返回 ' + res.status);
+        return res.json();
+      })
+      .then(function (j) {
+        if (!j || !j.ok) throw fail('proxy', '代理健康检查未通过');
+        return j;
+      });
+  }
+
+  /* 同源优先；同源不通且配了兜底地址时再试兜底。
+     这一步同时决定了后续 generate() 往哪里发请求。 */
+  function health() {
+    var tried = state.base;
+    return probe(tried).catch(function (firstErr) {
+      if (tried !== '' || !FALLBACK_ORIGIN) throw firstErr;
+      return probe(FALLBACK_ORIGIN).then(function (j) {
+        state.base = FALLBACK_ORIGIN;
+        return j;
+      });
+    }).then(function (j) {
+      state.checked = true;
+      state.ok = !!j.hasKey;
+      state.hasKey = !!j.hasKey;
+      if (j.models) state.models = j.models;
+      state.error = state.hasKey ? '' : '代理已部署，但还没写入 ZHIPU_API_KEY';
+      return state;
+    }).catch(function (err) {
+      state.checked = true;
+      state.ok = false;
+      state.error = FALLBACK_ORIGIN
+        ? '同源和兜底代理都连不上，已切到离线模式'
+        : '连不上同源代理 /api/health（纯静态主机不会提供 /api 路由，需要在 ai.js 里填 FALLBACK_ORIGIN）';
+      throw err;
+    });
+  }
+
+  /* ── 从模型输出里抠出 JSON ──────────────────────────
+     JSON mode 下通常是干净 JSON，但 glm-4.7（深度思考）实测仍会带 ```json 围栏，
+     所以这一步不能省。 */
+  /* 模型经常把 shell 正则里的反斜杠直接写进 JSON 字符串，例如
+        "command":"sed -i 's/console.log\(.*\)/\/\/&/g' src/*.js"
+     而 JSON 只认 \" \\ \/ \b \f \n \r \t \uXXXX —— `\(` 不是合法转义，
+     JSON.parse 会直接抛 "Bad escaped character"。
+     这不是能靠提示词保证的事（实测 glm-4-flash 照样犯），所以这里做一层修复：
+     把字符串里所有"非法转义"的单个反斜杠补成双反斜杠，让它成为字面反斜杠。
+     ⚠️ 只在严格解析失败后才调用 —— 合法 JSON 一个字节都不动。 */
+  function repairJsonEscapes(raw) {
+    var out = '', inStr = false;
+    for (var i = 0; i < raw.length; i++) {
+      var c = raw.charAt(i);
+      if (!inStr) {
+        if (c === '"') inStr = true;
+        out += c;
+        continue;
       }
-    } catch (e) { /* 隐私模式下 localStorage 会抛错，静默降级 */ }
-    return cfg;
+      if (c === '"') { inStr = false; out += c; continue; }
+      if (c !== '\\') { out += c; continue; }
+
+      var n = raw.charAt(i + 1);
+      if (n === '') { out += '\\\\'; continue; }                 // 末尾孤零零一个反斜杠
+      if (n === 'u' && /^[0-9a-fA-F]{4}$/.test(raw.substr(i + 2, 4))) {
+        out += raw.substr(i, 6); i += 5; continue;               // \uXXXX 保留
+      }
+      if ('"\\/bfnrt'.indexOf(n) >= 0) { out += c + n; i++; continue; }  // 合法转义保留
+      out += '\\\\' + n; i++;                                     // 非法 → 补成字面反斜杠
+    }
+    return out;
   }
 
-  function saveConfig(cfg) {
-    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg)); }
-    catch (e) { /* 存不下就只留在内存里 */ }
-  }
-
-  function providerOf(cfg) {
-    return PROVIDERS[cfg.provider] || PROVIDERS.zhipu;
-  }
-
-  function endpointOf(cfg) {
-    return (cfg.url || providerOf(cfg).url || '').trim();
-  }
-
-  function modelOf(cfg) {
-    return (cfg.model || providerOf(cfg).defaultModel || '').trim();
-  }
-
-  function isReady(cfg) {
-    return !!(cfg && cfg.key && endpointOf(cfg) && modelOf(cfg));
-  }
-
-  /* ── 从模型输出里抠出 JSON ────────────────────────── */
   function extractJson(text) {
     if (typeof text !== 'string') return null;
     var s = text.trim();
@@ -4894,7 +5895,6 @@ window.NL2SH_AI = (function () {
     if (fence) s = fence[1].trim();
     var start = s.indexOf('{');
     if (start < 0) return null;
-    /* 花括号配平，顺便跳过字符串里的括号 */
     var depth = 0, inStr = false, esc = false;
     for (var i = start; i < s.length; i++) {
       var c = s[i];
@@ -4909,62 +5909,92 @@ window.NL2SH_AI = (function () {
       else if (c === '}') {
         depth--;
         if (depth === 0) {
-          try { return JSON.parse(s.slice(start, i + 1)); }
-          catch (e) { return null; }
+          var slice = s.slice(start, i + 1);
+          try { return JSON.parse(slice); }
+          catch (e) {
+            try { return JSON.parse(repairJsonEscapes(slice)); }
+            catch (e2) { return null; }
+          }
         }
       }
     }
     return null;
   }
 
-  /* ── 校验并规整成前端渲染需要的形状 ──────────────── */
+  function fail(kind, message) {
+    var e = new Error(message);
+    e.kind = kind;
+    return e;
+  }
+
+  /* 新结构的 risk_level 与旧结构（以及我们内部的）风险词汇之间的映射 */
+  var RISK_LEVEL_MAP = { low: 'safe', medium: 'caution', high: 'danger' };
+  var RISK_WORDS = ['safe', 'caution', 'danger'];
+
+  function normalizeRisk(v) {
+    if (typeof v !== 'string') return '';
+    var s = v.trim().toLowerCase();
+    if (RISK_LEVEL_MAP[s]) return RISK_LEVEL_MAP[s];
+    if (RISK_WORDS.indexOf(s) >= 0) return s;
+    return '';
+  }
+
+  /* ── 校验并规整成前端渲染需要的形状 ────────────────
+     同时接受规格里的新结构 {command, segments[], risk_level, risk_note}
+     和历史结构 {cmd, anno[], risk, why}——模型偶尔会串，两种都收。 */
   function normalize(raw, query, opts) {
     opts = opts || {};
     var needAnno = opts.requireAnno !== false;
     var obj = typeof raw === 'string' ? extractJson(raw) : raw;
     if (!obj || typeof obj !== 'object') throw fail('format', '模型没有返回合法 JSON');
 
-    var cmd = typeof obj.cmd === 'string' ? obj.cmd.trim() : '';
-    if (!cmd) throw fail('format', '返回结果里没有 cmd 字段');
+    var cmd = typeof obj.command === 'string' ? obj.command
+      : (typeof obj.cmd === 'string' ? obj.cmd : '');
+    cmd = cmd.trim().replace(/\s*\n\s*/g, ' ').replace(/^```[a-z]*\s*|\s*```$/g, '');
+    if (!cmd) throw fail('format', '返回结果里没有 command 字段');
 
-    var risk = ['safe', 'caution', 'danger'].indexOf(obj.risk) >= 0 ? obj.risk : 'caution';
-    var why = typeof obj.why === 'string' ? obj.why.trim() : '';
+    var risk = normalizeRisk(obj.risk_level) || normalizeRisk(obj.risk) || 'caution';
+    var riskNote = typeof obj.risk_note === 'string' ? obj.risk_note.trim()
+      : (typeof obj.why === 'string' ? obj.why.trim() : '');
 
-    /* 只保留能在命令里逐字定位、且互不重叠的解释，避免高亮错位。
-       重叠过滤放在这里而不是只放在渲染层：否则数据层会留下"有解释条目、
+    /* segments（新）与 anno（旧）统一成 anno。
+       只保留能在命令里逐字定位、且互不重叠的段，避免高亮错位。
+       重叠过滤放在数据层而不是只放在渲染层：否则会留下"有解释条目、
        却一行都渲染不出来"的空壳，界面就会开天窗。 */
+    var rawSegs = Array.isArray(obj.segments) ? obj.segments
+      : (Array.isArray(obj.anno) ? obj.anno : []);
     var anno = [];
     var used = [];
-    if (Array.isArray(obj.anno)) {
-      obj.anno.forEach(function (a) {
-        if (!a || typeof a.t !== 'string' || !a.t) return;
-        var start = cmd.indexOf(a.t);
-        if (start < 0) return;
-        var end = start + a.t.length;
-        for (var k = 0; k < used.length; k++) {
-          if (start < used[k][1] && end > used[k][0]) return;   // 与已接受的区间重叠
-        }
-        used.push([start, end]);
-        anno.push({
-          t: a.t,
-          short: typeof a.short === 'string' && a.short.trim() ? a.short.trim() : a.t,
-          n: typeof a.n === 'string' ? a.n.trim() : ''
-        });
+    rawSegs.forEach(function (a) {
+      if (!a || typeof a !== 'object') return;
+      var part = typeof a.part === 'string' ? a.part
+        : (typeof a.t === 'string' ? a.t : '');
+      if (!part) return;
+      var start = cmd.indexOf(part);
+      if (start < 0) return;                       // 定位不到就丢掉，不要污染高亮
+      var end = start + part.length;
+      for (var k = 0; k < used.length; k++) {
+        if (start < used[k][1] && end > used[k][0]) return;   // 与已接受的区间重叠
+      }
+      used.push([start, end]);
+      var label = typeof a.label === 'string' ? a.label.trim()
+        : (typeof a.short === 'string' ? a.short.trim() : '');
+      if (!label) {
+        /* 模型没给短标签就从解释里截一个，保证节点卡片有标题可显示 */
+        var ex = typeof a.explanation === 'string' ? a.explanation
+          : (typeof a.n === 'string' ? a.n : '');
+        label = ex.replace(/[，。；：、,.;:]/g, ' ').trim().split(/\s+/)[0] || part;
+        if (label.length > 8) label = label.slice(0, 8);
+      }
+      anno.push({
+        t: part,
+        short: label,
+        n: (typeof a.explanation === 'string' ? a.explanation
+          : (typeof a.n === 'string' ? a.n : '')).trim()
       });
-      anno.sort(function (x, y) { return cmd.indexOf(x.t) - cmd.indexOf(y.t); });
-    }
-    if (needAnno && !anno.length) throw fail('format', '逐行解释为空，或全部无法在命令里定位');
-
-    var simRaw = obj.sim && typeof obj.sim === 'object' ? obj.sim : {};
-    var sim = {
-      scope: typeof simRaw.scope === 'string' && simRaw.scope.trim() ? simRaw.scope.trim() : '未说明',
-      sudo: !!simRaw.sudo,
-      irreversible: !!simRaw.irreversible,
-      note: typeof simRaw.note === 'string' ? simRaw.note.trim() : '',
-      tree: Array.isArray(simRaw.tree) ? simRaw.tree.filter(function (r) {
-        return r && typeof r.p === 'string' && ['read', 'add', 'edit', 'del'].indexOf(r.s) >= 0;
-      }).slice(0, 8) : []
-    };
+    });
+    anno.sort(function (x, y) { return cmd.indexOf(x.t) - cmd.indexOf(y.t); });
+    if (needAnno && !anno.length) throw fail('format', '逐段解释为空，或全部无法在命令里定位');
 
     var see = Array.isArray(obj.see) ? obj.see.filter(function (c) {
       return typeof c === 'string' && c.trim();
@@ -4975,9 +6005,8 @@ window.NL2SH_AI = (function () {
       cmd: cmd,
       flow: typeof obj.flow === 'string' ? obj.flow.trim() : '',
       risk: risk,
-      why: why || '模型未给出风险说明。',
+      why: riskNote || '模型未给出风险说明。',
       anno: anno,
-      sim: sim,
       see: see,
       source: 'ai'
     };
@@ -4985,27 +6014,18 @@ window.NL2SH_AI = (function () {
     return enforceSafety(result);
   }
 
-  /* 命令本身的危险特征不采信模型自述，直接升级等级并追加警告 */
+  /* 命令本身的危险特征不采信模型自述，直接升级等级 */
   function enforceSafety(result) {
     for (var i = 0; i < DANGER_PATTERNS.length; i++) {
       var p = DANGER_PATTERNS[i];
       var hit = p.test ? p.test(result.cmd) : p.re.test(result.cmd);
       if (!hit) continue;
       result.risk = 'danger';
-      result.sim.irreversible = true;
       result.safety = p.why;
-      if (result.why.indexOf(p.why) < 0) {
-        result.why = p.why + '。' + result.why;
-      }
+      if (result.why.indexOf(p.why) < 0) result.why = p.why + '。' + result.why;
       break;
     }
     return result;
-  }
-
-  function fail(kind, message) {
-    var e = new Error(message);
-    e.kind = kind;
-    return e;
   }
 
   function httpError(status, bodyText) {
@@ -5014,80 +6034,86 @@ window.NL2SH_AI = (function () {
       var j = JSON.parse(bodyText);
       detail = (j.error && (j.error.message || j.error.code)) || j.message || '';
     } catch (e) { detail = String(bodyText || '').slice(0, 160); }
-    if (status === 401 || status === 403) return fail('auth', 'Key 无效或没有该模型的权限');
-    if (status === 429) return fail('rate', '触发限流，稍后再试');
-    if (status >= 500) return fail('server', '服务商返回 ' + status + '，稍后再试');
+    if (status === 401 || status === 403) return fail('auth', '代理或上游拒绝了这个请求（密钥无效？）');
+    if (status === 429) return fail('rate', '请求太频繁，稍后再试');
+    if (status >= 500) return fail('server', '模型服务返回 ' + status + '，稍后再试');
     return fail('format', '请求失败 ' + status + (detail ? '：' + detail : ''));
   }
 
   /* ── 生成 ─────────────────────────────────────────────
-   * handlers: onProgress({elapsed, chars, cmd}), onDone(item), onError(err)
-   * 返回 { cancel: fn }
+   * opts.brief     极客终端模式：短提示词、少输出、更快
+   * opts.thinking  深度思考：切到 glm-4.7，推理内容走 onReasoning
+   * opts.repair    {cmd, code, err, attempt} 自纠错循环的第 N 次修正
+   * handlers: onProgress({elapsed, chars, cmd}), onReasoning(text), onDone(item), onError(err)
+   * 返回 { cancel }
    */
-  function generate(cfg, query, handlers, opts) {
+  function generate(query, handlers, opts) {
     opts = opts || {};
-    var brief = opts.brief === true; // 应急模式：只要命令，输出更少所以更快
-    var url = endpointOf(cfg);
-    var model = modelOf(cfg);
+    handlers = handlers || {};
+    var brief = opts.brief === true;
+    var session = opts.session || function () {};   // 当前会话累积的上下文，可选
+
     var ctrl = window.AbortController ? new AbortController() : null;
     var started = Date.now();
     var acc = '';
     var sentCmd = null;
+    var reasoning = '';
     var settled = false;
 
     var tick = setInterval(function () {
       if (settled) return;
-      handlers.onProgress({ elapsed: Date.now() - started, chars: acc.length, cmd: sentCmd });
+      if (handlers.onProgress) {
+        handlers.onProgress({ elapsed: Date.now() - started, chars: acc.length, cmd: sentCmd });
+      }
     }, 200);
 
     function finish(fn, arg) {
       if (settled) return;
       settled = true;
       clearInterval(tick);
-      fn(arg);
+      if (fn) fn(arg);
     }
 
-    /* cmd 是 JSON 的第一个字段，边收边把命令先亮出来，用户不用干等十几秒 */
     function sniffCmd() {
       if (sentCmd !== null) return;
-      var m = acc.match(/"cmd"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      var m = acc.match(/"command"\s*:\s*"((?:[^"\\]|\\.)*)"/) || acc.match(/"cmd"\s*:\s*"((?:[^"\\]|\\.)*)"/);
       if (!m) return;
       var value;
       try { value = JSON.parse('"' + m[1] + '"'); } catch (e) { return; }
       if (!value) return;
       sentCmd = value;
-      handlers.onProgress({ elapsed: Date.now() - started, chars: acc.length, cmd: sentCmd });
+      if (handlers.onProgress) {
+        handlers.onProgress({ elapsed: Date.now() - started, chars: acc.length, cmd: sentCmd });
+      }
     }
 
-    function consume(piece) {
-      acc += piece;
-      sniffCmd();
-    }
-
-    /* 沙箱报错后的修正请求：把上一条命令和真实报错一起喂回去 */
+    /* 自纠错循环：把上一条命令和沙箱里的真实报错一起喂回去 */
     var userContent = query;
     if (opts.repair) {
+      var r = opts.repair;
       userContent = '用户想做的事：' + query + '\n\n' +
-        '你上一次给出的命令是：\n' + opts.repair.cmd + '\n\n' +
-        '它在沙箱里执行失败了（退出码 ' + opts.repair.code + '），错误输出：\n' +
-        String(opts.repair.err || '').slice(0, 800) + '\n\n' +
-        '请修正这条命令，并按要求重新返回同样的 JSON 结构。';
+        '你上一次给出的命令是：\n' + r.cmd + '\n\n' +
+        '它在沙箱里执行失败了（退出码 ' + r.code + '），错误输出：\n' +
+        String(r.err || '').slice(0, 800) + '\n\n' +
+        '请根据这个真实报错修正命令，并按要求重新返回同样的 JSON 结构。' +
+        '如果失败原因是你用了沙箱里不存在的命令或参数，请换一个等效但更通用的写法。';
     }
 
     var payload = {
-      model: model,
       stream: true,
       temperature: 0.2,
-      max_tokens: brief ? 400 : 1200,
+      json: true,
+      max_tokens: opts.thinking ? 1600 : (brief ? 500 : 1200),
       messages: [
         { role: 'system', content: brief ? SYSTEM_PROMPT_SHORT : SYSTEM_PROMPT },
         { role: 'user', content: userContent }
       ]
     };
+    if (opts.thinking) payload.thinking = true;
 
-    fetch(url, {
+    fetch(urlFor(ENDPOINT), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cfg.key },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       signal: ctrl ? ctrl.signal : undefined
     }).then(function (res) {
@@ -5097,12 +6123,31 @@ window.NL2SH_AI = (function () {
       if (!res.body || typeof res.body.getReader !== 'function') {
         return res.json().then(function (j) {
           var msg = j.choices && j.choices[0] && j.choices[0].message;
-          consume((msg && (msg.content || msg.reasoning_content)) || '');
+          if (msg && msg.content) consume(msg.content);
         });
       }
       var reader = res.body.getReader();
       var decoder = new TextDecoder('utf-8');
       var buf = '';
+
+      function line(raw) {
+        var s = raw.trim();
+        if (!s || s.indexOf('data:') !== 0) return;
+        var data = s.slice(5).trim();
+        if (!data || data === '[DONE]') return;
+        try {
+          var j = JSON.parse(data);
+          var delta = j.choices && j.choices[0] && (j.choices[0].delta || j.choices[0].message);
+          if (!delta) return;
+          /* 深度思考模式：glm-4.7 会先吐 reasoning_content，单独送给可折叠面板 */
+          if (typeof delta.reasoning_content === 'string' && delta.reasoning_content) {
+            reasoning += delta.reasoning_content;
+            if (handlers.onReasoning) handlers.onReasoning(reasoning);
+          }
+          if (typeof delta.content === 'string' && delta.content) consume(delta.content);
+        } catch (e) { /* 半包或心跳，跳过 */ }
+      }
+
       function pump() {
         return reader.read().then(function (r) {
           if (r.done) {
@@ -5116,67 +6161,42 @@ window.NL2SH_AI = (function () {
           return pump();
         });
       }
-      function line(raw) {
-        var s = raw.trim();
-        if (!s || s.indexOf('data:') !== 0) return;
-        var data = s.slice(5).trim();
-        if (!data || data === '[DONE]') return;
-        try {
-          var j = JSON.parse(data);
-          var choice = j.choices && j.choices[0];
-          var delta = choice && (choice.delta || choice.message);
-          if (delta && typeof delta.content === 'string') consume(delta.content);
-          /* 推理模型会先把 token 花在 reasoning_content 上，这里只用来报进度 */
-          else if (delta && typeof delta.reasoning_content === 'string') acc += '';
-        } catch (e) { /* 半包或心跳，跳过 */ }
-      }
       return pump();
     }).then(function () {
-      finish(handlers.onDone, normalize(acc, query, { requireAnno: !brief }));
+      var item = normalize(acc, query, { requireAnno: !brief });
+      item.reasoning = reasoning;
+      item.attempt = opts.repair ? (opts.repair.attempt || 1) : 0;
+      finish(handlers.onDone, item);
     }).catch(function (err) {
       if (err && err.name === 'AbortError') return finish(handlers.onError, fail('abort', '已取消'));
       if (err && err.kind) return finish(handlers.onError, err);
-      finish(handlers.onError, fail('network',
-        '连不上模型服务。检查网络，或该端点是否允许浏览器跨域。'));
+      finish(handlers.onError, fail('network', '连不上同源代理 /api/chat，已切换到离线模式。'));
     });
+
+    function consume(piece) {
+      acc += piece;
+      sniffCmd();
+    }
 
     return {
       cancel: function () { if (ctrl) ctrl.abort(); }
     };
   }
 
-  /* 保存后做一次最小连通性测试 */
-  function test(cfg) {
-    var url = endpointOf(cfg);
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cfg.key },
-      body: JSON.stringify({
-        model: modelOf(cfg),
-        max_tokens: 8,
-        messages: [{ role: 'user', content: '回复OK' }]
-      })
-    }).then(function (res) {
-      if (!res.ok) return res.text().then(function (t) { throw httpError(res.status, t); });
-      return res.json();
-    });
-  }
-
   return {
-    PROVIDERS: PROVIDERS,
+    ENDPOINT: ENDPOINT,
+    MODELS: MODELS,
     SYSTEM_PROMPT: SYSTEM_PROMPT,
     SYSTEM_PROMPT_SHORT: SYSTEM_PROMPT_SHORT,
     DANGER_PATTERNS: DANGER_PATTERNS,
-    loadConfig: loadConfig,
-    saveConfig: saveConfig,
-    providerOf: providerOf,
-    endpointOf: endpointOf,
-    modelOf: modelOf,
-    isReady: isReady,
     extractJson: extractJson,
     normalize: normalize,
+    enforceSafety: enforceSafety,
+    normalizeRisk: normalizeRisk,
+    state: stateOf,
+    health: health,
     generate: generate,
-    test: test
+    fail: fail
   };
 })();
 
@@ -5676,7 +6696,24 @@ window.NL2SH_FX = (function () {
   /* 首屏"常见任务"标签：从规则库里挑几条最有代表性的。
      组合刻意覆盖不同类别——统计、日志分析、管道、打包、以及一条危险命令
      （危险那条是拿来展示风险印章和沙箱回滚的，它在沙箱里跑，不会伤到任何东西）。 */
-  var SAMPLE_IDS = [0, 19, 27, 39, 7];
+  /* 8 个示例，排成 2 行 4 列。挑选标准是"展示面尽量宽"，
+     让评委在没想好问什么的时候，随便点一个都能看到不同的能力：
+       管道 3 段 / awk 统计 / 最简单的一条 / 最常用的 ls
+       危险删除（会触发目录树红闪消失）/ && 序列
+       权限被拒绝（证明沙箱的权限是真的）/ 就地编辑并自动备份 */
+  var SAMPLE_IDS = [0, 19, 9, 45, 6, 39, 35, 29];
+
+  /* 网格里放不下完整问句，用短标签；完整问句挂 title，悬浮能看到 */
+  var SAMPLE_SHORT = {
+    0: '找出最大的 10 个文件',
+    19: '数一数有多少条 500 错误',
+    9: '访问最多的 10 个 IP',
+    45: '看目录里每个文件多大',
+    6: '删掉所有 .tmp 文件',
+    39: '打包后核对包里有什么',
+    35: '改属主：会被权限拒绝',
+    29: '改版本号并自动备份'
+  };
 
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) {
@@ -5696,7 +6733,7 @@ window.NL2SH_FX = (function () {
     };
   }
 
-  var mode = 'learn';
+  var mode = 'guide';
   var current = null;      // 当前展示的条目
   var typingToken = null;  // 打字动画的取消令牌
   var history = [];        // [{ item }]，最近的排最前
@@ -5721,16 +6758,211 @@ window.NL2SH_FX = (function () {
   }
 
   /* 命令文本 → 带标注锚点的 HTML；序号按命令中的先后顺序编号 */
-  function cmdHtml(cmd, ranges) {
-    var html = '', pos = 0;
-    ranges.forEach(function (r, k) {
-      if (r.start > pos) html += esc(cmd.slice(pos, r.start));
-      html += '<span class="tok" data-i="' + r.idx + '" tabindex="0">' +
-        esc(cmd.slice(r.start, r.end)) +
-        '<span class="tok__mark">' + (k + 1) + '</span></span>';
-      pos = r.end;
+  function cmdHtml(cmd, ranges, stages) {
+    /* 没有管道（只有一段）时退回原来的渲染 */
+    if (!stages || stages.length < 2) {
+      var plain = '', at = 0;
+      ranges.forEach(function (r, k) {
+        if (r.start > at) plain += esc(cmd.slice(at, r.start));
+        plain += '<span class="tok" data-i="' + r.idx + '" tabindex="0">' +
+          esc(cmd.slice(r.start, r.end)) +
+          '<span class="tok__mark">' + (k + 1) + '</span></span>';
+        at = r.end;
+      });
+      return plain + esc(cmd.slice(at));
+    }
+
+    /* 有管道时：先按段包一层 .stg（供节点悬浮联动），
+       再把落在段内的 anno 区间套成 .tok。跨段的 anno 不套，
+       否则会出现嵌套错位、高亮跑到隔壁段去。 */
+    var html = '', pos = 0, mark = 0;
+    stages.forEach(function (st, i) {
+      if (st.from > pos) html += esc(cmd.slice(pos, st.from));
+      var inner = '', innerPos = st.from;
+      ranges.forEach(function (r) {
+        if (r.start < st.from || r.end > st.to) return;
+        if (r.start > innerPos) inner += esc(cmd.slice(innerPos, r.start));
+        mark++;
+        inner += '<span class="tok" data-i="' + r.idx + '" tabindex="0">' +
+          esc(cmd.slice(r.start, r.end)) +
+          '<span class="tok__mark">' + mark + '</span></span>';
+        innerPos = r.end;
+      });
+      if (innerPos < st.to) inner += esc(cmd.slice(innerPos, st.to));
+      if (!inner) inner = esc(cmd.slice(st.from, st.to));
+      html += '<span class="stg" data-s="' + i + '">' + inner + '</span>';
+      pos = st.to;
     });
-    return html + esc(cmd.slice(pos));
+    if (pos < cmd.length) html += esc(cmd.slice(pos));
+    return html;
+  }
+
+  /* ── 管道拆解 ─────────────────────────────────────────
+     把命令按顶层 | 或 && 或 ; 切成若干段。自己扫描而不用沙箱的 tokenizer：
+     需要保留原文（含引号与空格），否则重新拼回去会破坏 awk '{print $7}' 这类写法；
+     顺便拿到每一段在命令里的字符偏移，悬浮联动高亮直接用它。
+
+     三种连接符的语义不同，界面上也会用不同的箭头表达：
+       |   管道：左边 stdout 直接变成右边 stdin，两边同时跑
+       &&  顺序：前一条成功（退出码 0）才跑后一条
+       ;   顺序：不管前一条成不成功都接着跑 */
+  function splitPipeline(cmd) {
+    var s = String(cmd || '');
+    var parts = [], start = 0, quote = null;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i);
+      if (quote) {
+        if (c === '\\' && quote === '"') { i++; continue; }
+        if (c === quote) quote = null;
+        continue;
+      }
+      if (c === '\\') { i++; continue; }
+      if (c === '"' || c === "'") { quote = c; continue; }
+      /* cut 必须在移动 i 之前记下来：&& 要吞掉两个字符，
+         但分段边界应停在第一个 & 处，否则段尾会多带一个 &。 */
+      var conn = null, cut = i;
+      if (c === '|') {
+        if (s.charAt(i + 1) === '|') { i++; continue; }   // || 是逻辑或，不是管道
+        conn = 'pipe';
+      } else if (c === '&' && s.charAt(i + 1) === '&') {
+        conn = 'and';
+        i++;
+      } else if (c === ';') {
+        conn = 'seq';
+      }
+      if (!conn) continue;
+      parts.push({ from: start, to: cut, conn: conn });
+      start = i + 1;
+    }
+    parts.push({ from: start, to: s.length, conn: null });
+
+    /* 掐掉每段两端空白并修正偏移，保证 text 是 cmd 的逐字子串 */
+    return parts.map(function (p) {
+      var a = p.from, b = p.to;
+      while (a < b && /\s/.test(s.charAt(a))) a++;
+      while (b > a && /\s/.test(s.charAt(b - 1))) b--;
+      return { text: s.slice(a, b), from: a, to: b, conn: p.conn };
+    }).filter(function (p) { return p.text.length > 0; });
+  }
+
+  /* 每一段的真实输出样例。
+     做法是把命令只跑到这一段为止（前缀），在一个全新的影子会话里执行——
+     所以样例是「那一段真的产出了什么」，不是编出来的。
+     结果按命令文本缓存，避免每次渲染都重跑。 */
+  var sampleCache = {};
+
+  function stageSamples(cmd, stages) {
+    if (!SBX || stages.length < 2) return [];
+    if (sampleCache[cmd]) return sampleCache[cmd];
+    var out = [];
+    for (var i = 0; i < stages.length; i++) {
+      var prefix = cmd.slice(0, stages[i].to);
+      var r = null;
+      try { r = SBX.createSession().run(prefix); } catch (e) { r = null; }
+      var lines = r ? String(r.out || '').split('\n').filter(function (l) { return l.trim(); }) : [];
+      out.push({
+        code: r ? r.code : null,
+        head: lines.slice(0, 3),
+        count: lines.length,
+        simulated: !!(r && r.simulated)
+      });
+    }
+    sampleCache[cmd] = out;
+    return out;
+  }
+
+  function connLabel(kind) {
+    return kind === 'pipe' ? '管道' : (kind === 'and' ? '成功才继续' : '接着执行');
+  }
+
+  function connExplain(kind) {
+    if (kind === 'pipe') return '管道（|）：把左边命令的标准输出直接接到右边命令的标准输入。两条命令是同时跑的，中间不会落成临时文件。';
+    if (kind === 'and') return '逻辑与（&&）：前一条命令成功（退出码 0）才执行后一条。失败就停下，不会继续往下做。';
+    return '分号（;）：无论前一条成功与否，都接着执行下一条。';
+  }
+
+  /* 这一段用的命令，沙箱里登记的用法字符串（真实数据，不是编的） */
+  function usageOf(cmdText) {
+    var m = String(cmdText).trim().match(/^(?:sudo\s+)?([\w.\-]+)/);
+    if (!m) return '';
+    var name = m[1];
+    var sb = getSandbox();
+    if (!sb || !sb.commandList) return '';
+    var list = sb.commandList();
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].name === name) {
+        return list[i].usage ? name + ' 的用法：' + list[i].usage : '';
+      }
+    }
+    return '';
+  }
+
+  /* 节点行：完整命令上方的横向管道视图 */
+  function pipeHtml(stages, samples) {
+    if (!stages || stages.length < 2) return '';
+    var row = stages.map(function (st, i) {
+      var s = samples[i] || {};
+      var arrow = '';
+      if (st.conn) {
+        arrow = '<span class="parrow parrow--' + st.conn + '" aria-hidden="true">' +
+          '<i></i><em>' + connLabel(st.conn) + '</em></span>';
+      }
+      return '<button class="pnode" type="button" data-s="' + i + '" style="--i:' + i + '">' +
+          '<span class="pnode__n">' + (i + 1) + '</span>' +
+          '<code class="pnode__c">' + esc(st.text) + '</code>' +
+          '<span class="pnode__o">' + (s.count ? s.count + ' 行输出' : '无输出') + '</span>' +
+        '</button>' + arrow;
+    }).join('');
+
+    return '<div class="pipe" id="pipe">' +
+      '<p class="pipe__lead">数据在这 ' + stages.length + ' 段之间流动。' +
+        '悬浮一段，命令里对应的片段会亮起来；点开它，能看到这一段<strong>真实</strong>跑了什么。</p>' +
+      '<div class="pipe__row">' + row + '</div>' +
+    '</div>';
+  }
+
+  /* 点击节点后展开的详情：用法、输入、输出全部来自沙箱的真实执行 */
+  function stageDetailHtml(item, stages, samples, i) {
+    var st = stages[i], s = samples[i] || {}, prev = samples[i - 1] || {};
+    var anno = null;
+    (item.anno || []).forEach(function (a) {
+      if (!anno && st.text.indexOf(a.t) >= 0) anno = a;
+    });
+    var usage = usageOf(st.text);
+    var isLast = i === stages.length - 1;
+
+    /* 形参必须和调用处一致：(标签, 行数组, 空态文案)。
+       这里多写一个参数会让数组落到错误的形参上，
+       表现为 lines.join is not a function —— 而监听器里的异常不会冒泡，
+       界面上只会看到"点了没反应"。 */
+    function block(tag, lines, empty) {
+      return '<div class="pdetail__io-col">' +
+        '<span class="pdetail__tag">' + tag + '</span>' +
+        (lines && lines.length
+          ? '<pre class="pdetail__pre">' + esc(lines.join('\n')) + '</pre>'
+          : '<em class="pdetail__none">' + empty + '</em>') +
+      '</div>';
+    }
+
+    return '<div class="pdetail__head">' +
+        '<span class="pdetail__idx">第 ' + (i + 1) + ' / ' + stages.length + ' 段</span>' +
+        (st.conn
+          ? '<span class="pdetail__conn">用「' + connLabel(st.conn) + '」接下一段</span>'
+          : '<span class="pdetail__conn">最后一段：它的输出就是终端里看到的结果</span>') +
+      '</div>' +
+      '<code class="pdetail__cmd">' + esc(st.text) + '</code>' +
+      (anno ? '<p class="pdetail__n">' + esc(anno.n) + '</p>' : '') +
+      (usage ? '<p class="pdetail__usage">' + esc(usage) + '</p>' : '') +
+      (st.conn ? '<p class="pdetail__hint">' + esc(connExplain(st.conn)) + '</p>' : '') +
+      '<div class="pdetail__io">' +
+        block('这一段的输入', i === 0 ? null : prev.head,
+          i === 0 ? '数据从这里开始——没有上游' : '上一段没有任何输出') +
+        block('这一段的输出', s.head,
+          s.count ? '输出行数较多，上面只显示前 3 行' : '没有打印任何东西（这类命令靠副作用，不靠输出）') +
+      '</div>' +
+      (isLast ? '<p class="pdetail__hint">它就是终端里那段输出的来源。</p>'
+              : '<p class="pdetail__hint">它的输出被喂给下一段当输入，所以不会直接出现在终端里——' +
+                '这正是管道省钱省事的地方：中间结果不落盘。</p>');
   }
 
   /* ── 首屏解剖图 ───────────────────────────────────── */
@@ -5869,6 +7101,83 @@ window.NL2SH_FX = (function () {
     }).join('');
   }
 
+  /* ── 执行前推演：让影子沙箱先跑一遍 ───────────────────
+     这是本项目最实在的一处设计：让模型"猜"会改动哪些文件，是整条链路里
+     最不可靠的一环；而在一个一次性会话里把命令真跑一遍、拿真实 diff 当预测，
+     得到的就是事实。代价是几毫秒，换来的是"推演"和"实测"永远不会互相打架。
+
+     边界要说清楚：diff 只能给出**被改动**的路径，给不出"读了哪些文件"——
+     沙箱没有记录读操作。所以只读命令这里会诚实地写"未改动任何文件"，
+     而不是编一个读取列表出来。 */
+  function inferImpact(cmd) {
+    if (!SBX || !cmd) return null;
+    var session, snap, r, diff = [];
+    try {
+      session = SBX.createSession();
+      snap = session.snapshot();
+      r = session.run(cmd);
+      diff = session.diffSince(snap) || [];
+    } catch (e) {
+      return null;
+    }
+
+    var tree = [], dels = 0, adds = 0, edits = 0;
+    diff.forEach(function (d) {
+      var kind = d.kind === 'del' ? 'del' : (d.kind === 'add' ? 'add' : 'edit');
+      if (kind === 'del') dels++;
+      else if (kind === 'add') adds++;
+      else edits++;
+      if (tree.length < 8) tree.push({ p: d.path, s: kind });
+    });
+
+    var failed = r.code !== 0 || !!String(r.err || '').trim();
+    var out = {
+      verified: true,                 // 标记：这份推演来自实跑，不是模型预测
+      sudo: /(^|\s)sudo(\s|$)/.test(String(cmd)),
+      irreversible: dels > 0,         // 有删除就当不可撤销，宁可保守
+      tree: tree,
+      scope: '',
+      note: ''
+    };
+
+    if (failed) {
+      out.scope = '无（这条命令会被拒绝或失败）';
+      out.note = '影子沙箱里它返回了退出码 ' + r.code + '：' +
+        String(r.err || r.out || '').split('\n').filter(Boolean).slice(0, 1).join('').slice(0, 90);
+    } else if (!diff.length) {
+      out.scope = '只读 · 未改动任何文件';
+      out.note = '跑完了，文件系统没有任何变化。这类命令拿信息，不动数据。';
+    } else {
+      var bits = [];
+      if (adds) bits.push('新增 ' + adds);
+      if (edits) bits.push('修改 ' + edits);
+      if (dels) bits.push('删除 ' + dels);
+      out.scope = bits.join(' · ');
+      out.note = dels
+        ? '有 ' + dels + ' 个文件会被真的删掉，而且不进回收站——这也是它需要先跑一遍的原因。'
+        : '共 ' + diff.length + ' 个路径发生变化，全部只在内存里，随时能一键回滚。';
+    }
+    return out;
+  }
+
+  /* 手写的推演文案（规则库）与实跑的结构合并：
+     结构用实跑的（准确），措辞用手写的（教得清楚）。 */
+  function effectiveSim(item) {
+    var live = inferImpact(item.cmd);
+    var base = item.sim || null;
+    if (!base) return live;
+    if (!live) return base;
+    return {
+      verified: true,
+      declared: true,
+      scope: live.scope,
+      sudo: base.sudo,
+      irreversible: base.irreversible || live.irreversible,
+      note: base.note,
+      tree: live.tree.length ? live.tree : base.tree
+    };
+  }
+
   function simHtml(sim) {
     if (!sim) return '';
     var tree = (sim.tree || []).map(function (row) {
@@ -5877,6 +7186,7 @@ window.NL2SH_FX = (function () {
     }).join('') || '<p class="tree__empty">不改动任何文件。</p>';
 
     var flags = '<span class="flag">影响范围 · ' + esc(sim.scope) + '</span>' +
+      (sim.verified ? '<span class="flag flag--ok">影子沙箱实跑</span>' : '') +
       (sim.sudo ? '<span class="flag flag--warn">需要 sudo</span>' : '') +
       (sim.irreversible ? '<span class="flag flag--bad">不可撤销</span>' : '');
 
@@ -5887,7 +7197,7 @@ window.NL2SH_FX = (function () {
       '</div>';
   }
 
-  function cardHtml(item, ranges, opts) {
+  function cardHtml(item, ranges, opts, stages, samples) {
     var risk = RISK[item.risk] || RISK.safe;
     var isAI = item.source === 'ai';
     var srcLabel = isAI
@@ -5905,20 +7215,31 @@ window.NL2SH_FX = (function () {
     }
     if (opts.loose && !opts.aiError) {
       notice += '<p class="notice"><span class="notice__tag">规则库</span>' +
-        '内置规则库只有 ' + DATA.items.length + ' 个任务，没有完全匹配的一条，下面是字面上最接近的。' +
-        '在「模型设置」里填一个 API Key，就能对任意描述实时生成。</p>';
+        '内置规则库有 ' + DATA.items.length + ' 个任务，没有完全匹配的一条，下面是字面上最接近的。' +
+        '展开上面的「接入状态」可以看到模型代理为什么没生效。</p>';
     }
     if (opts.noKey) {
-      notice += '<p class="notice"><span class="notice__tag">未配置模型</span>' +
-        '现在走的是内置规则库。填一个免费 Key（智谱 GLM-4-Flash 免费）之后，' +
-        '任意一句话都会实时生成命令和解释。</p>';
+      notice += '<p class="notice"><span class="notice__tag">离线模式</span>' +
+        '模型代理解析不可用（常见原因：还没部署 Worker，或部署在纯静态主机上没有 /api 路由）。' +
+        '现在走内置规则库——50 条已核对并逐条真跑验证过的任务，功能照常可用。</p>';
     }
+
+    /* §三.2：高危检测前置到「生成完成后、沙箱执行前」。
+       命令框边框变红 + 顶部红条，在跑之前就把话说清楚。 */
+    var dangerBar = item.risk === 'danger'
+      ? '<div class="dangerbar" role="alert">' +
+          '<span class="dangerbar__ic" aria-hidden="true">⚠</span>' +
+          '<div><p class="dangerbar__t">该命令具有高破坏性，禁止直接在生产环境执行，请先在沙箱中验证效果。</p>' +
+          '<p class="dangerbar__s">' + esc(item.safety || item.why) + '</p></div>' +
+        '</div>'
+      : '';
+
     var repairBanner = item.repairedFrom
-      ? '<div class="repair"><span class="repair__tag">自动修正</span>' +
+      ? '<div class="repair"><span class="repair__tag">自动修正 · 第 ' + (item.attempt || 1) + ' 次</span>' +
         '上一条命令在沙箱里执行失败了，已把真实报错回传给模型，这是它自己修好之后的版本。</div>'
       : '';
 
-    return '<article class="card">' +
+    return '<article class="card' + (item.risk === 'danger' ? ' card--danger' : '') + '">' +
       '<header class="card__head">' +
         '<div class="card__main">' +
           '<h2 class="card__q">' + esc(item.q) + '</h2>' +
@@ -5932,44 +7253,52 @@ window.NL2SH_FX = (function () {
           '<p class="card__why">' + esc(item.why) + '</p>' +
         '</div>' +
       '</header>' +
+      dangerBar +
       repairBanner +
 
       '<section class="sec sec-item" id="secSyn">' +
         '<h3 class="sec__h">SYNOPSIS · 命令</h3>' +
         notice +
+        /* 节点行在完整命令上方：先看数据怎么在几段之间流动，再看整条命令 */
+        pipeHtml(stages, samples) +
         '<div class="cmdwrap">' +
           '<code class="cmd" id="cardCmd"></code>' +
-          '<button class="cmdwrap__copy" type="button" id="copyBtn">复制</button>' +
+          '<button class="cmdwrap__copy is-locked" type="button" id="copyBtn">复制</button>' +
         '</div>' +
+        '<p class="copylock" id="copyLock">复制按钮在沙箱跑通之前是锁着的——' +
+          '一条没验证过的命令，复制到你的服务器上同样不可靠。</p>' +
+        /* 详情面板放在命令"之后"：放在节点与命令之间的话，一展开就把命令挤走，
+           而用户此刻正需要对照命令看这一段讲的是什么。 */
+        '<div class="pdetail" id="pdetail" hidden></div>' +
         (item.flow ? '<p class="flow">流程　' + esc(item.flow) + '</p>' : '') +
       '</section>' +
 
-      '<section class="sec rescue-only">' +
-        '<h3 class="sec__h">应急模式</h3>' +
-        '<p class="rescue__lead">只给命令和风险，不占用你的注意力。当前风险：' +
+      '<section class="sec geek-only">' +
+        '<h3 class="sec__h">极客终端模式</h3>' +
+        '<p class="geek__lead">只给命令和风险，不占用你的注意力。当前风险：' +
           risk.label + ' —— ' + esc(item.why) + '</p>' +
-        '<button class="rescue__switch" type="button" data-switch="learn">' +
-          '切到学习模式，看这条命令怎么拆 →</button>' +
+        '<button class="geek__switch" type="button" data-switch="guide">' +
+          '切到新手引导模式，看这条命令怎么拆 →</button>' +
       '</section>' +
 
-      '<section class="sec learn-only sec-item">' +
-        '<h3 class="sec__h">OPTIONS · 逐行解释</h3>' +
+      '<section class="sec guide-only sec-item">' +
+        '<h3 class="sec__h">OPTIONS · 逐段解释</h3>' +
         (item.anno.length
           ? '<p class="card__hint">指针移到某一条上，命令里对应的片段会亮起来。</p>' +
             '<ol class="opts">' + optsHtml(ranges) + '</ol>'
           : '<p class="notice"><span class="notice__tag">没有解释</span>' +
-            '这一条是在应急模式下生成的，只包含命令和风险。切到学习模式重新生成，就会带上逐行解释。</p>' +
+            '这一条是在极客终端模式下生成的，只包含命令和风险。切到新手引导模式重新生成，就会带上逐段解释。</p>' +
             '<button class="btn btn--go" type="button" id="regenBtn">重新生成（含解释）</button>') +
       '</section>' +
 
-      '<section class="sec learn-only sec-item">' +
-        '<h3 class="sec__h">SIDE EFFECTS · 模型预测的影响</h3>' +
-        simHtml(item.sim) +
+      '<section class="sec guide-only sec-item">' +
+        '<h3 class="sec__h">PREVIEW · 执行前推演</h3>' +
+        simHtml(effectiveSim(item)) +
       '</section>' +
 
       runSectionHtml(item) +
 
-      '<section class="sec learn-only sec-item">' +
+      '<section class="sec guide-only sec-item">' +
         '<h3 class="sec__h">SEE ALSO · 相关命令</h3>' +
         '<div class="see">' + (item.see || []).map(function (c) {
           return '<button class="see__btn" type="button" data-copy="' + esc(c) + '">' + esc(c) + '</button>';
@@ -5982,17 +7311,32 @@ window.NL2SH_FX = (function () {
     opts = opts || {};
     var result = $('#result');
     var ranges = findRanges(item.cmd, item.anno);
+    /* 管道拆解：分段 + 每一段的真实输出样例（影子会话里跑前缀算出来的） */
+    var stages = splitPipeline(item.cmd);
+    var samples = stageSamples(item.cmd, stages);
+
+    /* 复制按钮在沙箱跑通之前不放开：§二.2 要求"跑通后才允许复制/执行"。
+       规则库条目视为已核对，但它同样要过沙箱这一关（除非用户关了自动验证）。 */
+    copyUnlocked = false;
 
     if (typingToken) typingToken.cancelled = true;
     var token = typingToken = { cancelled: false };
 
     result.hidden = false;
     result.setAttribute('aria-live', 'polite');
-    result.innerHTML = cardHtml(item, ranges, opts);
+    result.innerHTML = cardHtml(item, ranges, opts, stages, samples);
 
     var cmdEl = $('#cardCmd', result);
     var copyBtn = $('#copyBtn', result);
-    copyBtn.addEventListener('click', function () { copyText(item.cmd, copyBtn, '复制'); });
+    copyBtn.addEventListener('click', function () {
+      if (!copyUnlocked) {
+        copyBtn.classList.add('is-locked-shake');
+        setTimeout(function () { copyBtn.classList.remove('is-locked-shake'); }, 420);
+        return;
+      }
+      copyText(item.cmd, copyBtn, '复制');
+    });
+    paintCopyLock(result, item);
 
     $$('.see__btn', result).forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -6000,17 +7344,18 @@ window.NL2SH_FX = (function () {
       });
     });
 
-    var switchBtn = $('[data-switch="learn"]', result);
-    if (switchBtn) switchBtn.addEventListener('click', function () { setMode('learn'); });
+    var switchBtn = $('[data-switch="guide"]', result);
+    if (switchBtn) switchBtn.addEventListener('click', function () { setMode('guide'); });
 
     var regenBtn = $('#regenBtn', result);
     if (regenBtn) regenBtn.addEventListener('click', function () {
       var q = $('#q').value.trim() || (current && current.q) || '';
       if (!q) return;
-      setMode('learn');
+      setMode('guide');
       ask(q);
     });
 
+    bindPipe(result, item, stages, samples);
     bindRun(result, item);
 
     /* 命令区先显形，让逐字输出看得见；其余分区等命令出完再依次淡入 */
@@ -6020,7 +7365,7 @@ window.NL2SH_FX = (function () {
 
     function finish() {
       /* 打字结束后换上带标注锚点的版本，悬停联动才有落点 */
-      cmdEl.innerHTML = cmdHtml(item.cmd, ranges);
+      cmdEl.innerHTML = cmdHtml(item.cmd, ranges, stages);
       bindHover(result, '.opt');
       var seal = $('#cardSeal', result);
       if (seal) seal.classList.add('is-stamped');
@@ -6033,11 +7378,74 @@ window.NL2SH_FX = (function () {
       cmdEl.textContent = item.cmd;
       finish();
     } else {
-      typeText(cmdEl, item.cmd, mode === 'rescue' ? 9 : 20, token, finish);
+      typeText(cmdEl, item.cmd, mode === 'geek' ? 9 : 20, token, finish);
     }
 
     markHistory(item);
     result.setAttribute('aria-busy', 'false');
+  }
+
+  /* ── 管道节点与命令片段的联动 ─────────────────────── */
+  function bindPipe(root, item, stages, samples) {
+    var box = $('#pipe', root);
+    if (!box || stages.length < 2) return;
+    /* 详情面板在命令之后（不在 .pipe 里），所以要从 root 找 */
+    var detail = $('#pdetail', root);
+
+    $$('.pnode', box).forEach(function (node) {
+      var i = Number(node.getAttribute('data-s'));
+
+      /* 惰性查找对应的命令片段：命令区是先逐字打字、打完后才换成
+         带 .stg 的标注版，绑定这一步跑在前头，所以不能在绑定时取一次就存着。 */
+      function lit(on) {
+        node.classList[on ? 'add' : 'remove']('is-lit');
+        var stg = $('.stg[data-s="' + i + '"]', root);
+        if (stg) stg.classList[on ? 'add' : 'remove']('is-lit');
+      }
+
+      node.addEventListener('mouseenter', function () { lit(true); });
+      node.addEventListener('mouseleave', function () { lit(false); });
+      node.addEventListener('focus', function () { lit(true); });
+      node.addEventListener('blur', function () { lit(false); });
+      node.addEventListener('click', function () {
+        $$('.pnode', box).forEach(function (n) { n.classList.remove('is-open'); });
+        node.classList.add('is-open');
+        if (!detail) return;
+        /* 监听器里抛异常不会传播给调用方，只会变成一条看不见的控制台报错，
+           用户看到的就是"点了没反应"。所以这里必须自己兜住并说出来。 */
+        try {
+          detail.innerHTML = stageDetailHtml(item, stages, samples, i);
+        } catch (err) {
+          detail.innerHTML = '<p class="pdetail__none">这一段详情渲染失败：' +
+            esc((err && err.message) || String(err)) + '</p>';
+        }
+        detail.hidden = false;
+      });
+    });
+  }
+
+  /* ── 复制闸门：沙箱跑通前不放行 ───────────────────── */
+  var copyUnlocked = false;
+
+  function paintCopyLock(root, item) {
+    var btn = $('#copyBtn', root);
+    var note = $('#copyLock', root);
+    if (!btn) return;
+    btn.classList.toggle('is-locked', !copyUnlocked);
+    btn.setAttribute('aria-disabled', copyUnlocked ? 'false' : 'true');
+    if (note) note.hidden = copyUnlocked;
+  }
+
+  function unlockCopy(root) {
+    copyUnlocked = true;
+    var btn = root && $('#copyBtn', root);
+    var note = root && $('#copyLock', root);
+    if (btn) {
+      btn.classList.remove('is-locked');
+      btn.classList.add('is-unlocked');
+      setTimeout(function () { btn.classList.remove('is-unlocked'); }, 700);
+    }
+    if (note) note.hidden = true;
   }
 
   /* 逐字输出，末尾跟一个光标 */
@@ -6151,7 +7559,311 @@ window.NL2SH_FX = (function () {
     });
   }
 
+  /* ── 收藏 ─────────────────────────────────────────────
+     收藏必须存下"整条结果"，不能只存问句：
+     模型每次生成的都是另一条命令，重新问一遍等于收藏失效。
+     规则库条目则可以按问句精确命中，不用占存储。 */
+  var FAV_KEY = 'nl2sh.favs';
+  var favorites = [];
+
+  function loadFavs() {
+    try {
+      var raw = window.localStorage.getItem(FAV_KEY);
+      if (raw) favorites = JSON.parse(raw);
+    } catch (e) { favorites = []; }
+    if (!Array.isArray(favorites)) favorites = [];
+    /* 只信结构完整的条目：存储里可能是旧版本、也可能被人手改过 */
+    favorites = favorites.filter(function (f) {
+      return f && typeof f.q === 'string' && typeof f.cmd === 'string';
+    }).slice(0, 30);
+  }
+
+  function saveFavs() {
+    try { window.localStorage.setItem(FAV_KEY, JSON.stringify(favorites)); } catch (e) { }
+  }
+
+  function favAt(item) {
+    var at = -1;
+    favorites.forEach(function (f, i) {
+      if (f.cmd === item.cmd && f.q === item.q) at = i;
+    });
+    return at;
+  }
+
+  function toggleFav(item) {
+    var at = favAt(item);
+    if (at >= 0) {
+      favorites.splice(at, 1);
+    } else {
+      var rec = { q: item.q, cmd: item.cmd, at: Date.now() };
+      if (item.source === 'ai') rec.item = item;
+      favorites.unshift(rec);
+    }
+    if (favorites.length > 30) favorites.length = 30;
+    saveFavs();
+    renderFavs();
+    return at < 0;
+  }
+
+  function paintFav(btn, item) {
+    var on = favAt(item) >= 0;
+    btn.textContent = on ? '★ 已收藏' : '☆ 收藏';
+    btn.classList.toggle('is-on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function renderFavs() {
+    var list = $('#favs');
+    var title = $('#favTitle');
+    if (!list || !title) return;
+    list.innerHTML = favorites.map(function (f, i) {
+      return '<li class="fav">' +
+        '<button class="index__item" type="button" data-f="' + i + '">' +
+          '<span class="index__q">' + esc(f.q) + '</span>' +
+          '<span class="index__cmd">' + esc(f.cmd) + '</span>' +
+        '</button>' +
+        '<button class="fav__del" type="button" data-fd="' + i + '" aria-label="取消收藏">×</button>' +
+      '</li>';
+    }).join('');
+    var none = favorites.length === 0;
+    title.hidden = none;
+    list.hidden = none;
+
+    $$('[data-f]', list).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var f = favorites[Number(btn.getAttribute('data-f'))];
+        if (!f) return;
+        $('#q').value = f.q;
+        if (f.item) {
+          /* 模型生成的那条：原样恢复，不再打扰模型 */
+          current = f.item;
+          renderResult(f.item, { instant: true });
+          scrollToEl('#result');
+        } else {
+          ask(f.q);
+        }
+      });
+    });
+    $$('[data-fd]', list).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        favorites.splice(Number(btn.getAttribute('data-fd')), 1);
+        saveFavs();
+        renderFavs();
+        /* 结果区那个收藏按钮的状态也要跟着变 */
+        var fb = $('#favBtn');
+        if (fb && current) paintFav(fb, current);
+      });
+    });
+  }
+
+  /* ── 新手闯关 ─────────────────────────────────────────
+     判定的是"结果"，不是"命令文本"。
+     同一件事有很多种写法（`ls -a` / `ls -la` / `ls --all`），
+     只要沙箱里的状态真的变成了目标要求的样子，就该算过——
+     这是它和选择题式"考试"的根本区别。
+     而且判定用的是真沙箱，做不到的事情没法蒙过去。 */
+  var QUEST_KEY = 'nl2sh.quest';
+
+  var LEVELS = [
+    {
+      id: 1, title: '先看清自己在哪',
+      goal: '打印出你当前所在目录的完整路径',
+      hint: '一个只有三个字母的命令',
+      check: function (sb, run) {
+        var want = sb.cwd();
+        var got = String(run.out || '').trim();
+        if (got === want) return { ok: true, why: '拿到了 ' + got };
+        return { ok: false, why: got ? '输出的不是当前路径（当前是 ' + want + '）' : '这条命令没有输出' };
+      }
+    },
+    {
+      id: 2, title: '连隐藏文件一起看',
+      goal: '列出当前目录下的所有文件，包括以点开头的隐藏文件',
+      hint: 'ls 有一个"全都列出来"的开关',
+      check: function (sb, run) {
+        var out = String(run.out || '');
+        if (!out.trim()) return { ok: false, why: '这条命令没有输出' };
+        var miss = ['.env', 'package.json'].filter(function (n) { return out.indexOf(n) < 0; });
+        if (miss.length) return { ok: false, why: '输出里看不到 ' + miss.join('、') + '——隐藏文件没被列出来' };
+        return { ok: true, why: '隐藏文件 .env 也在里面了' };
+      }
+    },
+    {
+      id: 3, title: '从一堆里挑出要的那类',
+      goal: '找出 uploads 目录里所有的 .png 文件',
+      hint: 'find 或者带通配符的 ls',
+      check: function (sb, run) {
+        var out = String(run.out || '');
+        var pngs = ['avatar.png', 'banner.png'];
+        var found = pngs.filter(function (n) { return out.indexOf(n) >= 0; }).length;
+        if (!found) return { ok: false, why: '输出里一个 .png 都没有' };
+        if (found < pngs.length) return { ok: false, why: '只找到 ' + found + ' 个，uploads 里一共有 ' + pngs.length + ' 个' };
+        if (/\.(js|txt|md|json|tmp)\b/.test(out)) return { ok: false, why: '混进了不是 png 的文件' };
+        return { ok: true, why: '两个 png 都找到了，也没有混进别的类型' };
+      }
+    },
+    {
+      id: 4, title: '改权限，而不是删数据',
+      goal: '让 scripts/deploy.sh 变成可执行文件',
+      hint: 'chmod 加上"执行"那一位',
+      check: function (sb, run) {
+        var node = findNodeIn(sb.tree('.'), '/home/student/project/scripts/deploy.sh');
+        if (!node) return { ok: false, why: 'deploy.sh 不见了——这一步不需要删除任何文件' };
+        if (node.mode & 0o111) return { ok: true, why: '现在是 ' + modeText(node) + '，有执行位了' };
+        return { ok: false, why: 'deploy.sh 现在还是 ' + modeText(node) + '，没有执行位' };
+      }
+    },
+    {
+      id: 5, title: '删得干净，也删得准',
+      goal: '删掉 cache 目录和它里面的所有文件，但别碰别的东西',
+      hint: '递归删除要带 -r',
+      check: function (sb, run) {
+        var t = sb.tree('.');
+        if (findNodeIn(t, '/home/student/project/cache')) return { ok: false, why: 'cache 目录还在' };
+        var keep = ['/home/student/project/notes.txt', '/home/student/project/package.json',
+          '/home/student/project/src', '/home/student/project/uploads', '/home/student/project/.env'];
+        var lost = keep.filter(function (p) { return !findNodeIn(t, p); });
+        if (lost.length) return { ok: false, why: '删过头了，这些不该动的也没了：' + lost.join('、') };
+        return { ok: true, why: 'cache 没了，其它文件一个没少' };
+      }
+    }
+  ];
+
+  var questDone = {};
+
+  function loadQuest() {
+    try {
+      var raw = window.localStorage.getItem(QUEST_KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && o.done && typeof o.done === 'object') questDone = o.done;
+      }
+    } catch (e) { questDone = {}; }
+  }
+
+  function saveQuest() {
+    try { window.localStorage.setItem(QUEST_KEY, JSON.stringify({ done: questDone })); } catch (e) { }
+  }
+
+  function curLevel() {
+    for (var i = 0; i < LEVELS.length; i++) if (!questDone[LEVELS[i].id]) return LEVELS[i];
+    return null;
+  }
+
+  function renderQuest() {
+    var host = $('#questBody');
+    var badge = $('#questBadge');
+    if (!host) return;
+    var solved = LEVELS.filter(function (l) { return questDone[l.id]; }).length;
+    if (badge) badge.textContent = solved + ' / ' + LEVELS.length + (solved === LEVELS.length ? ' 全通' : '');
+
+    var list = '<ol class="quest__list">' + LEVELS.map(function (l) {
+      var done = !!questDone[l.id];
+      var cur = !done && l.id === (curLevel() || {}).id;
+      return '<li class="qstep' + (done ? ' is-done' : '') + (cur ? ' is-cur' : '') + '">' +
+        '<span class="qstep__tick">' + (done ? '✓' : l.id) + '</span>' +
+        '<span class="qstep__t">' + esc(l.title) + '</span></li>';
+    }).join('') + '</ol>';
+
+    var lv = curLevel();
+    if (!lv) {
+      host.innerHTML = list +
+        '<div class="qcard qcard--all">' +
+          '<p class="qcard__t">五关全部通过。</p>' +
+          '<p class="qcard__h">你现在能：看位置、连隐藏文件一起列、按类型挑文件、改权限而不动数据、' +
+            '安全地递归删除。这几条覆盖了日常最常撞上的操作。</p>' +
+          '<button class="btn btn--ghost" type="button" id="questReset">重来一遍</button>' +
+        '</div>';
+      var rs = $('#questReset', host);
+      if (rs) rs.addEventListener('click', function () {
+        questDone = {}; saveQuest(); renderQuest();
+      });
+      return;
+    }
+
+    host.innerHTML = list +
+      '<div class="qcard">' +
+        '<p class="qcard__no">第 ' + lv.id + ' 关 / ' + LEVELS.length + '</p>' +
+        '<p class="qcard__t">' + esc(lv.goal) + '</p>' +
+        '<p class="qcard__h">提示：' + esc(lv.hint) + '</p>' +
+        '<div class="qcard__in">' +
+          '<span class="term__prompt">$</span>' +
+          '<input id="questIn" type="text" spellcheck="false" autocomplete="off" placeholder="在这里敲命令，Enter 检查">' +
+          '<button class="btn btn--go" type="button" id="questGo">检查</button>' +
+        '</div>' +
+        '<p class="qcard__r" id="questRes">判定看的是<b>沙箱里真的变成了什么样</b>，不是命令写得像不像。</p>' +
+      '</div>';
+
+    var input = $('#questIn', host);
+    var go = $('#questGo', host);
+    if (go) go.addEventListener('click', function () { questCheck(); });
+    if (input) {
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); questCheck(); }
+      });
+      input.focus();
+    }
+  }
+
+  function questCheck() {
+    var sb = getSandbox();
+    var host = $('#questBody');
+    var out = $('#questRes');
+    var input = $('#questIn');
+    if (!sb || !host || !out || !input) return;
+
+    var lv = curLevel();
+    if (!lv) return;
+    var cmd = input.value.trim();
+    if (!cmd) {
+      out.className = 'qcard__r is-bad';
+      out.textContent = '先敲一条命令。';
+      return;
+    }
+
+    var run = null;
+    try { run = sb.run(cmd); } catch (e) { run = null; }
+    if (!run) {
+      out.className = 'qcard__r is-bad';
+      out.textContent = '这条命令沙箱执行不了。';
+      return;
+    }
+
+    var res;
+    try { res = lv.check(sb, run); } catch (e) { res = { ok: false, why: '判定出错：' + e.message }; }
+
+    /* 无论过没过，都把这次执行的真实结果摆出来——包括报错原文 */
+    var extra = '';
+    if (String(run.err || '').trim()) extra = '真实报错：' + String(run.err).trim().split('\n')[0];
+    else if (String(run.out || '').trim()) extra = '真实输出：' + String(run.out).trim().split('\n').slice(0, 2).join(' / ');
+
+    if (res.ok) {
+      questDone[lv.id] = true;
+      saveQuest();
+      out.className = 'qcard__r is-good';
+      out.textContent = '通过 —— ' + res.why;
+      if (fx) fx.burstAt('#questGo', { count: 18, power: 2.4, color: fxColors().safe });
+      /* 关卡可能改动了文件系统（比如第 5 关真删了目录），左边面板要跟上 */
+      var resEl = $('#result');
+      if (resEl) {
+        paintFsTree(resEl, {
+          dying: (run.changes || []).filter(function (c) { return c.kind === 'del'; })
+            .map(function (c) { return c.path; })
+        });
+      }
+      input.value = '';
+      /* 留出读提示的时间，再翻到下一关 */
+      setTimeout(renderQuest, 1800);
+    } else {
+      out.className = 'qcard__r is-bad';
+      out.textContent = '还不对 —— ' + res.why + (extra ? '（' + extra + '）' : '');
+      input.select();
+    }
+  }
+
   /* ── 模式切换 ─────────────────────────────────────── */
+  var MODE_KEY = 'nl2sh.mode';
+
   function setMode(next) {
     if (next === mode) return;
     mode = next;
@@ -6161,8 +7873,19 @@ window.NL2SH_FX = (function () {
       btn.classList.toggle('is-on', on);
       btn.setAttribute('aria-selected', on ? 'true' : 'false');
     });
+    /* 记住选择：下次打开还在同一个模式里。
+       必须 try：隐私模式或禁用存储时 setItem 会直接抛异常。 */
+    try { window.localStorage.setItem(MODE_KEY, next); } catch (e) { }
     if (fx) fx.setTheme();
     if (current) renderResult(current, { instant: true });
+  }
+
+  /* 启动时恢复上次选的模式。要跑在 applyDeepLink 之前：
+     分享出去的链接必须以链接里的模式为准，不能被本地偏好盖掉。 */
+  function restoreMode() {
+    var saved = null;
+    try { saved = window.localStorage.getItem(MODE_KEY); } catch (e) { }
+    if (saved === 'geek' || saved === 'guide') setMode(saved);
   }
 
   /* ── 绑定 ─────────────────────────────────────────── */
@@ -6195,7 +7918,15 @@ window.NL2SH_FX = (function () {
 
     $('#samples').innerHTML = SAMPLE_IDS.map(function (i) {
       var item = DATA.items[i];
-      return '<button class="chip" type="button" data-q="' + esc(item.q) + '">' + esc(item.q) + '</button>';
+      var short = SAMPLE_SHORT[i] || item.q;
+      /* 每条示例下面挂一行命令预览：让"示例库"看起来是真的库，
+         而不是四五个随手放的标签——顺便让人知道点了会看到什么。 */
+      var cmd = item.cmd.length > 28 ? item.cmd.slice(0, 28) + '…' : item.cmd;
+      return '<button class="chip chip--card" type="button" data-q="' + esc(item.q) + '"' +
+          ' title="' + esc(item.q) + '">' +
+        '<span class="chip__t">' + esc(short) + '</span>' +
+        '<code class="chip__c">' + esc(cmd) + '</code>' +
+      '</button>';
     }).join('');
     $$('#samples .chip').forEach(function (chip) {
       chip.addEventListener('click', function () {
@@ -6233,9 +7964,20 @@ window.NL2SH_FX = (function () {
     var demoStop = $('#demoBarStop');
     if (demoStop) demoStop.addEventListener('click', endDemo);
 
+    /* 「立即体验」：平滑滚到输入框并聚焦，省掉用户自己找输入框这一步 */
+    var startBtn = $('#startBtn');
+    if (startBtn) startBtn.addEventListener('click', function () {
+      scrollToEl('#q');
+      var q = $('#q');
+      if (q) setTimeout(function () { q.focus(); }, 380);
+    });
+
     initSetup();
     updateStatus();
     updateSbxBar();
+    /* 启动时探一次同源代理：通了就用真模型，不通就静默走内置规则库。
+       不阻塞渲染——探测是异步的，失败也只是保持"离线模式"的状态。 */
+    probeProxy();
 
     /* 字体加载或内容回流都会让引线失准，交给 ResizeObserver 兜底 */
     if (window.ResizeObserver) {
@@ -6258,7 +8000,7 @@ window.NL2SH_FX = (function () {
       getBand: function () { return heroCmd; },
       getTokens: function () { return $$('#heroDissect .tok'); }
     });
-    /* 深链 ?mode=rescue 可能已经切过主题，初始化后必须再同步一次，
+    /* 深链 ?mode=geek 可能已经切过主题，初始化后必须再同步一次，
        否则粒子会用学习模式的蓝色画在应急模式的黑底上 */
     fx.setTheme();
   }
@@ -6306,21 +8048,49 @@ window.NL2SH_FX = (function () {
       '<p class="run__lead">这条命令会跑在一个内存文件系统里的"学生服务器"上——' +
         '目录结构、属主和权限规则都是真的，只有文件改动是临时的：' +
         '它只发生在浏览器内存里，随时能一键回到执行前。</p>' +
+      '<div id="loopPanel" class="loop" hidden></div>' +
       '<div class="run__bar">' +
         '<button class="btn btn--go' + (danger ? ' btn--danger' : '') + '" type="button" id="runBtn">' +
           (danger ? '在沙箱里跑一遍（危险命令，放心试）' : '在沙箱里跑一遍') + '</button>' +
+        '<button class="btn btn--ghost btn--fav" type="button" id="favBtn" aria-pressed="false">☆ 收藏</button>' +
         '<span class="run__meta" id="runMeta">' + s.files + ' 个文件 · ' + esc(s.cwd) + '</span>' +
       '</div>' +
-      '<div id="runBox"></div>' +
-      '<div class="term term--manual">' +
-        '<div class="term__head">' +
-          '<span class="term__cwd">沙箱终端 · 与上面的执行共用同一个文件系统</span>' +
-          '<span class="term__code">可交互</span>' +
-        '</div>' +
-        '<pre class="term__body" id="manualOut">$ 输入 help 看支持哪些命令，或者自己敲一条试试（↑ 调出上一条）</pre>' +
-        '<div class="term__input">' +
-          '<span class="term__prompt">$</span>' +
-          '<input id="sbxInput" type="text" spellcheck="false" autocomplete="off" placeholder="ls -l uploads">' +
+      /* 终端区：左边 30% 是实时文件系统面板，右边是"执行结果 + 可交互终端"。
+         树要包住整块终端区，而不是只跟手敲终端并排——
+         它显示的是上面那条命令对文件系统做了什么，两者必须能同屏对照。 */
+      '<div class="sbxzone">' +
+        '<aside class="fsTree" id="fsTree" aria-label="沙箱虚拟文件系统">' +
+          '<div class="fsTree__head">' +
+            '<span class="fsTree__title">虚拟文件系统</span>' +
+            '<button class="fsTree__undo" type="button" id="treeUndo">一键回滚</button>' +
+          '</div>' +
+          '<div class="fsTree__cwd">' +
+            '<span class="fsTree__led" aria-hidden="true"></span>' +
+            '<code id="fsTreeCwd">' + esc(s.cwd) + '</code>' +
+            '<span class="fsTree__count" id="fsTreeCount">' + s.files + ' 个文件</span>' +
+          '</div>' +
+          '<div class="fsTree__body" id="fsTreeBody" role="tree"></div>' +
+          '<div class="fsTree__tip" id="fsTreeTip" hidden></div>' +
+          '<p class="fsTree__legend">' +
+            '<span class="lg lg--r">可读</span>' +
+            '<span class="lg lg--w">可写</span>' +
+            '<span class="lg lg--x">可执行</span>' +
+            '<span class="lg lg--none">无权限</span>' +
+          '</p>' +
+        '</aside>' +
+        '<div class="sbxzone__main">' +
+          '<div id="runBox"></div>' +
+          '<div class="term term--manual">' +
+            '<div class="term__head">' +
+              '<span class="term__cwd">沙箱终端 · 与上面的执行共用同一个文件系统</span>' +
+              '<span class="term__code">可交互</span>' +
+            '</div>' +
+            '<pre class="term__body" id="manualOut">$ 输入 help 看支持哪些命令，或者自己敲一条试试（↑ 调出上一条）</pre>' +
+            '<div class="term__input">' +
+              '<span class="term__prompt">$</span>' +
+              '<input id="sbxInput" type="text" spellcheck="false" autocomplete="off" placeholder="ls -l uploads">' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>' +
       '</section>';
@@ -6332,6 +8102,15 @@ window.NL2SH_FX = (function () {
     return { cls: 'edit', label: '修改' };
   }
 
+  /* 逐行显形：终端输出一行一行出现，而不是"啪"地一整块糊上来。
+     延迟上限压在 22 行——88 行的 du 输出要是每行都等，观众就跑了。 */
+  function termLines(text, cls) {
+    return String(text).replace(/\n$/, '').split('\n').map(function (l, i) {
+      return '<span class="tl' + (cls ? ' ' + cls : '') + '" style="--n:' +
+        Math.min(i, 22) + '">' + l + '</span>';
+    }).join('\n');
+  }
+
   function runHtml(item) {
     var run = item.run;
     var bad = run.code !== 0 || !!String(run.err || '').trim();
@@ -6339,12 +8118,11 @@ window.NL2SH_FX = (function () {
     body.push('<span class="t-prompt">student@sandbox</span>:<span class="t-prompt">' +
       esc(run.cwd) + '</span>$ ' + esc(item.cmd));
     if (run.out) {
-      body.push(esc(String(run.out).replace(/\n$/, ''))
-        .replace(/（[^）]*沙箱[^）]*）/g, '<span class="t-sim">$&</span>'));
+      body.push(termLines(esc(String(run.out).replace(/\n$/, ''))
+        .replace(/（[^）]*沙箱[^）]*）/g, '<span class="t-sim">$&</span>')));
     }
     if (run.err) {
-      body.push(esc(String(run.err).replace(/\n$/, ''))
-        .split('\n').map(function (l) { return '<span class="t-err">' + l + '</span>'; }).join('\n'));
+      body.push(termLines(esc(String(run.err).replace(/\n$/, '')), 't-err'));
     }
     body.push('<span class="t-note">[退出码 ' + run.code + ' · ' + run.ms + 'ms' +
       (run.simulated ? ' · 其中包含模拟输出' : '') + ']</span>');
@@ -6384,7 +8162,10 @@ window.NL2SH_FX = (function () {
     return '<div class="term">' +
         '<div class="term__head">' +
           '<span class="term__cwd">沙箱 shell · 非交互</span>' +
-          '<span class="term__code term__code--' + (bad ? 'bad' : 'ok') + '">exit ' + run.code + '</span>' +
+          '<span class="term__acts">' +
+            '<button class="term__btn" type="button" id="runCopy">复制输出</button>' +
+            '<span class="term__code term__code--' + (bad ? 'bad' : 'ok') + '">exit ' + run.code + '</span>' +
+          '</span>' +
         '</div>' +
         '<pre class="term__body">' + body.join('\n') + '</pre>' +
       '</div>' +
@@ -6392,55 +8173,254 @@ window.NL2SH_FX = (function () {
         '<div class="diff__head">' + head + '</div>' +
         '<ul class="diff__list">' + rows + '</ul>' +
         '<div class="diff__foot">' + foot + fix + '</div>' +
-      '</div>' +
-      treeHtml(changes);
+      '</div>';
   }
 
-  function treeHtml(changes) {
-    var sb = getSandbox();
-    if (!sb) return '';
-    var changed = {};
-    (changes || []).forEach(function (c) { changed[c.path] = c.kind; });
-    var root = sb.tree('.');
-    if (!root) return '';
+  /* ── 虚拟文件系统面板（终端左侧，占 30%）───────────────
+     规格要求：实时同步沙箱状态、文件夹可展开收起、权限染色、
+     悬浮显示详情、删除的节点先红闪再消失、顶部一键回滚。 */
 
-    var out = [], total = 0;
-    var CAP = 26;                 // 整棵树最多这么多行，超出就折叠
-    function rec(node, prefix, depth, isLast) {
-      var kind = changed[node.path];
-      out.push('<div class="tree__row' + (kind ? ' tree__row--' + kind : '') + '">' +
-        '<span>' + esc(prefix + (depth ? (isLast ? '└─ ' : '├─ ') : '') +
-          node.name + (node.t === 'd' ? '/' : '')) + '</span>' +
-        (node.t === 'f' ? '<span class="tree__size">' + fmtB(node.size) + '</span>' : '') +
-        '</div>');
-      total++;
-      if (!node.children || depth >= 2 || total >= CAP) return;
+  var treeOpen = {};            // 路径 → 是否展开；没记录过就按默认层级决定
 
-      var kids = node.children.slice().sort(function (a, b) {
-        if (a.t !== b.t) return a.t === 'd' ? -1 : 1;   // 目录排在文件前面
-        return a.name < b.name ? -1 : 1;
-      });
-      var perDir = depth === 0 ? 10 : 5;
-      var shown = kids.slice(0, perDir);
-      shown.forEach(function (child, i) {
-        if (total >= CAP) return;
-        rec(child, prefix + (depth ? (isLast ? '   ' : '│  ') : ''), depth + 1, i === shown.length - 1);
-      });
-      if (kids.length > shown.length && total < CAP) {
-        out.push('<div class="tree__row"><span>' +
-          esc(prefix + (depth ? (isLast ? '   ' : '│  ') : '') + '└─ …另外 ' +
-            (kids.length - shown.length) + ' 项') + '</span></div>');
-        total++;
-      }
+  /* 与沙箱同一套权限规则：当前用户 uid 1000，属主看 owner 位、非属主看 other 位。
+     不能简单地"有读权限就算可读"——那样 root 的 640 日志会被画成可读。 */
+  function accessOf(node) {
+    var m = node.mode || 0;
+    var bits = node.uid === 1000 ? (m >> 6) & 7 : m & 7;
+    return { r: !!(bits & 4), w: !!(bits & 2), x: !!(bits & 1) };
+  }
+
+  /* 三色语义有优先级：可执行=绿 > 可写=黄 > 只读=灰 > 无权限=红。
+     一个文件同时可写可执行时，最该被一眼看见的是"它能被执行"。 */
+  function permClass(a) {
+    if (a.x) return 'is-x';
+    if (a.w) return 'is-w';
+    if (a.r) return 'is-r';
+    return 'is-none';
+  }
+
+  function modeText(node) {
+    var m = node.mode || 0;
+    var out = node.t === 'd' ? 'd' : '-';
+    [6, 3, 0].forEach(function (shift) {
+      var b = (m >> shift) & 7;
+      out += (b & 4 ? 'r' : '-') + (b & 2 ? 'w' : '-') + (b & 1 ? 'x' : '-');
+    });
+    return out;
+  }
+
+  function modeOctal(node) { return (node.mode || 0).toString(8).padStart(4, '0'); }
+
+  /* 图标按"能不能直接跑"和扩展名分，不用花哨 emoji：
+     悬浮在命令行里的人认的是字符，不是彩色图标。 */
+  function iconOf(node) {
+    if (node.t === 'd') return '';
+    var n = node.name;
+    if (accessOf(node).x || /\.sh$/.test(n)) return '⚙';
+    if (/\.(png|jpg|jpeg|webp|gif)$/i.test(n)) return '◫';
+    if (/\.(log|txt|md)$/i.test(n)) return '▤';
+    if (/\.(gz|zip|tar)$/i.test(n)) return '◆';
+    if (/\.(js|css|json|ya?ml|env)$/i.test(n)) return '❯';
+    return '·';
+  }
+
+  function cmpNodes(a, b) {
+    if (a.t !== b.t) return a.t === 'd' ? -1 : 1;      // 目录排在文件前面
+    return a.name < b.name ? -1 : 1;
+  }
+
+  function nodeOpen(node, depth) {
+    if (treeOpen[node.path] !== undefined) return treeOpen[node.path];
+    return depth < 1;                                   // 默认只展开根目录这一层
+  }
+
+  function stampText(ts) {
+    if (!ts) return '—';
+    var d = new Date(ts * 1000);
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+      ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function findNodeIn(rootNode, path) {
+    if (!rootNode) return null;
+    if (rootNode.path === path) return rootNode;
+    var kids = rootNode.children || [];
+    for (var i = 0; i < kids.length; i++) {
+      var hit = findNodeIn(kids[i], path);
+      if (hit) return hit;
     }
-    rec(root, '', 0, true);
-    if (total >= CAP) {
-      out.push('<div class="tree__row"><span class="tree__size">（文件树已折叠，完整结构可以在沙箱终端里用 find / ls 自己翻）</span></div>');
-    }
-    return '<div class="tree">' +
-      '<div class="tree__title">沙箱文件树 · ' + esc(root.path) + '</div>' +
-      '<div id="treeBody">' + out.join('') + '</div>' +
+    return null;
+  }
+
+  var treeBudget = 0;
+  function fsNodeHtml(node, depth) {
+    if (treeBudget > 240) return '';                     // 兜底：不让树把 DOM 撑爆
+    treeBudget++;
+    var a = accessOf(node);
+    var isDir = node.t === 'd';
+    var kids = (node.children || []).slice().sort(cmpNodes);
+    var open = isDir && kids.length > 0 && nodeOpen(node, depth);
+
+    var html = '<div class="fsn ' + permClass(a) + (isDir ? ' fsn--dir' : ' fsn--file') +
+        (open ? ' is-open' : '') + '" data-p="' + esc(node.path) + '"' +
+        (isDir ? ' data-dir="1"' : '') + ' tabindex="0" role="treeitem"' +
+        ' aria-expanded="' + (isDir ? String(open) : 'false') + '">' +
+      '<span class="fsn__tw">' + (isDir && kids.length ? (open ? '▾' : '▸') : '') + '</span>' +
+      '<span class="fsn__ic">' + iconOf(node) + '</span>' +
+      '<span class="fsn__n">' + esc(node.name) + (isDir ? '/' : '') + '</span>' +
+      (isDir ? '<span class="fsn__c">' + (kids.length || '') + '</span>'
+             : '<span class="fsn__s">' + fmtB(node.size || 0) + '</span>') +
+    '</div>';
+
+    if (isDir && kids.length) {
+      html += '<div class="fsn__kids"' + (open ? '' : ' hidden') + '>' +
+        kids.map(function (k) { return fsNodeHtml(k, depth + 1); }).join('') +
       '</div>';
+    }
+    return html;
+  }
+
+  function fsTreeHtml() {
+    var sb = getSandbox();
+    if (!sb) return '<p class="fsTree__none">沙箱未就绪</p>';
+    var root;
+    try { root = sb.tree('.'); } catch (e) { root = null; }
+    if (!root) return '<p class="fsTree__none">读不到文件树</p>';
+    treeBudget = 0;
+    return fsNodeHtml(root, 0);
+  }
+
+  /* 删除的节点不能直接消失：先红闪两次，再塌缩掉。
+     渲染的是删除后的树，所以补一行"幽灵"在原位置演这段动画。 */
+  function flashDeleted(root, paths) {
+    var host = $('#fsTreeBody', root);
+    if (!host) return;
+    (paths || []).slice(0, 12).forEach(function (p, i) {
+      var parent = p.replace(/\/[^/]+$/, '') || '/';
+      var row = host.querySelector('.fsn[data-p="' + parent + '"]');
+      var holder = row && row.nextElementSibling;
+      if (!holder || !holder.classList || !holder.classList.contains('fsn__kids')) {
+        holder = host;                                  // 父目录也一起没了，就落在面板底部
+      }
+      var g = document.createElement('div');
+      g.className = 'fsn fsn--file is-dying';
+      g.style.animationDelay = (i * 60) + 'ms';
+      g.innerHTML = '<span class="fsn__tw"></span><span class="fsn__ic">✕</span>' +
+        '<span class="fsn__n">' + esc(p.split('/').pop()) + '</span>' +
+        '<span class="fsn__s">已删除</span>';
+      holder.insertBefore(g, holder.firstChild);
+      setTimeout(function () { if (g.parentNode) g.parentNode.removeChild(g); }, 1800 + i * 60);
+    });
+  }
+
+  function paintFsTree(root, opts) {
+    opts = opts || {};
+    var host = $('#fsTreeBody', root);
+    if (!host) return;
+    host.innerHTML = fsTreeHtml();
+    var sb = getSandbox();
+    var cwdEl = $('#fsTreeCwd', root);
+    if (cwdEl && sb) cwdEl.textContent = sb.cwd();
+    var cnt = $('#fsTreeCount', root);
+    if (cnt && sb) cnt.textContent = sandboxStats().files + ' 个文件';
+    if (opts.dying && opts.dying.length) flashDeleted(root, opts.dying);
+    if (opts.rolling) playRollback(root);
+  }
+
+  function playRollback(root) {
+    var panel = $('#fsTree', root);
+    if (!panel) return;
+    panel.classList.remove('is-rolling');
+    void panel.offsetWidth;                             // 强制回流，让动画能重放
+    panel.classList.add('is-rolling');
+    setTimeout(function () { panel.classList.remove('is-rolling'); }, 1100);
+    if (fx) fx.burstAt('#treeUndo', { count: 16, power: 2.4, color: fxColors().safe });
+  }
+
+  /* 回滚：主按钮和终端区那个「时光倒流」共用这一条实现，行为必须一致 */
+  function doRollback(root, item) {
+    var sb = getSandbox();
+    if (!sb || !item || !item.run) return;
+    var r = sb.restore(item.run.snapshot);
+    item.run.restored = !!r.ok;
+    item.run.changes = [];
+    paintRun(root, item);
+    paintFsTree(root, { rolling: !!r.ok });
+    updateSbxBar();
+  }
+
+  function showTreeTip(root, target) {
+    var tipEl = $('#fsTreeTip', root);
+    var bodyHost = $('#fsTreeBody', root);
+    if (!tipEl || !bodyHost) return;
+    var row = target && target.closest ? target.closest('.fsn') : null;
+    if (!row || row.classList.contains('is-dying')) { tipEl.hidden = true; return; }
+    var sb = getSandbox();
+    if (!sb) return;
+    var rootNode;
+    try { rootNode = sb.tree('.'); } catch (e) { return; }
+    var node = findNodeIn(rootNode, row.getAttribute('data-p'));
+    if (!node) { tipEl.hidden = true; return; }
+
+    var a = accessOf(node);
+    var can = (a.r ? '读 ' : '') + (a.w ? '写 ' : '') + (a.x ? '执行' : '');
+    tipEl.innerHTML =
+      '<code class="fsTree__tipp">' + esc(node.path) + '</code>' +
+      '<div class="fsTree__tipr"><span>权限</span><code>' + modeText(node) + ' (' + modeOctal(node) + ')</code></div>' +
+      '<div class="fsTree__tipr"><span>大小</span><code>' +
+        (node.t === 'd' ? '目录' : (node.size || 0) + ' B · ' + fmtB(node.size || 0)) + '</code></div>' +
+      '<div class="fsTree__tipr"><span>修改</span><code>' + stampText(node.mtime) + '</code></div>' +
+      '<div class="fsTree__tipr"><span>属主</span><code>' + (node.uid === 0 ? 'root' : 'student') +
+        ' (uid ' + node.uid + ')</code></div>' +
+      '<div class="fsTree__tipr"><span>你可</span><code>' + (can || '无任何权限') + '</code></div>';
+    tipEl.hidden = false;
+
+    /* 浮层跟着行垂直移动，并夹在面板范围内，避免溢出到终端上去 */
+    var hb = bodyHost.getBoundingClientRect();
+    var rb = row.getBoundingClientRect();
+    var top = rb.top - hb.top + bodyHost.scrollTop;
+    tipEl.style.top = Math.max(0, Math.min(top - 4, Math.max(0, bodyHost.scrollHeight - 40))) + 'px';
+  }
+
+  function bindFsTree(root, item) {
+    var panel = $('#fsTree', root);
+    if (!panel) return;
+
+    var undo = $('#treeUndo', panel);
+    if (undo) undo.addEventListener('click', function () { doRollback(root, item); });
+
+    var bodyHost = $('#fsTreeBody', panel);
+    if (!bodyHost) return;
+
+    /* 事件委托：整棵树只挂一组监听，重绘之后不用重新绑定 */
+    bodyHost.addEventListener('click', function (e) {
+      var row = e.target.closest ? e.target.closest('.fsn--dir') : null;
+      if (!row || !bodyHost.contains(row)) return;
+      var p = row.getAttribute('data-p');
+      var wasOpen = row.classList.contains('is-open');
+      treeOpen[p] = !wasOpen;
+      row.classList.toggle('is-open', !wasOpen);
+      row.setAttribute('aria-expanded', String(!wasOpen));
+      var kids = row.nextElementSibling;
+      if (kids && kids.classList.contains('fsn__kids')) {
+        kids.hidden = wasOpen;
+        if (!wasOpen) {
+          kids.classList.remove('is-in');
+          void kids.offsetWidth;
+          kids.classList.add('is-in');
+        }
+      }
+      var tw = $('.fsn__tw', row);
+      if (tw) tw.textContent = wasOpen ? '▸' : '▾';
+    });
+
+    bodyHost.addEventListener('mouseover', function (e) { showTreeTip(root, e.target); });
+    bodyHost.addEventListener('mouseleave', function () {
+      var tipEl = $('#fsTreeTip', root);
+      if (tipEl) tipEl.hidden = true;
+    });
+    bodyHost.addEventListener('focusin', function (e) { showTreeTip(root, e.target); });
   }
 
   function fmtB(n) {
@@ -6450,36 +8430,52 @@ window.NL2SH_FX = (function () {
     return (v >= 10 ? Math.round(v) : v.toFixed(1)) + u[i];
   }
 
-  function paintRun(result, item) {
+  function paintRun(result, item, opts) {
     var box = $('#runBox', result);
     if (!box || !item.run) return;
     box.innerHTML = runHtml(item);
 
     var undo = $('#undoBtn', result);
-    if (undo) undo.addEventListener('click', function () {
-      var sb = getSandbox();
-      if (!sb) return;
-      var r = sb.restore(item.run.snapshot);
-      item.run.restored = r.ok;
-      item.run.changes = [];
-      paintRun(result, item);
-      updateSbxBar();
-      /* 时光倒流：粒子回流到按钮上 */
-      if (fx && r.ok) fx.burstAt('#undoBtn', { count: 18, power: 2.6, color: fxColors().safe });
-    });
+    if (undo) undo.addEventListener('click', function () { doRollback(result, item); });
 
     var fix = $('#fixBtn', result);
     if (fix) fix.addEventListener('click', function () {
       item.run.repairedOnce = true;
       repairFrom(item);
     });
+
+    /* 复制这次的真实输出：终端里的内容是可以整段拿走的 */
+    var rc = $('#runCopy', result);
+    if (rc) rc.addEventListener('click', function () {
+      var tb = $('.term__body', box);
+      copyText(tb ? tb.textContent : '', rc, '复制输出');
+    });
+
+    /* 文件系统面板跟着一起刷新；删掉的节点交给 flashDeleted 演消失动画 */
+    paintFsTree(result, opts || {});
   }
 
   function bindRun(result, item) {
     var btn = $('#runBtn', result);
     if (!btn) return;
-    btn.addEventListener('click', function () { runInSandbox(result, item, {}); });
+    btn.addEventListener('click', function () {
+      /* §三.2：高危命令在执行前弹二次确认 */
+      if (item.risk === 'danger') {
+        confirmDanger(result, item, function () { runInSandbox(result, item, {}); });
+        return;
+      }
+      runInSandbox(result, item, {});
+    });
     if (item.run) paintRun(result, item);
+    bindFsTree(result, item);
+    if (!item.run) paintFsTree(result);
+
+    var fav = $('#favBtn', result);
+    if (fav) {
+      paintFav(fav, item);
+      fav.addEventListener('click', function () { toggleFav(item); paintFav(fav, item); });
+    }
+
     bindManualTerminal(result);
   }
 
@@ -6495,6 +8491,8 @@ window.NL2SH_FX = (function () {
         var cmd = input.value.trim();
         if (!cmd) return;
         manualHistory.push(cmd);
+        /* 只留最近 20 条：再往上翻也记不住，还会让 ↑ 变成翻旧账 */
+        if (manualHistory.length > 20) manualHistory.shift();
         manualAt = manualHistory.length;
         input.value = '';
         manualRun(cmd);
@@ -6539,6 +8537,14 @@ window.NL2SH_FX = (function () {
     }
     out.innerHTML += (manualLine ? '\n' : '') + chunk.join('\n');
     manualLine++;
+    /* 手敲的命令同样要实时反映到左边的文件系统面板上 */
+    var res = $('#result');
+    if (res) {
+      paintFsTree(res, {
+        dying: (r.changes || []).filter(function (c) { return c.kind === 'del'; })
+          .map(function (c) { return c.path; })
+      });
+    }
     out.scrollTop = out.scrollHeight;
     updateSbxBar();
   }
@@ -6564,8 +8570,14 @@ window.NL2SH_FX = (function () {
       var s = sandboxStats();
       meta.textContent = s.files + ' 个文件 · ' + s.cwd;
     }
-    paintRun(result, item);
+    /* 被删掉的路径交给文件树面板演"红闪两次再消失" */
+    var dels = (r.changes || []).filter(function (c) { return c.kind === 'del'; })
+      .map(function (c) { return c.path; });
+    paintRun(result, item, { dying: dels });
     updateSbxBar();
+
+    /* §二.2：跑通了才允许复制。失败时保持锁定并把原因留在终端里。 */
+    if (r.code === 0 && !String(r.err || '').trim()) unlockCopy(result);
 
     /* 粒子反馈：真跑成功用安全色，失败用危险色 */
     if (fx) {
@@ -6583,20 +8595,54 @@ window.NL2SH_FX = (function () {
     if (opts.onDone) opts.onDone(item.run);
   }
 
-  /* 沙箱报错 → 把报错喂回模型，让它自己修一版 */
+  /* 高危命令在执行前的二次确认。
+     用页面内的弹层而不是 window.confirm：confirm 会阻塞整个渲染循环，
+     弹的时候粒子、进度条全停，而且样式无法统一。 */
+  function confirmDanger(result, item, onYes) {
+    var host = $('#runBox', result);
+    if (!host || $('#dangerAsk', result)) return;
+    var box = document.createElement('div');
+    box.className = 'ask2';
+    box.id = 'dangerAsk';
+    box.innerHTML =
+      '<p class="ask2__t">这条命令被判定为<strong>高破坏性</strong>。沙箱里跑它不会伤到你的电脑，' +
+        '但请确认你已经看清它要动什么。</p>' +
+      '<code class="ask2__c">' + esc(item.cmd) + '</code>' +
+      '<div class="ask2__b">' +
+        '<button class="btn btn--danger" type="button" id="dangerYes">我确认，在沙箱里跑</button>' +
+        '<button class="btn btn--ghost" type="button" id="dangerNo">先不跑</button>' +
+      '</div>';
+    host.appendChild(box);
+    $('#dangerYes', box).addEventListener('click', function () {
+      box.remove();
+      onYes();
+    });
+    $('#dangerNo', box).addEventListener('click', function () {
+      box.remove();
+    });
+    $('#dangerYes', box).focus();
+  }
+
+  /* 沙箱报错 → 把真实报错喂回模型，让它自己修一版。
+     最多 3 轮：免费额度下多轮很慢，而且第 3 次还错通常说明需求本身没说清。
+     每一次尝试都记进 attempts，界面要完整回放「第 N 次 → 失败原因 → 已修正」。 */
+  var MAX_ATTEMPTS = 3;
+  var attempts = [];
+
   function repairFrom(item) {
     var run = item.run;
     if (!run || repairing) return;
-    var cfg = AI.loadConfig();
-    if (!AI.isReady(cfg)) return;
+    if (!AI.state().ok || forceOffline) return;
+    if (attempts.length >= MAX_ATTEMPTS) return;
     var q = ($('#q').value || '').trim() || item.q;
     ask(q, {
       cmd: item.cmd, code: run.code,
-      err: [run.err, run.out].filter(Boolean).join('\n').slice(0, 800)
+      err: [run.err, run.out].filter(Boolean).join('\n').slice(0, 800),
+      attempt: attempts.length + 1
     });
   }
 
-  /* ── 生成流程：优先模型，失败回退内置规则库 ────────── */
+  /* ── 生成流程：优先真实模型，不可用时回退内置规则库 ── */
   var running = null;
   var progressLabel = '';
 
@@ -6607,29 +8653,37 @@ window.NL2SH_FX = (function () {
   function ask(text, repairCtx, opts) {
     stopRunning();
     opts = opts || {};
-    var cfg = AI.loadConfig();
     var local = pickItem(text);
+    var st = AI.state();
+    var isRepair = !!repairCtx;
 
-    /* 演示模式强制走规则库；没配 Key 或开了离线模式同理，都不发请求 */
-    if (opts.forceLocal || cfg.offline || !AI.isReady(cfg)) {
+    /* 新一轮需求才开始新的轨迹；修正轮要接着记 */
+    if (!isRepair) attempts = [];
+
+    /* 演示模式 / 强制离线 / 代理不可用：一律走内置规则库，不发请求 */
+    if (opts.forceLocal || forceOffline || !st.ok) {
       current = local.item;
-      renderResult(local.item, { loose: local.loose, noKey: !cfg.offline && !opts.forceLocal });
+      renderResult(local.item, { loose: local.loose, noKey: !forceOffline });
       autoVerify(local.item);
       return;
     }
 
-    var model = AI.modelOf(cfg);
-    progressLabel = repairCtx
-      ? '沙箱执行失败，正在让 ' + model + ' 修一版'
-      : '正在让 ' + model + ' 分析';
+    var thinking = !!opts.thinking;
+    var model = thinking ? (st.models.think || AI.MODELS.think) : (st.models.fast || AI.MODELS.fast);
+    progressLabel = isRepair
+      ? '第 ' + repairCtx.attempt + ' 次修正：把沙箱的真实报错喂回 ' + model
+      : (thinking ? '正在让 ' + model + ' 深度思考（较慢）' : '正在让 ' + model + ' 分析');
     current = null;
     showProgress();
-    running = AI.generate(cfg, text, {
+
+    running = AI.generate(text, {
       onProgress: function (p) { updateProgress(p); },
+      onReasoning: function (txt) { updateReasoning(txt); },
       onDone: function (item) {
         running = null;
         item.modelLabel = model;
-        if (repairCtx) item.repairedFrom = repairCtx;
+        item.thinking = thinking;
+        if (isRepair) { item.repairedFrom = repairCtx; item.attempt = repairCtx.attempt; }
         current = item;
         renderResult(item, {});
         autoVerify(item);
@@ -6640,7 +8694,7 @@ window.NL2SH_FX = (function () {
         renderResult(local.item, { loose: true, aiError: err });
         autoVerify(local.item);
       }
-    }, { brief: mode === 'rescue', repair: repairCtx });
+    }, { brief: mode === 'geek', thinking: thinking, repair: repairCtx });
   }
 
   /* 生成完就自动在沙箱里跑一遍：这是"闭环"里最关键的一环，
@@ -6656,14 +8710,52 @@ window.NL2SH_FX = (function () {
         onDone: function (run) {
           if (current !== item) return;
           var failed = run.code !== 0 || !!String(run.err || '').trim();
+
+          /* 记进轨迹：界面靠它回放整个自纠错过程 */
+          attempts.push({
+            n: (item.attempt || 0) + 1,
+            cmd: item.cmd,
+            code: run.code,
+            err: [run.err, run.out].filter(Boolean).join('\n').slice(0, 300),
+            ok: !failed
+          });
+          paintLoop(result);
+
           if (!failed) return;
-          if (item.source === 'ai' && !item.repairedFrom) {
+          if (item.source === 'ai' && !item.repairedFrom && attempts.length < MAX_ATTEMPTS) {
             repairing = false;
             repairFrom(item);
           }
         }
       });
     }, 240);
+  }
+
+  /* 自纠错闭环的轨迹面板：这是本作品最该被看见的一段过程 */
+  function paintLoop(root) {
+    if (!root) return;
+    var host = $('#loopPanel', root);
+    if (!host) return;
+    if (!attempts.length) { host.hidden = true; host.innerHTML = ''; return; }
+    host.hidden = false;
+    var passed = attempts.some(function (a) { return a.ok; });
+    host.innerHTML =
+      '<div class="loop__head">' +
+        '<span class="loop__title">沙箱自验证闭环</span>' +
+        '<span class="loop__badge ' + (passed ? 'loop__badge--ok' : 'loop__badge--bad') + '">' +
+          (passed ? '已在沙箱中跑通' : '尝试了 ' + attempts.length + ' 次仍未跑通') +
+        '</span>' +
+      '</div>' +
+      attempts.map(function (a, i) {
+        return '<div class="loop__step ' + (a.ok ? 'is-ok' : 'is-bad') + '">' +
+          '<span class="loop__n">第 ' + a.n + ' 次</span>' +
+          '<code class="loop__cmd">' + esc(a.cmd) + '</code>' +
+          '<span class="loop__verdict">' + (a.ok ? '通过（退出码 0）'
+            : '失败（退出码 ' + a.code + '）') + '</span>' +
+          (a.ok ? '' : '<pre class="loop__err">' + esc(a.err || '（无错误输出）') + '</pre>') +
+          (i < attempts.length - 1 ? '<span class="loop__arrow">↓ 把真实报错喂回模型，自动修正</span>' : '') +
+        '</div>';
+      }).join('');
   }
 
   function showProgress() {
@@ -6680,6 +8772,10 @@ window.NL2SH_FX = (function () {
         '</div>' +
         '<div class="progress__bar"><i></i></div>' +
         '<code class="progress__cmd" id="progressCmd" hidden></code>' +
+        '<details class="think" id="thinkPanel" hidden>' +
+          '<summary class="think__sum">模型的推理过程<span class="think__len" id="thinkLen"></span></summary>' +
+          '<pre class="think__body" id="thinkBody"></pre>' +
+        '</details>' +
         '<p class="progress__hint">命令一到就先显示出来，等完整结构收完再展开逐行解释和执行前推演。</p>' +
       '</div>';
     $('#cancelBtn').addEventListener('click', function () {
@@ -6688,6 +8784,19 @@ window.NL2SH_FX = (function () {
       result.hidden = true;
       result.setAttribute('aria-busy', 'false');
     });
+  }
+
+  /* 深度思考模式的推理流。glm-4-flash 不产生这段内容，
+     只有显式切到 glm-4.7 才有——所以这个面板平时是隐藏的。 */
+  function updateReasoning(txt) {
+    var panel = $('#thinkPanel');
+    var body = $('#thinkBody');
+    var len = $('#thinkLen');
+    if (!panel || !body) return;
+    panel.hidden = false;
+    body.textContent = txt;
+    if (len) len.textContent = '（' + txt.length + ' 字）';
+    body.scrollTop = body.scrollHeight;
   }
 
   function updateProgress(p) {
@@ -6702,127 +8811,82 @@ window.NL2SH_FX = (function () {
     }
   }
 
-  /* ── 模型设置面板 ─────────────────────────────────── */
+  /* ── 接入状态 ─────────────────────────────────────────
+     密钥在 Worker 的环境变量里，前端没有"配置 Key"这回事了。
+     这里只显示：同源代理通不通、当前会调用哪个模型。 */
+  var forceOffline = false;
+
   function updateStatus() {
-    var cfg = AI.loadConfig();
     var el = $('#status');
     var text = $('#statusText');
     if (!el || !text) return;
-    if (cfg.offline) {
+    var st = AI.state();
+    if (forceOffline) {
       el.className = 'status status--off';
       text.textContent = '离线模式 · 只用内置规则库';
-    } else if (AI.isReady(cfg)) {
+      return;
+    }
+    if (st.ok) {
       el.className = 'status status--ok';
-      text.textContent = AI.modelOf(cfg) + ' · 已配置';
+      text.textContent = 'AI 已接入 · ' + (st.models && st.models.fast ? st.models.fast : 'glm-4-flash');
+    } else if (!st.checked) {
+      el.className = 'status status--demo';
+      text.textContent = '检测代理中…';
     } else {
       el.className = 'status status--demo';
-      text.textContent = '未配置 Key · 用内置规则库';
+      text.textContent = '离线模式 · 用内置规则库';
     }
   }
 
-  function initSetup() {
-    var sel = $('#providerSel');
-    var modelInput = $('#modelInput');
-    var modelList = $('#modelList');
-    var keyInput = $('#keyInput');
-    var urlRow = $('#urlRow');
-    var urlInput = $('#urlInput');
-    var offlineInput = $('#offlineInput');
+  function paintSetup() {
     var hint = $('#setupHint');
-    var state = $('#setupState');
-    if (!sel) return;
+    var stateEl = $('#setupState');
+    if (!stateEl) return;
+    var st = AI.state();
+    if (forceOffline) stateEl.textContent = '离线模式 · 不发任何请求';
+    else if (st.ok) stateEl.textContent = '代理已连通 · 密钥在服务端';
+    else if (st.checked) stateEl.textContent = st.error || '代理不可用 · 已降级到内置规则库';
+    else stateEl.textContent = '正在检测代理…';
+    if (hint && !hint.textContent) {
+      hint.innerHTML = '模型请求走同源边缘代理 <code>/api/chat</code>：密钥只存在服务端环境变量里，' +
+        '前端拿不到，也不会随页面分发给任何访客。<br>' +
+        '代理不可用时自动降级到内置规则库，功能照常可用。';
+    }
+  }
 
-    var cfg = AI.loadConfig();
-
-    Object.keys(AI.PROVIDERS).forEach(function (id) {
-      var opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = AI.PROVIDERS[id].label;
-      sel.appendChild(opt);
+  function probeProxy() {
+    return AI.health().then(function () {
+      updateStatus(); paintSetup();
+    }).catch(function () {
+      updateStatus(); paintSetup();
     });
-    sel.value = cfg.provider || 'zhipu';
-    keyInput.value = cfg.key || '';
-    offlineInput.checked = !!cfg.offline;
+  }
 
-    function paintProvider(keepValues) {
-      var p = AI.providerOf({ provider: sel.value });
-      modelList.innerHTML = p.models.map(function (m) {
-        return '<option value="' + esc(m) + '"></option>';
-      }).join('');
-      if (!keepValues) {
-        modelInput.value = p.defaultModel || '';
-        urlInput.value = p.custom ? (cfg.url || '') : '';
-      }
-      modelInput.placeholder = p.defaultModel || '模型名';
-      urlRow.hidden = !p.custom;
-      hint.innerHTML = p.note +
-        (p.keyUrl ? ' <a href="' + p.keyUrl + '" target="_blank" rel="noopener">去申请 Key</a>。' : '') +
-        '<br>Key 只存在这台电脑的浏览器里；页面是纯静态的，请求从你的浏览器直接发往服务商，不经过任何中间服务器。';
-      paintState();
-    }
+  function initSetup() {
+    var offInput = $('#offlineInput');
+    var recheck = $('#recheckBtn');
+    if (!$('#setupState')) return;
 
-    function formValue() {
-      return {
-        provider: sel.value,
-        model: modelInput.value.trim(),
-        url: urlInput.value.trim(),
-        key: keyInput.value.trim(),
-        offline: offlineInput.checked
-      };
-    }
-
-    function paintState() {
-      var v = formValue();
-      if (v.offline) { state.textContent = '离线模式 · 不发请求'; return; }
-      if (v.key && AI.modelOf(v)) { state.textContent = '已填写 · 点「保存并测试」确认'; return; }
-      state.textContent = '未配置 Key · 当前用内置规则库';
-    }
-
-    sel.addEventListener('change', function () { paintProvider(false); });
-    modelInput.addEventListener('input', paintState);
-    keyInput.addEventListener('input', paintState);
-    offlineInput.addEventListener('change', paintState);
-
-    $('#saveKeyBtn').addEventListener('click', function () {
-      var v = formValue();
-      if (!v.offline && !v.key) {
-        hint.textContent = '还没填 API Key。或者勾上「离线模式」只用内置规则库。';
-        return;
-      }
-      AI.saveConfig(v);
-      updateStatus();
-      if (v.offline) {
-        hint.textContent = '已切到离线模式，不会再发任何请求。';
-        paintState();
-        return;
-      }
-      var btn = this;
-      btn.disabled = true;
-      btn.textContent = '测试中…';
-      AI.test(v).then(function () {
-        hint.textContent = '连接正常，可以开始用了。';
-        state.textContent = '已连接 · ' + AI.modelOf(v);
-      }).catch(function (err) {
-        hint.textContent = '测试失败：' + (err.message || '未知错误') + '。Key、模型名和接口地址都检查一下。';
-        state.textContent = '未连通 · 先看下面的提示';
-      }).then(function () {
-        btn.disabled = false;
-        btn.textContent = '保存并测试';
+    if (offInput) {
+      offInput.checked = forceOffline;
+      offInput.addEventListener('change', function () {
+        forceOffline = offInput.checked;
+        updateStatus();
+        paintSetup();
       });
-    });
-
-    $('#clearKeyBtn').addEventListener('click', function () {
-      keyInput.value = '';
-      AI.saveConfig(formValue());
-      updateStatus();
-      paintState();
-      hint.textContent = 'Key 已清除，回到内置规则库。';
-    });
-
-    paintProvider(true);
-    modelInput.value = cfg.model || AI.providerOf(cfg).defaultModel || '';
-    urlInput.value = cfg.url || '';
-    paintProvider(true);
+    }
+    if (recheck) {
+      recheck.addEventListener('click', function () {
+        var btn = this;
+        btn.disabled = true;
+        btn.textContent = '检测中…';
+        probeProxy().then(function () {
+          btn.disabled = false;
+          btn.textContent = '重新检测';
+        });
+      });
+    }
+    paintSetup();
   }
 
   /* ── 自动演示：评委只花几分钟，被动等待等于丢分 ────── */
@@ -6870,7 +8934,7 @@ window.NL2SH_FX = (function () {
     if (btn) { btn.disabled = true; btn.textContent = '演示进行中…'; }
 
     /* 演示必须确定性：强制走内置规则库（不联网、不等模型），并确保沙箱会跑 */
-    setMode('learn');
+    setMode('guide');
     autoRunBackup = autoRun;
     autoRun = true;
     var q = '找出并删除所有 .tmp 文件';
@@ -6915,21 +8979,15 @@ window.NL2SH_FX = (function () {
     }, 260);
   }
 
-  /* 深链接：?q=一句话&mode=rescue  可以直接分享某一条结果 */
+  /* 深链接：?q=一句话&mode=geek  可以直接分享某一条结果 */
   function applyDeepLink() {
     var params;
     try { params = new URLSearchParams(window.location.search); }
     catch (e) { return; }
     var m = params.get('mode');
-    if (m === 'rescue' || m === 'learn') {
-      document.documentElement.setAttribute('data-mode', m);
-      $$('.mode').forEach(function (btn) {
-        var on = btn.getAttribute('data-mode') === m;
-        btn.classList.toggle('is-on', on);
-        btn.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      mode = m;
-    }
+    /* 这里以前把 setMode 的逻辑抄了一份。抄一份的代价是：改了 setMode
+       （比如加本地记忆）深链接这条路不会跟着变，两边会悄悄漂移。 */
+    if (m === 'geek' || m === 'guide') setMode(m);
     var q = params.get('q');
     if (q) {
       $('#q').value = q;
@@ -6946,6 +9004,11 @@ window.NL2SH_FX = (function () {
   initFx();
   bind();
   renderHistory();
+  loadFavs();
+  renderFavs();
+  loadQuest();
+  renderQuest();
+  restoreMode();
   applyDeepLink();
 
   (function firstPaint() {
