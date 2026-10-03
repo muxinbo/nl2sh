@@ -1569,6 +1569,18 @@ html[data-mode="geek"] .geek-only { display: block; }
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+/* 成功但零输出的如实提醒（不判为失败，理由见 app.js 里的注释） */
+.loop__note {
+  margin: 7px 0 0;
+  padding: 7px 10px;
+  border-left: 2px solid var(--caution);
+  border-radius: 3px;
+  background: var(--caution-bg);
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+.loop__note code { color: var(--caution); }
 .loop__arrow {
   display: block;
   margin-top: 10px;
@@ -2258,6 +2270,51 @@ html[data-mode="geek"] .geek-only { display: block; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ── 多轮对话线程 ─────────────────────────────────────── */
+.thread {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 10px;
+  margin-bottom: 14px;
+  padding: 9px 13px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 12px;
+}
+.thread__badge {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border: 1px solid var(--signal);
+  border-radius: 999px;
+  font: 600 10.5px/1.4 var(--f-mono);
+  letter-spacing: .06em;
+  color: var(--signal);
+}
+.thread__q {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-3);
+}
+.thread__sep { color: var(--rule-strong); }
+.thread__hint { color: var(--ink-3); font-size: 11.5px; }
+.thread__new {
+  margin-left: auto;
+  flex: 0 0 auto;
+  padding: 4px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 11.5px/1.4 var(--f-ui);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.thread__new:hover { border-color: var(--danger); color: var(--danger); }
 
 /* ── AI 数据分析入口与报告 ──────────────────────────────
    赛道三评审侧重点第一条含"数据处理能力"。这块界面要让人看清两件事：
@@ -6289,7 +6346,20 @@ window.NL2SH_AI = (function () {
        另外 JSON 里 / 不需要转义、\/ 会被解析成一个正斜杠，
        所以要表达"反斜杠 + 斜杠"必须写 \\/ —— 这条也说清楚，能少一轮自动修正。 */
     '6. JSON 字符串里要表达反斜杠必须写两个：要表达 \\( 就写 \\\\(，要表达 \\d 就写 \\\\d。',
-    '7. JSON 里正斜杠 / 不需要转义；写 \\/ 会被解析成一个 /。要表达"反斜杠加斜杠"必须写 \\\\/。'
+    '7. JSON 里正斜杠 / 不需要转义；写 \\/ 会被解析成一个 /。要表达"反斜杠加斜杠"必须写 \\\\/。',
+    /* 多轮对话：用户会追问，模型必须知道"它"指的是什么。 */
+    '8. 用户可能在**追问上一条命令**（例如刚问完「找出最大的 10 个文件」，接着说「那只要今天的呢」）。',
+    '   对话历史会一并给你，请结合上下文理解需求；仍然只返回同样结构的 JSON 对象。',
+    /* 真机实测踩到的三个坑，全部写进规则——它们共同的特征是"看起来成功、结果却是错的"：
+       ① grep `ls -l` 里的日期字符串 → ls 的日期格式随 locale 变（中文是「10月 02」），一定匹配不到；
+       ② 把 find 的输出管道接给 ls → ls 不读标准输入，会静默列出当前目录，退出码还是 0；
+       ③ find 的 -printf → 本沙箱未实现；管道会把它的报错和退出码一起吃掉，
+          外面只看到"成功、零输出"。所以排序要走 ls -lS / du -ah | sort -rh。 */
+    '9. 排序与筛选请用这些写法：按大小 `ls -lS` 或 `du -ah | sort -rh`；按时间用 find 的 -mtime / -size 条件。',
+    '   **避开三个会"假装成功"的写法**：',
+    '   · 不要用 find 的 -printf（本沙箱未实现，管道会吃掉报错，命令零输出却返回成功）；',
+    '   · 不要 grep `ls -l` 输出里的日期字符串（日期格式随系统语言变，中文环境是「10月 02」）；',
+    '   · 不要把 find 的输出管道接给 ls（ls 不读标准输入，会静默列出当前目录）。'
   ].join('\n');
 
   /* 极客终端模式用：只要命令，输出越少越快（免费额度下"少输出"就是"快"） */
@@ -6700,19 +6770,33 @@ window.NL2SH_AI = (function () {
         '如果失败原因是你用了沙箱里不存在的命令或参数，请换一个等效但更通用的写法。';
     }
 
+    /* 组装消息：system + 对话历史 + 本次提问。
+       多轮对话是"智能交互"最直观的一块——没有历史，用户问完
+       「找出最大的 10 个文件」就没法接「那只要今天的呢」，
+       产品立刻从"能对话的助手"退化成"一问答一题的表单"。
+       只带最近的若干轮（服务端还会再裁一次），token 与延迟都受控。 */
+    var msgs = [{
+      role: 'system',
+      content: opts.analysis ? SYSTEM_PROMPT_ANALYST : (brief ? SYSTEM_PROMPT_SHORT : SYSTEM_PROMPT)
+    }];
+    if (opts.history && opts.history.length) {
+      for (var hi = 0; hi < opts.history.length; hi++) {
+        var h = opts.history[hi];
+        if (h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string' && h.content) {
+          msgs.push({ role: h.role, content: h.content });
+        }
+      }
+    }
+    msgs.push({ role: 'user', content: userContent });
+
     var payload = {
       stream: true,
       temperature: opts.analysis ? 0.1 : 0.2,
       json: true,
       max_tokens: opts.thinking ? 1600 : (opts.analysis ? 1600 : (brief ? 500 : 1200)),
-      messages: [
-        {
-          role: 'system',
-          content: opts.analysis ? SYSTEM_PROMPT_ANALYST : (brief ? SYSTEM_PROMPT_SHORT : SYSTEM_PROMPT)
-        },
-        { role: 'user', content: userContent }
-      ]
+      messages: msgs
     };
+    payload.turns = msgs.length;
     if (opts.thinking) payload.thinking = true;
 
     fetch(urlFor(ENDPOINT), {
@@ -8124,7 +8208,15 @@ window.NL2SH_FX = (function () {
 
     result.hidden = false;
     result.setAttribute('aria-live', 'polite');
-    result.innerHTML = cardHtml(item, ranges, opts, stages, samples);
+    result.innerHTML = threadHtml() + cardHtml(item, ranges, opts, stages, samples);
+
+    /* 对话线程上的「新对话」：清掉上下文，下一句就是全新的开始 */
+    var newChat = $('#newChat', result);
+    if (newChat) newChat.addEventListener('click', function () {
+      resetThread();
+      var t = $('#thread', result);
+      if (t) t.remove();
+    });
 
     var cmdEl = $('#cardCmd', result);
     var copyBtn = $('#copyBtn', result);
@@ -9683,6 +9775,65 @@ window.NL2SH_FX = (function () {
     if (running) { running.cancel(); running = null; }
   }
 
+  /* ── 多轮对话 ─────────────────────────────────────────
+     "智能交互"最直观的一块：用户问完「找出最大的 10 个文件」，
+     应该能接着问「那只要今天的呢」。没有历史，产品立刻从
+     "能对话的助手"退化成"一问答一题的表单"。
+
+     只带最近 3 轮：token、延迟、以及"模型被旧上下文带偏"的风险都受控。
+     助手侧只保留「命令 + 一句风险说明」——把整张卡片的解释全塞回去，
+     上下文会迅速膨胀，而对追问有用的其实就是"上一条到底跑了什么"。 */
+  var thread = [];
+  var THREAD_KEEP = 3;
+
+  function threadHistory() {
+    var out = [];
+    thread.slice(-THREAD_KEEP - 1, -1).forEach(function (t) {
+      out.push({ role: 'user', content: t.q });
+      /* ⚠️ 历史里的助手回复必须是**完整合法**的回答样例（含 segments）。
+         第一版这里只塞了 {command, risk_note}，结果模型照着这个残缺样子模仿，
+         下一轮直接不返回 segments —— 界面报"逐段解释为空"。
+         给模型的例子就是给模型的规范，残缺的样例等于教它偷懒。 */
+      if (t.answer) out.push({ role: 'assistant', content: t.answer });
+    });
+    return out;
+  }
+
+  /* 把内部结构还原成规格里的 JSON，作为历史样例回放给模型 */
+  var RISK_BACK = { safe: 'low', caution: 'medium', danger: 'high' };
+
+  function answerSample(item) {
+    try {
+      return JSON.stringify({
+        command: item.cmd,
+        segments: (item.anno || []).map(function (a) {
+          return { part: a.t, label: a.short || '', explanation: a.n || '' };
+        }),
+        risk_level: RISK_BACK[item.risk] || 'medium',
+        risk_note: item.why || ''
+      });
+    } catch (e) { return ''; }
+  }
+
+  function threadHtml() {
+    if (thread.length < 2) return '';
+    var prev = thread.slice(0, -1).slice(-THREAD_KEEP);
+    return '<div class="thread">' +
+      '<span class="thread__badge">本次对话 · 第 ' + thread.length + ' 轮</span>' +
+      prev.map(function (t) {
+        return '<span class="thread__q">' + esc(t.q.length > 22 ? t.q.slice(0, 22) + '…' : t.q) + '</span>';
+      }).join('<span class="thread__sep">→</span>') +
+      '<span class="thread__hint">上面这些已经作为上下文带给模型，可以直接追问</span>' +
+      '<button class="thread__new" type="button" id="newChat">新对话</button>' +
+    '</div>';
+  }
+
+  function resetThread() {
+    thread = [];
+    var t = $('#thread');
+    if (t) t.remove();
+  }
+
   function ask(text, repairCtx, opts) {
     stopRunning();
     opts = opts || {};
@@ -9692,6 +9843,13 @@ window.NL2SH_FX = (function () {
 
     /* 新一轮需求才开始新的轨迹；修正轮要接着记 */
     if (!isRepair) attempts = [];
+
+    /* 新提问（不是修正轮）才写进对话线程。
+       即使这一轮走的是离线规则库，也要记进去——切回在线后上下文仍然连贯。 */
+    if (!isRepair && !opts.forceLocal) {
+      thread.push({ q: text, cmd: '', why: '' });
+      if (thread.length > 12) thread = thread.slice(-12);
+    }
 
     /* 演示模式 / 强制离线 / 代理不可用：一律走内置规则库，不发请求 */
     if (opts.forceLocal || forceOffline || !st.ok) {
@@ -9717,6 +9875,12 @@ window.NL2SH_FX = (function () {
         item.modelLabel = model;
         item.thinking = thinking;
         if (isRepair) { item.repairedFrom = repairCtx; item.attempt = repairCtx.attempt; }
+        if (!isRepair && thread.length) {
+          var last = thread[thread.length - 1];
+          last.cmd = item.cmd || '';
+          last.why = item.why || '';
+          last.answer = answerSample(item);
+        }
         current = item;
         renderResult(item, {});
         autoVerify(item);
@@ -9727,7 +9891,13 @@ window.NL2SH_FX = (function () {
         renderResult(local.item, { loose: true, aiError: err });
         autoVerify(local.item);
       }
-    }, { brief: mode === 'geek', thinking: thinking, repair: repairCtx });
+    }, {
+      brief: mode === 'geek',
+      thinking: thinking,
+      repair: repairCtx,
+      /* 追问靠它：把最近几轮的问答带上，模型才知道"那只要今天的呢"在问什么 */
+      history: isRepair ? [] : threadHistory()
+    });
   }
 
   /* 生成完就自动在沙箱里跑一遍：这是"闭环"里最关键的一环，
@@ -9750,7 +9920,10 @@ window.NL2SH_FX = (function () {
             cmd: item.cmd,
             code: run.code,
             err: [run.err, run.out].filter(Boolean).join('\n').slice(0, 300),
-            ok: !failed
+            ok: !failed,
+            /* 成功但零输出：不进"失败"分支（那会误伤 mkdir/rm/chmod），
+               只用来在闭环面板上如实提醒一句 */
+            empty: !failed && !String(run.out || '').trim()
           });
           paintLoop(result);
 
@@ -9786,6 +9959,17 @@ window.NL2SH_FX = (function () {
           '<span class="loop__verdict">' + (a.ok ? '通过（退出码 0）'
             : '失败（退出码 ' + a.code + '）') + '</span>' +
           (a.ok ? '' : '<pre class="loop__err">' + esc(a.err || '（无错误输出）') + '</pre>') +
+          /* 静默无操作：退出码 0、stderr 干净，但一个字符都没输出。
+             典型的坑是"管道把前一条命令的报错吃掉了"（例如 find 的 -printf
+             被沙箱拒绝，报错进了管道、外面只看到成功和空输出）。
+             这种情况**不当作失败去自动修正**：mkdir / rm / chmod 本来就该没输出，
+             一刀切会把正常的命令也判错、平白多跑几轮模型。
+             所以这里只如实提示，把判断权交给看的人。 */
+          (a.ok && a.empty
+            ? '<p class="loop__note">命令成功，但没有任何输出——如果它本该列出或统计出东西，' +
+              '这通常意味着条件写错了。这里不自动判定为失败：<code>mkdir</code>、<code>rm</code>、' +
+              '<code>chmod</code> 这类命令本来就该没有输出。</p>'
+            : '') +
           (i < attempts.length - 1 ? '<span class="loop__arrow">↓ 把真实报错喂回模型，自动修正</span>' : '') +
         '</div>';
       }).join('');
