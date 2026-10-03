@@ -133,6 +133,34 @@ html[data-mode="rescue"] .plate {
 
 .topbar, main, .foot { position: relative; z-index: 1; }
 
+/* ── 粒子层 ─────────────────────────────────────────
+   字符场铺满视口垫在内容下面；管道流只在首屏解剖图里。
+   两者都不接收指针事件，文字永远在最上层。
+
+   ⚠️ canvas 是「替换元素」：宽高为 auto 时用的是固有尺寸 300×150，
+   inset: 0 只定位不拉伸。所以必须显式写 width/height: 100%。 */
+.fx-field {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+  pointer-events: none;
+}
+.fx-flow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+  pointer-events: none;
+}
+.dissect__col,
+.dissect__cmd { position: relative; z-index: 2; }
+.dissect .leaders { z-index: 1; }
+
 /* 通用小标签：man page 与工程图纸上的分区标题 */
 .eyebrow {
   font: 500 10.5px/1 var(--f-mono);
@@ -451,7 +479,8 @@ main {
 .ask__actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;          /* 窄屏要把整项换到下一行，而不是把按钮压扁 */
+  gap: 14px;
   margin-top: 14px;
 }
 .btn {
@@ -462,6 +491,8 @@ main {
   background: transparent;
   color: var(--ink);
   cursor: pointer;
+  white-space: nowrap;      /* 按钮文字永远不折行 */
+  flex: 0 0 auto;
   transition: background 0.16s, color 0.16s, border-color 0.16s, filter 0.16s;
 }
 .btn--go {
@@ -1330,6 +1361,7 @@ html[data-mode="rescue"] .rescue-only { display: block; }
 </head>
 <body>
 <div class="plate" aria-hidden="true"></div>
+<canvas id="fxField" class="fx-field" aria-hidden="true"></canvas>
 
 <header class="topbar">
   <a class="brand" href="#top">
@@ -1587,20 +1619,20 @@ window.NL2SH = {
     },
     {
       q: "批量把 PNG 转成 WebP",
-      cmd: "for f in *.png; do cwebp -q 80 \"$f\" -o \"${f%.png}.webp\"; done",
+      cmd: "for f in uploads/*.png; do cwebp -q 80 \"$f\" -o \"${f%.png}.webp\"; done",
       risk: "caution",
       why: "每张图都会在旁边生成一个新的 .webp 文件。",
       anno: [
-        { t: "for f in *.png", n: "遍历当前目录下每一个 .png 文件，循环变量叫 f。注意：不递归子目录。" },
+        { t: "for f in uploads/*.png", n: "遍历 uploads 目录下每一个 .png 文件，循环变量叫 f。注意：不递归子目录。" },
         { t: "cwebp -q 80", n: "Google 的 WebP 编码器，-q 80 表示质量 80，通常体积能降一半以上。" },
         { t: "\"${f%.png}.webp\"", n: "${f%.png} 表示去掉结尾的 .png，再拼上 .webp 作为输出名，所以原图不会被覆盖。" }
       ],
       sim: {
-        scope: "当前目录", sudo: false, irreversible: false,
+        scope: "uploads 目录", sudo: false, irreversible: false,
         note: "原 PNG 保留，只是多出同名的 .webp 文件。",
-        tree: [{ p: "./a.png", s: "read" }, { p: "./a.webp", s: "add" }, { p: "./b.webp", s: "add" }]
+        tree: [{ p: "./uploads/avatar.png", s: "read" }, { p: "./uploads/avatar.webp", s: "add" }, { p: "./uploads/banner.webp", s: "add" }]
       },
-      see: ["cwebp -q 80 in.png -o out.webp", "mogrify -format webp *.png", "for f in *.png; do cwebp -q 80 \"$f\" -o \"${f%.png}.webp\"; done"]
+      see: ["cwebp -q 80 in.png -o out.webp", "mogrify -format webp *.png", "for f in uploads/*.png; do cwebp -q 80 \"$f\" -o \"${f%.png}.webp\"; done"]
     },
     {
       q: "找出并删除所有 .tmp 文件",
@@ -1655,7 +1687,7 @@ window.NL2SH = {
     },
     {
       q: "统计日志里出现最多的 10 个 IP",
-      cmd: "awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -10",
+      cmd: "awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -10",
       flow: "取第一列 → 排序 → 去重并计数 → 按次数倒排 → 取前 10",
       risk: "safe",
       why: "只读日志文件。",
@@ -1666,10 +1698,10 @@ window.NL2SH = {
       ],
       sim: {
         scope: "只读", sudo: false, irreversible: false,
-        note: "只读取 access.log。",
-        tree: [{ p: "./access.log", s: "read" }]
+        note: "只读取 nginx 的访问日志，不写入任何文件。",
+        tree: [{ p: "/var/log/nginx/access.log", s: "read" }]
       },
-      see: ["goaccess access.log --log-format=COMBINED", "awk '{print $1}' access.log | sort -u | wc -l", "grep -c ' 404 ' access.log"]
+      see: ["goaccess /var/log/nginx/access.log --log-format=COMBINED", "awk '{print $1}' /var/log/nginx/access.log | sort -u | wc -l", "grep -c ' 404 ' /var/log/nginx/access.log"]
     },
     {
       q: "重启 nginx 并跟着看日志",
@@ -1695,6 +1727,7 @@ window.NL2SH = {
       cmd: "find / -type f -size +1G -exec rm -i {} \\;",
       risk: "danger",
       why: "全盘扫描加上删除，通常需要 sudo，且删除不可撤销。",
+      expect: "denied",
       anno: [
         { t: "find /", n: "从根目录开始找，会扫描整块磁盘，比较慢，也容易扫到系统文件。" },
         { t: "-size +1G", n: "只匹配大于 1GB 的文件。" },
@@ -1702,7 +1735,7 @@ window.NL2SH = {
       ],
       sim: {
         scope: "整个文件系统", sudo: true, irreversible: true,
-        note: "全盘范围。建议先换成 -print 跑一遍看清列表。",
+        note: "全盘范围。建议先换成 -print 跑一遍看清列表。这是本作品里少数「注定会失败」的示例：属于 root 的文件会返回 Permission denied，而这正是权限规则在起作用，不是沙箱坏了。",
         tree: [{ p: "/", s: "read" }, { p: "/var/log/big.log", s: "del" }]
       },
       see: ["find / -type f -size +1G -print", "du -xhd1 / | sort -rh | head", "find / -xdev -type f -size +1G -print"]
@@ -1723,6 +1756,650 @@ window.NL2SH = {
         tree: [{ p: "进程表", s: "read" }]
       },
       see: ["ps -o pid,rss,cmd -C nginx --sort=-rss", "top -o %MEM -p $(pgrep -d, nginx)", "systemctl status nginx"]
+    },
+    {
+      q: "找出 7 天没被动过的文件",
+      cmd: "find . -type f -mtime +7",
+      flow: "从当前目录递归 → 只看普通文件 → 只留修改时间超过 7 天的",
+      risk: "safe",
+      why: "只读取文件时间戳，不做任何修改。",
+      anno: [
+        { t: "find .", n: "从当前目录开始递归查找。把点换成斜杠就是全盘扫描，会很慢。" },
+        { t: "-type f", n: "-type 限定类型：f 是普通文件、d 是目录、l 是软链接。" },
+        { t: "-mtime +7", n: "mtime 是内容修改时间；+7 表示 7 天以前，不含最近 7 天。单位是天，不是分钟。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只遍历时间戳，不写不删。",
+        tree: [{ p: "./", s: "read" }, { p: "./ 下所有子目录", s: "read" }]
+      },
+      see: ["find . -type f -mtime -1", "find . -type f -newermt '7 days ago'", "find . -type f -mtime +7 -exec ls -l {} \\;"]
+    },
+    {
+      q: "只看当前目录下一层有哪些子目录",
+      cmd: "find . -maxdepth 1 -type d",
+      risk: "safe",
+      why: "只列目录名，不读取内容。",
+      anno: [
+        { t: "find .", n: "从当前目录开始找。" },
+        { t: "-maxdepth 1", n: "只往下走一层，不递归。目录很深时能省掉大量时间。" },
+        { t: "-type d", n: "只要目录，不要文件。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只列名字。",
+        tree: [{ p: "./", s: "read" }]
+      },
+      see: ["ls -d */", "find . -maxdepth 2 -type d", "du -sh * | sort -rh"]
+    },
+    {
+      q: "按修改时间列出最近动过的文件",
+      cmd: "ls -lt | head -n 6",
+      risk: "safe",
+      why: "只读取目录项信息。",
+      anno: [
+        { t: "ls", n: "列出目录内容。" },
+        { t: "-lt", n: "-l 长格式（权限、属主、大小、时间都列出来），-t 按修改时间从新到旧排。" },
+        { t: "head -n 6", n: "只看前 6 行。目录里文件多的时候不加它会被刷屏。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不写入任何内容。",
+        tree: [{ p: "./", s: "read" }]
+      },
+      see: ["ls -ltr | head", "stat notes.txt", "find . -maxdepth 1 -type f | head"]
+    },
+    {
+      q: "看当前目录里每项各占多少空间",
+      cmd: "du -sh * | sort -rh",
+      risk: "safe",
+      why: "只统计大小，需要遍历一遍目录。",
+      anno: [
+        { t: "du -sh", n: "-s 每项只给一个总计（不展开子目录），-h 用 K/M/G 显示而不是一串字节。" },
+        { t: "*", n: "由 shell 先展开成当前目录下的每一项。它不含隐藏文件——以点开头的会被跳过。" },
+        { t: "sort -rh", n: "按容量从大到小排；-h 让它按人类可读的单位比较，否则 9M 会排在 10K 前面。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只统计，不修改。",
+        tree: [{ p: "./", s: "read" }]
+      },
+      see: ["du -sh * | sort -rh | head -n 5", "du -ah . | sort -rh | head -n 10", "df -h"]
+    },
+    {
+      q: "看 inode 有没有被用满",
+      cmd: "df -i",
+      risk: "safe",
+      why: "只读取文件系统统计。",
+      anno: [
+        { t: "df", n: "disk free：显示各个挂载点的使用情况。" },
+        { t: "-i", n: "这次看的是 inode 数量而不是字节数。磁盘还剩很多空间但 inode 用满，同样会创建不了新文件。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不写任何东西。",
+        tree: [{ p: "挂载点信息", s: "read" }]
+      },
+      see: ["df -h", "df -hT", "find / -xdev -type f | wc -l"]
+    },
+    {
+      q: "看一个文件的权限、大小和三个时间戳",
+      cmd: "stat notes.txt",
+      risk: "safe",
+      why: "只读取文件元信息。",
+      anno: [
+        { t: "stat", n: "打印文件的元信息，比 ls -l 详细：三个时间戳、inode 号、块数都在这里。" },
+        { t: "notes.txt", n: "要看的目标文件。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不修改时间戳，也不读取内容。",
+        tree: [{ p: "./notes.txt", s: "read" }]
+      },
+      see: ["ls -l notes.txt", "file notes.txt", "stat -c '%a %U %s %n' notes.txt"]
+    },
+    {
+      q: "数一数访问日志里有多少条 500 错误",
+      cmd: "grep -c ' 500 ' /var/log/nginx/access.log",
+      risk: "safe",
+      why: "只读日志。",
+      anno: [
+        { t: "grep", n: "按内容筛选行。" },
+        { t: "-c", n: "不打印匹配的行，只打印匹配的条数。" },
+        { t: "' 500 '", n: "前后各留一个空格，免得把 1500、2500 这类数字也匹配进来——这是 grep 最常见的翻车点。" },
+        { t: "/var/log/nginx/access.log", n: "nginx 的访问日志路径。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只读日志，不写入。",
+        tree: [{ p: "/var/log/nginx/access.log", s: "read" }]
+      },
+      see: ["grep -c ' 404 ' /var/log/nginx/access.log", "awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c", "grep ' 500 ' /var/log/nginx/access.log | head -n 20"]
+    },
+    {
+      q: "看被访问最多的 URL 是哪些",
+      cmd: "awk '{print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -n 10",
+      flow: "取出请求路径 → 排序 → 去重并计数 → 按次数倒排 → 取前 10",
+      risk: "safe",
+      why: "只读日志。",
+      anno: [
+        { t: "awk '{print $7}'", n: "nginx 日志按空格分列，第 7 列是请求路径（第 1 列是 IP，第 9 列是状态码）。" },
+        { t: "uniq -c", n: "合并相邻的重复行并统计次数。它只处理相邻重复，所以前面必须先 sort。" },
+        { t: "sort -rn", n: "按次数数值倒序，访问最多的排最前面。" },
+        { t: "head -n 10", n: "只要前 10 名。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只读日志。",
+        tree: [{ p: "/var/log/nginx/access.log", s: "read" }]
+      },
+      see: ["awk '{print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -n 5", "awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head", "grep -c '/api/health' /var/log/nginx/access.log"]
+    },
+    {
+      q: "看日志里的 HTTP 状态码分布",
+      cmd: "awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn",
+      flow: "取出状态码 → 排序 → 去重计数 → 按次数倒排",
+      risk: "safe",
+      why: "只读日志。",
+      anno: [
+        { t: "awk '{print $9}'", n: "第 9 列是 HTTP 状态码。" },
+        { t: "sort | uniq -c", n: "先排序让相同状态码挨在一起，再由 uniq -c 数出每种出现多少次。" },
+        { t: "sort -rn", n: "出现次数多的排前面，一眼就能看出 200 占了多少、错误有多少。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只读日志。",
+        tree: [{ p: "/var/log/nginx/access.log", s: "read" }]
+      },
+      see: ["grep -c ' 404 ' /var/log/nginx/access.log", "awk '$9 >= 500' /var/log/nginx/access.log | head", "grep -c ' 500 ' /var/log/nginx/access.log"]
+    },
+    {
+      q: "把一段文本全部转成大写",
+      cmd: "cat notes.txt | tr 'a-z' 'A-Z'",
+      risk: "safe",
+      why: "只把结果打印出来，原文件不动。",
+      anno: [
+        { t: "cat notes.txt", n: "把文件内容送进管道。tr 自己不读文件参数，靠管道喂给它。" },
+        { t: "tr 'a-z' 'A-Z'", n: "tr 按字符替换：小写区间的每个字符映射成对应的大写字符。" },
+        { t: "|", n: "管道：左边命令的输出直接变成右边命令的输入。两边是同时跑的，不会先存成临时文件。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "结果只打印在屏幕上，原文件保持不变。想存下来得自己重定向。",
+        tree: [{ p: "./notes.txt", s: "read" }]
+      },
+      see: ["cat notes.txt | tr -d ' '", "cat notes.txt | tr ' ' '\\n' | head", "cat notes.txt | tr 'a-z' 'A-Z' > upper.txt"]
+    },
+    {
+      q: "打包 src 目录，并立刻确认包里有什么",
+      cmd: "tar -czf src-$(date +%F).tar.gz ./src && tar -tzf src-$(date +%F).tar.gz",
+      flow: "打包成按日期命名的归档 → 成功才继续 → 列出包内清单核对",
+      risk: "caution",
+      why: "会在当前目录生成一个新文件；原目录不动，但同名归档会被直接覆盖。",
+      anno: [
+        { t: "tar -czf", n: "c 创建归档，z 用 gzip 压缩，f 后面紧跟归档文件名。这三个字母的顺序不能乱。" },
+        { t: "src-$(date +%F).tar.gz", n: "$(date +%F) 会先执行、把结果插进命令里，于是得到形如 src-2026-10-02.tar.gz 的文件名。" },
+        { t: "&&", n: "前一条成功（退出码为 0）才执行后一条，打包失败就不用去列了。" },
+        { t: "tar -tzf", n: "t 表示只列出归档内容、不解包。打完包顺手核对一下，确认没漏东西。" }
+      ],
+      sim: {
+        scope: "当前目录", sudo: false, irreversible: false,
+        note: "新增一个 .tar.gz 文件，不删不改 ./src。",
+        tree: [{ p: "./src", s: "read" }, { p: "./src-2026-10-02.tar.gz", s: "add" }]
+      },
+      see: ["tar -tzf backup.tar.gz", "tar -xzf src.tar.gz -C /tmp", "du -sh ./src"]
+    },
+    {
+      q: "给部署脚本加上执行权限",
+      cmd: "chmod +x scripts/deploy.sh && ls -l scripts/deploy.sh",
+      risk: "caution",
+      why: "改了文件权限。改动本身可逆，但给来路不明的脚本加执行权限再运行，性质完全不同。",
+      anno: [
+        { t: "chmod +x", n: "+x 给所有者、组、其他人**都**加上执行位。只想让自己能跑，用 u+x 更保守。" },
+        { t: "scripts/deploy.sh", n: "目标文件。" },
+        { t: "ls -l scripts/deploy.sh", n: "改完立刻看一眼权限列，确认真的生效——权限位在终端里是看不见的，必须查。" }
+      ],
+      sim: {
+        scope: "单个文件", sudo: false, irreversible: false,
+        note: "只改权限位，随时能改回来。",
+        tree: [{ p: "./scripts/deploy.sh", s: "edit" }]
+      },
+      see: ["chmod u+x scripts/deploy.sh", "chmod 755 scripts/deploy.sh", "ls -l scripts/"]
+    },
+    {
+      q: "看本机在监听哪些端口",
+      cmd: "ss -lntp",
+      risk: "caution",
+      why: "只是查看，但要管理员权限才能看到别人进程的名字。",
+      anno: [
+        { t: "ss", n: "查看网络连接，是 netstat 的现代替代品。" },
+        { t: "-lnt", n: "-l 只看监听状态，-n 不做域名和服务名解析（更快更准），-t 只看 TCP。" },
+        { t: "p", n: "显示占用端口的进程。查别的用户的进程需要 sudo，否则进程名那一列是空的。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只查询内核里的连接表，不改动任何配置。",
+        tree: [{ p: "连接表", s: "read" }]
+      },
+      see: ["sudo ss -lptn 'sport = :80'", "ss -tnp state established", "ss -s"]
+    },
+    {
+      q: "看哪个进程在吃 CPU",
+      cmd: "ps aux --sort=-%cpu | head -n 5",
+      risk: "safe",
+      why: "只读取进程信息，不发送任何信号。",
+      anno: [
+        { t: "ps aux", n: "a 显示所有用户的进程，u 用面向用户的格式（带 CPU、内存百分比），x 连没有终端的进程也列出来。" },
+        { t: "--sort=-%cpu", n: "按 CPU 使用率倒序排列。负号表示从大到小，只写 %cpu 会变成升序。" },
+        { t: "head -n 5", n: "只看前 5 行。ps 看一眼就够，不用刷一屏。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只读进程表，不改变任何进程状态。",
+        tree: [{ p: "进程表", s: "read" }]
+      },
+      see: ["ps aux --sort=-rss | head", "ps -o pid,%cpu,cmd -C nginx --sort=-%cpu", "top -b -n1 | head -n 12"]
+    },
+    {
+      q: "把文件里的 todo 换成 done（先看结果，不改文件）",
+      cmd: "sed 's/todo/done/' notes.txt",
+      flow: "读入文件 → 逐行替换 → 结果打到屏幕，原文件不动",
+      risk: "safe",
+      why: "sed 不加 -i 就只把结果打印出来，不碰原文件。",
+      anno: [
+        { t: "sed", n: "流编辑器：读一行、按脚本改一行、输出一行。它不打开编辑器界面，天生适合脚本里用。" },
+        { t: "'s/todo/done/'", n: "s 是 substitute（替换）：把每行里**第一处** todo 换成 done。注意没加 g，所以一行里第二处不会被换。" },
+        { t: "notes.txt", n: "输入文件。sed 把结果打到标准输出，原文件保持不变——想真改要加 -i。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "原文件不会被修改。这是改配置之前最该先跑的一遍。",
+        tree: [{ p: "./notes.txt", s: "read" }]
+      },
+      see: ["sed 's/todo/done/g' notes.txt", "sed -n '/todo/p' notes.txt", "sed 's/todo/done/' notes.txt > new.txt"]
+    },
+    {
+      q: "就地替换文件里的文字",
+      cmd: "sed -i 's/todo/done/' notes.txt",
+      risk: "caution",
+      why: "直接改写原文件；写错了没有回收站，只能靠备份或版本控制。",
+      anno: [
+        { t: "sed", n: "流编辑器。" },
+        { t: "-i", n: "in-place：把结果写回原文件。**这个参数是 sed 里最容易造成损失的一个**——加之前先用不加 -i 的形式看一遍。" },
+        { t: "'s/todo/done/'", n: "把每行第一处 todo 换成 done。" },
+        { t: "notes.txt", n: "被就地修改的文件。" }
+      ],
+      sim: {
+        scope: "单个文件", sudo: false, irreversible: true,
+        note: "内容被直接改写。想反悔只能靠 -i.bak 留下的备份，或者你手上的版本控制。",
+        tree: [{ p: "./notes.txt", s: "edit" }]
+      },
+      see: ["sed 's/todo/done/' notes.txt", "sed -i.bak 's/todo/done/' notes.txt", "cp notes.txt notes.txt.bak && sed -i 's/todo/done/' notes.txt"]
+    },
+    {
+      q: "改版本号，同时自动留一份备份",
+      cmd: "sed -i.bak 's/0.3.1/0.4.0/' package.json",
+      risk: "caution",
+      why: "会改写 package.json，同时生成一个 .bak 副本。",
+      anno: [
+        { t: "sed -i.bak", n: "就地修改，并且在改之前把原文件复制成 package.json.bak。**这一步等于给自己留了后悔药**，改配置文件时值得养成习惯。" },
+        { t: "'s/0.3.1/0.4.0/'", n: "把每行第一处 0.3.1 换成 0.4.0。版本号里的点会匹配任意字符，但在这里不影响结果。" },
+        { t: "package.json", n: "目标文件。" }
+      ],
+      sim: {
+        scope: "单个文件", sudo: false, irreversible: false,
+        note: "新增一个 .bak 备份文件，原文件被改写。反悔就 mv 回来。",
+        tree: [{ p: "./package.json", s: "edit" }, { p: "./package.json.bak", s: "add" }]
+      },
+      see: ["sed -i 's/0.3.1/0.4.0/' package.json", "git diff package.json", "cp package.json package.json.bak"]
+    },
+    {
+      q: "把某一处字符全部替换掉",
+      cmd: "sed 's/o/0/g' notes.txt",
+      risk: "safe",
+      why: "只打印结果，不改文件。",
+      anno: [
+        { t: "sed", n: "流编辑器。" },
+        { t: "'s/o/0/g'", n: "g 是 global：每行里**所有**的小写 o 都换成数字 0。不加 g 只换第一处——这是 sed 最常被搞混的一点。" },
+        { t: "notes.txt", n: "输入文件。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "原文件不变。",
+        tree: [{ p: "./notes.txt", s: "read" }]
+      },
+      see: ["sed 's/o/0/' notes.txt", "sed 's/[0-9]/N/g' notes.txt", "sed 's/o/0/g' notes.txt > out.txt"]
+    },
+    {
+      q: "只打印包含某个词的行",
+      cmd: "sed -n '/uploads/p' notes.txt",
+      risk: "safe",
+      why: "只读，只输出。",
+      anno: [
+        { t: "sed -n", n: "-n 关掉默认输出：不加它 sed 会把每一行都打出来。关掉之后，只有你显式要求打印的行才会出现。" },
+        { t: "'/uploads/p'", n: "斜杠里是模式，末尾的 p 表示 print。合起来就是「只打印匹配这个模式的行」。" },
+        { t: "notes.txt", n: "输入文件。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不修改任何文件。",
+        tree: [{ p: "./notes.txt", s: "read" }]
+      },
+      see: ["grep 'uploads' notes.txt", "sed -n '/todo/p' notes.txt", "sed -n '1,2p' notes.txt"]
+    },
+    {
+      q: "给文件的每一行加两个空格缩进",
+      cmd: "sed 's/^/  /' notes.txt",
+      risk: "safe",
+      why: "只打印结果，不改文件。",
+      anno: [
+        { t: "sed", n: "流编辑器。" },
+        { t: "'s/^/  /'", n: "^ 匹配行首。把行首替换成两个空格，效果就是整体缩进。同理 s/$/x/ 会在行尾加内容。" },
+        { t: "notes.txt", n: "输入文件。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "原文件不变。",
+        tree: [{ p: "./notes.txt", s: "read" }]
+      },
+      see: ["sed 's/^/    /' notes.txt", "sed 's/$/  <- 这一行结束/' notes.txt", "sed -i 's/^/  /' notes.txt"]
+    },
+    {
+      q: "改系统日志被权限拒绝（这是好事）",
+      cmd: "sed -i 's/warn/WARN/' /var/log/nginx/error.log",
+      risk: "caution",
+      why: "目标是 root 拥有的日志文件，普通用户改不动——这个失败是权限规则在起作用。",
+      expect: "denied",
+      anno: [
+        { t: "sed -i", n: "就地修改，需要对这个文件有写权限。" },
+        { t: "'s/warn/WARN/'", n: "把 warn 换成大写的 WARN。" },
+        { t: "/var/log/nginx/error.log", n: "系统日志，属主是 root、权限 640：普通用户连读都不行，更别说改。" }
+      ],
+      sim: {
+        scope: "无（会被拒绝）", sudo: false, irreversible: false,
+        note: "命令会返回 Permission denied 并且不修改任何东西。要改系统日志得用 sudo，而且通常应该改日志轮转配置，而不是手改日志内容。",
+        tree: [{ p: "/var/log/nginx/error.log", s: "read" }]
+      },
+      see: ["sudo sed -i 's/warn/WARN/' /var/log/nginx/error.log", "ls -l /var/log/nginx/", "id"]
+    },
+    {
+      q: "把部署脚本的属主交给 root",
+      cmd: "sudo chown root scripts/deploy.sh",
+      risk: "caution",
+      why: "改属主需要 root；改完之后普通用户就不能再修改这个文件了。",
+      anno: [
+        { t: "sudo", n: "以管理员权限运行。chown 是少数**必须** root 才能执行的命令之一。" },
+        { t: "chown", n: "change owner：改文件的属主。" },
+        { t: "root", n: "新的属主。也可以写 student 交回给自己。" },
+        { t: "scripts/deploy.sh", n: "目标文件。改完之后它的属主变成 root，你这个普通用户就只能读、不能写了。" }
+      ],
+      sim: {
+        scope: "单个文件", sudo: true, irreversible: false,
+        note: "只是属主字段变化，用 sudo chown student 就能改回来。但要意识到：交给 root 之后，普通用户就失去了修改权。",
+        tree: [{ p: "./scripts/deploy.sh", s: "edit" }]
+      },
+      see: ["sudo chown student scripts/deploy.sh", "ls -l scripts/", "stat scripts/deploy.sh"]
+    },
+    {
+      q: "普通用户改属主会被拒绝",
+      cmd: "chown root notes.txt",
+      risk: "caution",
+      why: "chown 只有 root 能执行，这是内核的硬性限制，不是配置问题。",
+      expect: "denied",
+      anno: [
+        { t: "chown", n: "改属主。它和 chmod 的关键区别：chmod 改权限位、自己有文件就能改，chown 改归属、**永远要 root**。" },
+        { t: "root", n: "想改成的新属主。" },
+        { t: "notes.txt", n: "目标文件。命令会在动手之前就被拒绝，文件不会有任何变化。" }
+      ],
+      sim: {
+        scope: "无（会被拒绝）", sudo: false, irreversible: false,
+        note: "返回 Operation not permitted，文件不受影响。想让它成功必须加 sudo。",
+        tree: [{ p: "./notes.txt", s: "read" }]
+      },
+      see: ["sudo chown root notes.txt", "chmod 644 notes.txt", "id"]
+    },
+    {
+      q: "递归把整个目录的属主交出去",
+      cmd: "sudo chown -R root ./cache",
+      risk: "danger",
+      why: "递归改属主会让普通用户失去整个目录树的写权限，之后连缓存都写不进去。",
+      anno: [
+        { t: "sudo", n: "以 root 执行。" },
+        { t: "chown -R", n: "-R 递归：目录本身和它下面**每一个**文件都会被改。作用范围很容易超出预期。" },
+        { t: "root", n: "新的属主。注意 chown 改的是归属，决定「谁有资格改这个文件」；而 chmod 改的是权限位，决定「谁能读、能写」。两者不是一回事。" },
+        { t: "./cache", n: "目标目录。执行完这个目录对普通用户就变成只读了。" }
+      ],
+      sim: {
+        scope: "cache 及全部子项", sudo: true, irreversible: false,
+        note: "权限与属主改动不会被记录下来，改回去要靠记忆或重新 chown。生产环境里这通常是个事故。",
+        tree: [{ p: "./cache/", s: "edit" }, { p: "./cache/index.tmp", s: "edit" }, { p: "./cache/session.tmp", s: "edit" }]
+      },
+      see: ["sudo chown -R student ./cache", "ls -l ./cache", "sudo chown -R www-data:www-data ./uploads"]
+    },
+    {
+      q: "把源码目录打包成 zip",
+      cmd: "zip -r src.zip ./src",
+      risk: "caution",
+      why: "会在当前目录生成一个新的 zip 文件。",
+      anno: [
+        { t: "zip", n: "打 zip 包。和 tar 的最大区别：zip 会同时压缩和归档，不用再记 z 这种字母。" },
+        { t: "-r", n: "递归。**打目录必须加**，否则 zip 会直接拒绝并告诉你原因。" },
+        { t: "src.zip", n: "归档文件名。不写 .zip 后缀时 zip 会自动补上。" },
+        { t: "./src", n: "要打包的目录。包里会保留 src/ 这一层。" }
+      ],
+      sim: {
+        scope: "当前目录", sudo: false, irreversible: false,
+        note: "新增一个 src.zip；原目录只读。",
+        tree: [{ p: "./src", s: "read" }, { p: "./src.zip", s: "add" }]
+      },
+      see: ["zip -r src.zip ./src && unzip -l src.zip", "tar -czf src.tar.gz ./src", "unzip -l src.zip"]
+    },
+    {
+      q: "把几个文件打成一个包",
+      cmd: "zip release.zip package.json notes.txt",
+      risk: "caution",
+      why: "生成新文件；同名包会被覆盖。",
+      anno: [
+        { t: "zip", n: "打 zip 包。" },
+        { t: "release.zip", n: "归档名。文件列表写在归档名后面。" },
+        { t: "package.json notes.txt", n: "要打的几个文件。打**文件**不需要 -r，只有打目录才需要。" }
+      ],
+      sim: {
+        scope: "当前目录", sudo: false, irreversible: false,
+        note: "新增 release.zip；两个源文件都不动。",
+        tree: [{ p: "./package.json", s: "read" }, { p: "./notes.txt", s: "read" }, { p: "./release.zip", s: "add" }]
+      },
+      see: ["zip -r release.zip ./src ./uploads", "unzip -l release.zip", "tar -czf release.tar.gz package.json notes.txt"]
+    },
+    {
+      q: "打包之后立刻核对包里有什么",
+      cmd: "zip -r src.zip ./src && unzip -l src.zip",
+      flow: "递归打包目录 → 成功才继续 → 列出包内清单",
+      risk: "caution",
+      why: "生成新文件；清单只读。",
+      anno: [
+        { t: "zip -r src.zip ./src", n: "递归打包 ./src 目录。" },
+        { t: "&&", n: "打包成功才去列清单。打包失败时继续列只会看到一堆没用的报错。" },
+        { t: "unzip -l src.zip", n: "-l 只列出内容、不解包。**打完包顺手核对一遍**，是避免「交上去才发现漏了文件」的最便宜的习惯。" }
+      ],
+      sim: {
+        scope: "当前目录", sudo: false, irreversible: false,
+        note: "新增一个 src.zip。",
+        tree: [{ p: "./src", s: "read" }, { p: "./src.zip", s: "add" }]
+      },
+      see: ["unzip -l src.zip", "tar -tzf src.tar.gz", "zip -r src.zip ./src"]
+    },
+    {
+      q: "把源码打包再解到一个干净的目录",
+      cmd: "zip -r s.zip ./src && mkdir -p restore && unzip s.zip -d restore",
+      flow: "打包 → 建目标目录 → 解包进去",
+      risk: "caution",
+      why: "生成一个 zip 和一个新目录，并往新目录里写入文件。",
+      anno: [
+        { t: "zip -r s.zip ./src", n: "先把目录打成包。" },
+        { t: "mkdir -p restore", n: "-p 表示父目录不存在就一起建、目录已存在也不报错。脚本里建目录基本都用它。" },
+        { t: "unzip s.zip -d restore", n: "-d 指定解到哪个目录。不加 -d 会直接解在当前目录，容易和已有文件混在一起。" }
+      ],
+      sim: {
+        scope: "当前目录与 restore/", sudo: false, irreversible: false,
+        note: "新增 s.zip 和 restore/ 目录；源目录不动。",
+        tree: [{ p: "./s.zip", s: "add" }, { p: "./restore/", s: "add" }, { p: "./restore/app.js", s: "add" }]
+      },
+      see: ["unzip -l s.zip", "unzip -o s.zip -d restore", "tar -xzf s.tar.gz -C restore"]
+    },
+    {
+      q: "看日志开头 20 行",
+      cmd: "head -n 20 /var/log/nginx/access.log",
+      risk: "safe",
+      why: "只读日志。",
+      anno: [
+        { t: "head", n: "取文件开头若干行。日志文件很大时，直接 cat 会刷爆终端。" },
+        { t: "-n 20", n: "取前 20 行。不写 -n 默认是 10 行。" },
+        { t: "/var/log/nginx/access.log", n: "nginx 访问日志。它的每行格式是：IP、时间、请求行、状态码、字节数、来源、UA。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不写入任何文件。",
+        tree: [{ p: "/var/log/nginx/access.log", s: "read" }]
+      },
+      see: ["tail -n 20 /var/log/nginx/access.log", "head -n 5 package.json", "sed -n '1,20p' /var/log/nginx/access.log"]
+    },
+    {
+      q: "把健康检查的噪音从日志里滤掉",
+      cmd: "grep -v '/health' /var/log/nginx/access.log | head -n 15",
+      flow: "读日志 → 丢掉包含 /health 的行 → 取前 15 行",
+      risk: "safe",
+      why: "只读日志。",
+      anno: [
+        { t: "grep -v", n: "-v 是 invert：**不**匹配的行才保留。查日志时它比正向匹配更常用——因为噪音总是占大多数。" },
+        { t: "'/health'", n: "要排除的内容。" },
+        { t: "/var/log/nginx/access.log", n: "日志文件。" },
+        { t: "head -n 15", n: "滤完还是会很长，只取前 15 行。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只读日志，不写入任何文件。",
+        tree: [{ p: "/var/log/nginx/access.log", s: "read" }]
+      },
+      see: ["grep -c '/api/health' /var/log/nginx/access.log", "grep -v '/health' /var/log/nginx/access.log | wc -l", "awk '{print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head"]
+    },
+    {
+      q: "忽略大小写搜索错误",
+      cmd: "grep -i 'error' /var/log/nginx/error.log | head -n 3",
+      risk: "safe",
+      why: "只读日志。",
+      anno: [
+        { t: "grep -i", n: "-i 忽略大小写：Error、ERROR、error 都能匹配上。查日志时几乎总该加它。" },
+        { t: "'error'", n: "要找的内容。" },
+        { t: "/var/log/nginx/error.log", n: "nginx 错误日志。" },
+        { t: "head -n 3", n: "只看前 3 条，先确认格式对不对。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只读取日志，不修改任何内容。",
+        tree: [{ p: "/var/log/nginx/error.log", s: "read" }]
+      },
+      see: ["grep -in 'error' /var/log/nginx/error.log | tail -n 10", "grep -c 'error' /var/log/nginx/error.log", "tail -n 20 /var/log/nginx/error.log"]
+    },
+    {
+      q: "看最新的错误日志",
+      cmd: "tail -n 20 /var/log/nginx/error.log",
+      risk: "safe",
+      why: "只读日志。",
+      anno: [
+        { t: "tail", n: "取文件末尾若干行——排障时看的是**最近**发生了什么，所以 tail 比 head 用得多。" },
+        { t: "-n 20", n: "取最后 20 行。" },
+        { t: "/var/log/nginx/error.log", n: "nginx 错误日志。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不写入。想持续盯着新日志用 tail -f。",
+        tree: [{ p: "/var/log/nginx/error.log", s: "read" }]
+      },
+      see: ["tail -f /var/log/nginx/error.log", "tail -n 50 /var/log/nginx/error.log", "journalctl -u nginx -n 50"]
+    },
+    {
+      q: "看目录里文件的大小（带单位）",
+      cmd: "ls -lh uploads/",
+      risk: "safe",
+      why: "只读目录信息。",
+      anno: [
+        { t: "ls", n: "列出目录内容。" },
+        { t: "-lh", n: "-l 长格式，-h 把字节数换成人看的 K/M/G。**没有 -h 的话，184007 和 73007 这两个数字很难一眼比出大小。**" },
+        { t: "uploads/", n: "目标目录。目录名末尾加斜杠可以避免和同名文件混淆。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不修改任何东西。",
+        tree: [{ p: "./uploads/", s: "read" }]
+      },
+      see: ["ls -lah uploads/", "du -sh uploads/", "stat uploads/avatar.png"]
+    },
+    {
+      q: "连隐藏文件一起列出来",
+      cmd: "ls -la",
+      risk: "safe",
+      why: "只读目录信息。",
+      anno: [
+        { t: "ls", n: "列出目录内容。" },
+        { t: "-la", n: "-a 连以点开头的隐藏文件也列出来，-l 长格式。**排查「为什么这里有个配置」时，十有八九答案在隐藏文件里。**" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不修改任何东西。",
+        tree: [{ p: "./", s: "read" }]
+      },
+      see: ["ls -la uploads/", "ls -l", "find . -maxdepth 1 -type f"]
+    },
+    {
+      q: "看文件系统类型和容量",
+      cmd: "df -hT",
+      risk: "safe",
+      why: "只读挂载点信息。",
+      anno: [
+        { t: "df", n: "disk free：各挂载点的使用情况。" },
+        { t: "-hT", n: "-h 人类可读单位，-T 多显示一列文件系统类型（ext4、xfs、tmpfs……）。查「这台机器的盘是什么格式」就看它。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "不写任何东西。",
+        tree: [{ p: "挂载点信息", s: "read" }]
+      },
+      see: ["df -h", "df -i", "mount | column -t"]
+    },
+    {
+      q: "看某个目录总共占多大",
+      cmd: "du -sh node_modules",
+      risk: "safe",
+      why: "只统计大小，需要遍历该目录。",
+      anno: [
+        { t: "du", n: "disk usage：统计目录/文件的磁盘占用。" },
+        { t: "-sh", n: "-s 只输出一个总计，不把每个子目录都列出来；-h 用 K/M/G 显示。" },
+        { t: "node_modules", n: "目标目录。依赖目录通常是项目里最占地方的那个。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只统计，不修改。",
+        tree: [{ p: "./node_modules", s: "read" }]
+      },
+      see: ["du -sh * | sort -rh", "du -ah . | sort -rh | head -n 10", "df -h"]
+    },
+    {
+      q: "看已经建立起来的连接",
+      cmd: "ss -tnp state established",
+      risk: "caution",
+      why: "只是查看，但要看别人的进程名需要管理员权限。",
+      anno: [
+        { t: "ss", n: "查看网络连接，netstat 的替代品。" },
+        { t: "-tnp", n: "-t 只看 TCP，-n 不做名称解析（更快更准），-p 显示占用连接的进程。" },
+        { t: "state established", n: "过滤条件：只看已经建立（正在通信）的连接。想只看监听中的用 ss -lntp。" }
+      ],
+      sim: {
+        scope: "只读", sudo: false, irreversible: false,
+        note: "只查询内核连接表。",
+        tree: [{ p: "连接表", s: "read" }]
+      },
+      see: ["ss -lntp", "ss -s", "sudo ss -tnp state established"]
     }
   ]
 };
@@ -3023,6 +3700,9 @@ window.NL2SH_SBX_CMDS = (function () {
         var abs = resolve(ctx, t);
         var node = ctx.fs.get(abs);
         if (!node) { ctx.err('tar: ' + t + ': Cannot stat: No such file or directory\n'); missing = true; return; }
+        /* 目标是单个文件时，条目名就是文件名本身。
+           原先直接走 walk + p.slice(rootLen)，对文件会切出一个空名字。 */
+        if (node.t === 'f') { entries.push(H.baseName(abs)); bytes += node.size || 0; return; }
         var rootLen = abs === '/' ? 1 : abs.length + 1;
         ctx.fs.walk(abs, function (p, n) {
           if (p === abs && targets.length === 1 && node.t === 'd') return;
@@ -3066,15 +3746,281 @@ window.NL2SH_SBX_CMDS = (function () {
   };
   CMDS.tar.usage = 'tar -czf 归档.tar.gz 目录';
 
-  CMDS.unzip = function (ctx) {
-    ctx.simulated = true;
-    var a = parseArgs(ctx.argv.slice(1), ['l', 'o'], ['d']);
-    var z = ctx.fs.get(resolve(ctx, a.args[0] || ''));
-    if (!z) { ctx.err('unzip: 找不到 ' + (a.args[0] || '') + '\n'); ctx.setCode(9); return; }
-    ctx.out('（沙箱里没有真实的 zip 解码器，这里只做占位）\n');
+  /* ── sed：只实现最常用的两种脚本 ─────────────────────
+     s/旧/新/[gi]   替换；-i 就地改（可带备份后缀，如 -i.bak）
+     -n /模式/p     只打印匹配的行
+     模式按 ERE 解释（和 grep -E 一致），分组写 ( ) 而不是 \( \)；
+     替换串里 \1..\9 与 & 照常可用。 */
+  CMDS.sed = function (ctx) {
+    var argv = ctx.argv.slice(1);
+    var inPlace = false, backup = null, quiet = false, script = null, files = [];
+    for (var i = 0; i < argv.length; i++) {
+      var a = argv[i];
+      if (a === '-n' || a === '--quiet' || a === '--silent') { quiet = true; continue; }
+      if (a === '-E' || a === '-r' || a === '--regexp-extended') { continue; }
+      if (a === '-i') { inPlace = true; continue; }
+      if (a.indexOf('-i') === 0) { inPlace = true; backup = a.slice(2); continue; }
+      if (a === '--') { files = files.concat(argv.slice(i + 1)); break; }
+      if (a.charAt(0) === '-' && a.length > 1) { continue; }
+      if (script === null) { script = a; continue; }
+      files.push(a);
+    }
+    if (script === null) { ctx.err('sed: 缺少脚本\n'); ctx.setCode(1); return; }
+
+    var subst = null, printRe = null;
+    if (script.charAt(0) === 's') {
+      var parts = splitSed(script.slice(2), script.charAt(1));
+      if (parts.length < 2) { ctx.err('sed: 替换表达式不完整：' + script + '\n'); ctx.setCode(1); return; }
+      subst = { pat: parts[0], rep: parts[1], flags: parts[2] || '' };
+    } else if (script.charAt(0) === '/') {
+      var end = script.lastIndexOf('/');
+      if (end <= 0 || script.slice(end + 1) !== 'p') {
+        ctx.err('sed: 沙箱只实现了 s/旧/新/ 与 -n /模式/p\n'); ctx.setCode(2); return;
+      }
+      printRe = script.slice(1, end);
+    } else {
+      ctx.err('sed: 沙箱只实现了 s/旧/新/ 与 -n /模式/p（暂不支持 d / a / i / y 等脚本）\n');
+      ctx.setCode(2);
+      return;
+    }
+
+    var jsFlags = '';
+    if (subst) {
+      if (subst.flags.indexOf('g') >= 0) jsFlags += 'g';
+      if (subst.flags.indexOf('i') >= 0) jsFlags += 'i';
+      if (subst.flags.indexOf('p') >= 0) quiet = true;      /* s///p：只打印改动过的行 */
+    }
+    var repJs = subst ? sedRepToJs(subst.rep) : '';
+
+    var inputs = files.length ? files : [null];             /* 没有文件参数就读管道 */
+    var touched = 0, failed = false;
+
+    inputs.forEach(function (f) {
+      var text, path = null, node = null;
+      if (f === null) { text = String(ctx.stdin || ''); }
+      else {
+        path = resolve(ctx, f);
+        node = ctx.fs.get(path);
+        /* 自己检查，不走 readFile —— 那样报错会顶着别的命令名，误导人 */
+        if (!node) { ctx.err('sed: ' + f + ': No such file or directory\n'); ctx.setCode(2); failed = true; return; }
+        if (node.t === 'd') { ctx.err('sed: read error on ' + f + ': Is a directory\n'); ctx.setCode(2); failed = true; return; }
+        if (!ctx.can(node, 'r', ctx.euid)) {
+          ctx.err("sed: can't read " + f + ': Permission denied\n');
+          ctx.setCode(2);
+          failed = true;
+          return;
+        }
+        text = String(node.data == null ? '' : node.data);
+      }
+      touched++;
+
+      var endedWithNL = /\n$/.test(text);
+      var lines = text.split('\n');
+      if (endedWithNL) lines.pop();
+
+      var outLines = [];
+      lines.forEach(function (line) {
+        var result = line, changed = false;
+        if (subst) {
+          result = line.replace(new RegExp(subst.pat, jsFlags), repJs);
+          changed = result !== line;
+        }
+        if (quiet) {
+          if (printRe !== null) {
+            if (new RegExp(printRe).test(line)) outLines.push(result);
+          } else if (changed) {
+            outLines.push(result);
+          }
+          return;
+        }
+        outLines.push(result);
+      });
+
+      var newText = outLines.join('\n');
+      if (endedWithNL && outLines.length) newText += '\n';
+
+      if (!inPlace) { ctx.out(newText); return; }
+
+      if (path === null) { ctx.err('sed: -i 不能用于标准输入\n'); ctx.setCode(1); failed = true; return; }
+      if (!ctx.can(node, 'w', ctx.euid)) {
+        ctx.err("sed: can't write " + f + ': Permission denied\n');
+        ctx.setCode(2);
+        failed = true;
+        return;
+      }
+      if (backup) {
+        var bpath = path + backup;
+        if (ctx.canWritePath(ctx.fs, bpath, ctx.euid).ok) {
+          ctx.fs.writeFile(bpath, text, { uid: node.uid, mode: node.mode });
+        }
+      }
+      ctx.fs.writeFile(path, newText);
+    });
+
+    if (failed) ctx.setCode(2);
+    else if (!touched) ctx.setCode(2);
   };
-  CMDS.unzip.usage = 'unzip 归档.zip';
-  CMDS.unzip.simulated = true;
+  CMDS.sed.usage = "sed [-i[后缀]] 's/旧/新/[gi]' [文件...]";
+
+  /* s 后面那个字符就是分隔符，所以 s|旧|新| 也合法；\<分隔符> 表示字面量 */
+  function splitSed(str, d) {
+    var out = [], cur = '';
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charAt(i);
+      if (c === '\\' && i + 1 < str.length) {
+        var n = str.charAt(i + 1);
+        if (n === d) { cur += d; i++; continue; }
+        cur += c + n; i++; continue;
+      }
+      if (c === d) { out.push(cur); cur = ''; continue; }
+      cur += c;
+    }
+    out.push(cur);
+    return out;
+  }
+
+  /* sed 的替换串 → JS 的替换串：& 是整个匹配，\1..\9 是分组 */
+  function sedRepToJs(rep) {
+    var out = '';
+    for (var i = 0; i < rep.length; i++) {
+      var c = rep.charAt(i);
+      if (c === '\\' && i + 1 < rep.length) {
+        var n = rep.charAt(i + 1);
+        if (n >= '0' && n <= '9') { out += '$' + n; i++; continue; }
+        if (n === '&') { out += '&'; i++; continue; }
+        if (n === '\\') { out += '\\'; i++; continue; }
+        out += n; i++; continue;
+      }
+      if (c === '&') { out += '$&'; continue; }
+      if (c === '$') { out += '$$'; continue; }
+      out += c;
+    }
+    return out;
+  }
+
+  /* ── chown：只有 root 能改属主（沙箱不跟踪属组）──────── */
+  CMDS.chown = function (ctx) {
+    var a = parseArgs(ctx.argv.slice(1), ['R', 'v', 'h', 'f'], []);
+    if (a.args.length < 2) { ctx.err('chown: missing operand\n'); ctx.setCode(1); return; }
+    var spec = a.args[0], targets = a.args.slice(1);
+
+    if (spec.indexOf(':') >= 0 || spec.indexOf('.') >= 0) {
+      ctx.err('chown: 沙箱只跟踪属主、不跟踪属组，请只写用户名\n');
+      ctx.setCode(2);
+      return;
+    }
+    var uid;
+    if (spec === 'root') uid = 0;
+    else if (spec === 'student') uid = 1000;
+    else { ctx.err("chown: invalid user: '" + spec + "'\n"); ctx.setCode(1); return; }
+
+    if (ctx.euid !== 0) {
+      ctx.err("chown: changing ownership of '" + targets[0] + "': Operation not permitted\n");
+      ctx.setCode(1);
+      return;
+    }
+
+    var changed = [];
+    targets.forEach(function (t) {
+      var path = resolve(ctx, t);
+      var node = ctx.fs.get(path);
+      if (!node) { ctx.err("chown: cannot access '" + t + "': No such file or directory\n"); ctx.setCode(1); return; }
+      if (a.flags.R) ctx.fs.walk(path, function (p, n) { n.uid = uid; changed.push(p); });
+      else { node.uid = uid; changed.push(path); }
+    });
+    if (a.flags.v) changed.forEach(function (p) {
+      ctx.out("ownership of '" + p + "' changed to " + spec + '\n');
+    });
+  };
+  CMDS.chown.usage = 'chown [-R] 用户 路径...';
+
+  /* ── zip / unzip：和 tar 一样，归档内容由沙箱自己记账 ── */
+  CMDS.zip = function (ctx) {
+    var H = ctx.helpers;
+    var a = parseArgs(ctx.argv.slice(1), ['r', 'q', 'j'], []);
+    if (a.args.length < 2) { ctx.err('zip: 用法：zip [-r] 归档.zip 路径...\n'); ctx.setCode(1); return; }
+
+    var fname = a.args[0];
+    if (!/\.zip$/.test(fname)) fname += '.zip';
+    var targets = a.args.slice(1);
+    var path = resolve(ctx, fname);
+
+    var entries = [], bytes = 0, bad = false;
+    targets.forEach(function (t) {
+      var abs = resolve(ctx, t);
+      var node = ctx.fs.get(abs);
+      if (!node) { ctx.err('zip: ' + t + ': No such file or directory\n'); bad = true; return; }
+      if (node.t === 'd' && !a.flags.r) {
+        ctx.err('zip: ' + t + ' is a directory（要加 -r 才会递归）\n');
+        bad = true;
+        return;
+      }
+      /* 单个文件：条目名就是文件名（和 tar 同一个坑） */
+      if (node.t === 'f') { entries.push(H.baseName(abs)); bytes += node.size || 0; return; }
+      var rootLen = abs === '/' ? 1 : abs.length + 1;
+      ctx.fs.walk(abs, function (p, n) {
+        if (p === abs && targets.length === 1 && node.t === 'd') return;
+        entries.push(abs === '/' ? p.slice(1) : p.slice(rootLen));
+        if (n.t === 'f') bytes += n.size || 0;
+      });
+    });
+    if (bad) { ctx.setCode(1); return; }
+
+    var perm = ctx.canWritePath(ctx.fs, path, ctx.euid);
+    if (!perm.ok) { ctx.err('zip: ' + fname + ': Permission denied\n'); ctx.setCode(2); return; }
+
+    ctx.fs.writeFile(path, '', { uid: ctx.euid === 0 ? 0 : 1000 });
+    var created = ctx.fs.get(path);
+    created.size = Math.max(256, Math.round(bytes * 0.45));   /* deflate 大致同量级 */
+    created.data = null;
+    created.zipEntries = entries.slice(0, 500);
+    if (!a.flags.q) entries.forEach(function (e) { ctx.out('  adding: ' + e + '\n'); });
+    ctx.out('（沙箱生成的 zip：' + entries.length + ' 项，未压缩 ' + H.fmtSize(bytes) +
+      ' → 归档 ' + H.fmtSize(created.size) + '）\n');
+  };
+  CMDS.zip.usage = 'zip [-r] 归档.zip 路径...';
+
+  CMDS.unzip = function (ctx) {
+    var H = ctx.helpers;
+    var a = parseArgs(ctx.argv.slice(1), ['l', 'o', 'q'], ['d']);
+    if (!a.args.length) { ctx.err('unzip: 用法：unzip [-l] [-d 目录] 归档.zip\n'); ctx.setCode(1); return; }
+
+    var path = resolve(ctx, a.args[0]);
+    var node = ctx.fs.get(path);
+    if (!node) { ctx.err('unzip: cannot find or open ' + a.args[0] + '\n'); ctx.setCode(9); return; }
+    if (!node.zipEntries) { ctx.err('unzip: 这个归档不是沙箱生成的，解不开\n'); ctx.setCode(9); return; }
+
+    if (a.flags.l) {
+      ctx.out('Archive:  ' + H.baseName(path) + '\n' +
+        '  Length      Name\n' +
+        '---------  ----------\n');
+      node.zipEntries.forEach(function (e) { ctx.out('        0  ' + e + '\n'); });
+      ctx.out('---------  ----------\n' + node.zipEntries.length + ' files\n');
+      return;
+    }
+
+    var dest = a.values.d ? resolve(ctx, a.values.d) : ctx.cwd();
+    if (a.values.d && !ctx.fs.isDir(dest)) ctx.fs.mkdirp(dest, { uid: ctx.euid === 0 ? 0 : 1000 });
+    if (!ctx.canWritePath(ctx.fs, dest + '/x', ctx.euid).ok) {
+      ctx.err('unzip: ' + (a.values.d || '.') + ': Permission denied\n');
+      ctx.setCode(2);
+      return;
+    }
+
+    var skipped = 0, wrote = 0;
+    node.zipEntries.forEach(function (e) {
+      var target = resolve(ctx, dest + '/' + e);
+      ctx.fs.mkdirp(H.dirName(target), { uid: ctx.euid === 0 ? 0 : 1000 });
+      if (ctx.fs.isDir(target)) return;
+      if (ctx.fs.exists(target) && !a.flags.o) { skipped++; return; }
+      ctx.fs.writeFile(target, '', { uid: ctx.euid === 0 ? 0 : 1000 });
+      if (!a.flags.q) ctx.out('  inflating: ' + e + '\n');
+      wrote++;
+    });
+    ctx.out('（沙箱解出 ' + wrote + ' 项' +
+      (skipped ? '，跳过已存在的 ' + skipped + ' 项（加 -o 可覆盖）' : '') + '，文件内容为空占位）\n');
+  };
+  CMDS.unzip.usage = 'unzip [-l] [-d 目录] 归档.zip';
 
   CMDS.help = function (ctx) {
     ctx.out('沙箱实现了这些命令：\n');
@@ -3103,10 +4049,10 @@ window.NL2SH_SBX_CMDS = (function () {
 /* nl2sh · 浏览器沙箱引擎
  *
  * 一个跑在前端的内存文件系统 + 迷你 shell。它不是 Linux 内核，但实现了
- * find / ls / du / rm / chmod / grep / sort / xargs / awk / tar 这些命令的
- * 真实语义：路径解析、管道、重定向、退出码、属主与权限检查、递归副作用。
+ * find / ls / du / rm / chmod / chown / grep / sort / xargs / awk / sed / tar / zip
+ * 这些命令的真实语义：路径解析、管道、重定向、退出码、属主与权限检查、递归副作用。
  * 目的是让"执行前推演"从模型的猜测变成可验证的事实：命令真的跑一遍，
- * 文件树真的变化，然后可以一键回到执行前。
+ * 文件树真的变化（快照里带内容指纹，所以同长度的替换也看得见），然后可以一键回到执行前。
  *
  * 明确不做的：所有依赖内核与 systemd 的东西（systemctl / journalctl / ss / ps /
  * cwebp）走内置桩，输出由固定场景生成，UI 上会标注"模拟输出"，不假装是真的。
@@ -3261,11 +4207,22 @@ window.NL2SH_SANDBOX = (function () {
   };
 
   /* ── 快照与 diff ──────────────────────────────────── */
+  /* 便宜的内容指纹：只用来判断"内容变没变"。
+     没有它，同样长度的替换（例如 sed 's/todo/done/'）在 diff 里是隐形的，
+     而"跑完之后文件到底变没变"正是这个沙箱要回答的核心问题。 */
+  function contentSig(n) {
+    if (n.t !== 'f' || typeof n.data !== 'string' || !n.data.length) return '';
+    if (n.data.length > 200000) return '';      // 大文件跳过，避免每次快照都哈希一遍
+    var h = 5381;
+    for (var i = 0; i < n.data.length; i++) h = ((h << 5) + h + n.data.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(16);
+  }
+
   function manifest(fs) {
     var m = {};
     for (var k in fs.nodes) {
       var n = fs.nodes[k];
-      m[k] = { t: n.t, size: n.size || 0, mode: n.mode, uid: n.uid };
+      m[k] = { t: n.t, size: n.size || 0, mode: n.mode, uid: n.uid, sig: contentSig(n) };
     }
     return m;
   }
@@ -3276,7 +4233,7 @@ window.NL2SH_SANDBOX = (function () {
     for (k in after) {
       if (!before[k]) out.push({ path: k, kind: 'add', t: after[k].t });
       else if (before[k].size !== after[k].size || before[k].mode !== after[k].mode ||
-               before[k].uid !== after[k].uid) {
+               before[k].uid !== after[k].uid || before[k].sig !== after[k].sig) {
         out.push({ path: k, kind: 'chg', t: after[k].t, size: after[k].size, mode: after[k].mode });
       }
     }
@@ -4225,6 +5182,478 @@ window.NL2SH_AI = (function () {
 
 </script>
 <script>
+/* assets/fx.js */
+/* nl2sh · 粒子引擎
+ *
+ * 设计原则：粒子必须承载信息，不做装饰。
+ *   · 环境字符场 —— 粒子是终端字符（> _ $ | 0 1），不是圆点；连线编码邻近关系
+ *   · 管道粒子流 —— 沿命令从左向右流动，"经过"某个零件时点亮，表达管道语义
+ *   · 执行爆散   —— 沙箱真跑时粒子从按钮放射，撤销时反向回流
+ *
+ * 性能与可访问性：
+ *   · DPR 上限 2，粒子数按面积估算并封顶
+ *   · 页面隐藏 / canvas 离开视口时暂停
+ *   · prefers-reduced-motion 下只画一帧静态画面，不起循环
+ */
+window.NL2SH_FX = (function () {
+  'use strict';
+
+  /* 只用命令行的字符，和主题同源 */
+  var GLYPHS = ['>', '_', '$', '|', '/', '~', '#', '0', '1', '{', '}', '[', ']', ':', ';', '+', '=', '*', '-'];
+
+  var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  function themeColors(el) {
+    var cs = getComputedStyle(el || document.documentElement);
+    function pick(name, fallback) {
+      var v = (cs.getPropertyValue(name) || '').trim();
+      return v || fallback;
+    }
+    return {
+      dot: pick('--signal', '#0b6ba8'),
+      line: pick('--rule-strong', '#93aabd'),
+      glyph: pick('--ink-3', '#7e97ad'),
+      warn: pick('--caution', '#a8640a'),
+      bad: pick('--danger', '#b33325'),
+      safe: pick('--safe', '#0d7466')
+    };
+  }
+
+  function dpr() { return Math.min(window.devicePixelRatio || 1, 2); }
+
+  function fitCanvas(canvas) {
+    var rect = canvas.getBoundingClientRect();
+    var r = dpr();
+    var w = Math.max(1, Math.round(rect.width));
+    var h = Math.max(1, Math.round(rect.height));
+    if (canvas.width !== w * r || canvas.height !== h * r) {
+      canvas.width = w * r;
+      canvas.height = h * r;
+    }
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    return { w: w, h: h, ctx: ctx };
+  }
+
+  /* ── 环境字符场（铺满视口，垫在内容下面）──────────────── */
+  function Field(canvas) {
+    this.canvas = canvas;
+    this.colors = themeColors();
+    this.particles = [];
+    this.bursts = [];
+    this.pointer = { x: -9999, y: -9999, active: false };
+    this.running = false;
+    this.visible = true;
+    this.raf = 0;
+    this.last = 0;
+
+    var self = this;
+    this._measure();
+    this._seed();
+    this._drawOnce();          // 先出一帧：首屏不空白，rAF 迟到也不影响观感
+    this._bind();
+    this.start();
+
+    window.addEventListener('resize', function () { self._debouncedResize(); }, { passive: true });
+  }
+
+  Field.prototype._measure = function () {
+    var m = fitCanvas(this.canvas);
+    this.w = m.w;
+    this.h = m.h;
+    this.ctx = m.ctx;
+  };
+
+  Field.prototype._count = function () {
+    var area = this.w * this.h;
+    var n = Math.round(area * 0.000088);           // 面积密度
+    var cap = this.w < 700 ? 46 : 130;             // 移动端降量
+    return Math.max(20, Math.min(cap, n));
+  };
+
+  Field.prototype._seed = function () {
+    var n = this._count();
+    this.particles = [];
+    for (var i = 0; i < n; i++) this.particles.push(this._spawn());
+  };
+
+  Field.prototype._spawn = function () {
+    var isGlyph = Math.random() < 0.34;
+    return {
+      x: Math.random() * this.w,
+      y: Math.random() * this.h,
+      vx: (Math.random() - 0.5) * 0.34,
+      vy: (Math.random() - 0.5) * 0.34,
+      r: isGlyph ? 11 + Math.random() * 5 : 1.1 + Math.random() * 1.5,
+      a: 0.20 + Math.random() * 0.34,
+      glyph: isGlyph ? GLYPHS[(Math.random() * GLYPHS.length) | 0] : '',
+      isGlyph: isGlyph
+    };
+  };
+
+  Field.prototype._bind = function () {
+    var self = this;
+    window.addEventListener('pointermove', function (e) {
+      self.pointer.x = e.clientX;
+      self.pointer.y = e.clientY;
+      self.pointer.active = true;
+    }, { passive: true });
+    window.addEventListener('pointerleave', function () { self.pointer.active = false; }, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) self.pause(); else self.start();
+    });
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function () { self._debouncedResize(); });
+      ro.observe(document.documentElement);
+    }
+  };
+
+  Field.prototype._debouncedResize = function () {
+    var self = this;
+    clearTimeout(this._rz);
+    this._rz = setTimeout(function () {
+      var ratioChanged = Math.abs(self.w - document.documentElement.clientWidth) > 4;
+      self._measure();
+      if (ratioChanged || self.particles.length !== self._count()) self._seed();
+      self._drawOnce();
+    }, 140);
+  };
+
+  Field.prototype.setTheme = function () {
+    this.colors = themeColors();
+    this._drawOnce();
+  };
+
+  Field.prototype.burst = function (x, y, opts) {
+    opts = opts || {};
+    var n = opts.count || 16;
+    var power = opts.power || 2.6;
+    var glyphs = opts.glyphs || GLYPHS;
+    for (var i = 0; i < n; i++) {
+      var ang = (Math.PI * 2 * i) / n + Math.random() * 0.5;
+      var sp = power * (0.4 + Math.random() * 0.8);
+      this.bursts.push({
+        x: x, y: y,
+        vx: Math.cos(ang) * sp,
+        vy: Math.sin(ang) * sp,
+        life: 1,
+        decay: 0.014 + Math.random() * 0.016,
+        glyph: Math.random() < 0.5 ? glyphs[(Math.random() * glyphs.length) | 0] : '',
+        color: opts.color || this.colors.dot,
+        r: 1 + Math.random() * 1.6
+      });
+    }
+    if (!REDUCED) this.start();
+  };
+
+  Field.prototype.start = function () {
+    if (REDUCED) { this._drawOnce(); return; }
+    if (this.running || document.hidden) return;
+    this.running = true;
+    var self = this;
+    this.last = performance.now();
+    (function loop(now) {
+      if (!self.running) return;
+      var dt = Math.min(34, now - self.last);
+      self.last = now;
+      self._step(dt);
+      self._draw();
+      self.raf = requestAnimationFrame(loop);
+    })(this.last);
+  };
+
+  Field.prototype.pause = function () {
+    this.running = false;
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = 0;
+  };
+
+  Field.prototype._step = function (dt) {
+    var f = dt / 16.67;
+    for (var i = 0; i < this.particles.length; i++) {
+      var p = this.particles[i];
+      p.x += p.vx * f;
+      p.y += p.vy * f;
+
+      /* 指针排斥：让场对鼠标有反应，但很轻 */
+      if (this.pointer.active) {
+        var dx = p.x - this.pointer.x, dy = p.y - this.pointer.y;
+        var d2 = dx * dx + dy * dy;
+        if (d2 < 13000 && d2 > 1) {
+          var d = Math.sqrt(d2);
+          var push = (1 - d / 114) * 0.34;
+          p.x += (dx / d) * push * f;
+          p.y += (dy / d) * push * f;
+        }
+      }
+
+      if (p.x < -20) p.x = this.w + 20;
+      if (p.x > this.w + 20) p.x = -20;
+      if (p.y < -20) p.y = this.h + 20;
+      if (p.y > this.h + 20) p.y = -20;
+    }
+    for (var b = this.bursts.length - 1; b >= 0; b--) {
+      var q = this.bursts[b];
+      q.x += q.vx * f; q.y += q.vy * f;
+      q.vx *= 0.965; q.vy *= 0.965;
+      q.life -= q.decay * f;
+      if (q.life <= 0) this.bursts.splice(b, 1);
+    }
+  };
+
+  Field.prototype._draw = function () {
+    var ctx = this.ctx, c = this.colors;
+    ctx.clearRect(0, 0, this.w, this.h);
+
+    var ps = this.particles;
+    /* 邻近连线：先画线，让点和字符盖在上面 */
+    if (this.w >= 700) {
+      ctx.lineWidth = 1;
+      var limit = 138, limit2 = limit * limit;
+      for (var i = 0; i < ps.length; i++) {
+        for (var j = i + 1; j < ps.length; j++) {
+          var dx = ps[i].x - ps[j].x, dy = ps[i].y - ps[j].y;
+          var d2 = dx * dx + dy * dy;
+          if (d2 > limit2) continue;
+          var t = 1 - d2 / limit2;
+          ctx.strokeStyle = c.line;
+          ctx.globalAlpha = t * 0.16;
+          ctx.beginPath();
+          ctx.moveTo(ps[i].x, ps[i].y);
+          ctx.lineTo(ps[j].x, ps[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    for (var k = 0; k < ps.length; k++) {
+      var p = ps[k];
+      if (p.isGlyph) {
+        ctx.globalAlpha = p.a * 0.8;
+        ctx.fillStyle = c.glyph;
+        ctx.font = '500 ' + Math.round(p.r) + 'px Consolas, "Cascadia Mono", monospace';
+        ctx.fillText(p.glyph, p.x, p.y);
+      } else {
+        ctx.globalAlpha = p.a;
+        ctx.fillStyle = c.dot;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+        ctx.fill();
+      }
+    }
+
+    for (var b = 0; b < this.bursts.length; b++) {
+      var q = this.bursts[b];
+      ctx.globalAlpha = Math.max(0, q.life) * 0.85;
+      ctx.fillStyle = q.color;
+      if (q.glyph) {
+        ctx.font = '600 11px Consolas, "Cascadia Mono", monospace';
+        ctx.fillText(q.glyph, q.x, q.y);
+      } else {
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, q.r * q.life, 0, 6.2832);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  Field.prototype._drawOnce = function () {
+    this._measure();
+    this._draw();
+  };
+
+  /* ── 管道粒子流（沿命令从左往右）──────────────────────
+     这就是"管道"的物理隐喻：数据从左边流进，从右边流出。
+     经过某个零件（token）的横向范围时，粒子提亮。 */
+  function Flow(canvas, opts) {
+    this.canvas = canvas;
+    this.getBand = opts.getBand;
+    this.tokens = opts.getTokens || function () { return []; };
+    this.colors = themeColors();
+    this.parts = [];
+    this.running = false;
+    this.raf = 0;
+    this.acc = 0;
+
+    var self = this;
+    this._measure();
+    this._prime();             // 预置粒子铺在管道上，首帧就能看到流动带
+    this._drawOnce();
+    window.addEventListener('resize', function () { self._measure(); self._prime(); self._drawOnce(); }, { passive: true });
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function () { self._measure(); self._drawOnce(); });
+      ro.observe(canvas.parentElement || canvas);
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) self.pause(); else self.start();
+    });
+    this.start();
+  }
+
+  /** 沿管道铺一批粒子（位置随机），让静态首帧也有内容 */
+  Flow.prototype._prime = function () {
+    var band = this._band();
+    if (!band || band.right <= band.left) return;
+    this.parts = [];
+    for (var i = 0; i < 26; i++) {
+      this.parts.push({
+        x: band.left + Math.random() * (band.right - band.left),
+        y: band.y + (Math.random() - 0.5) * 18,
+        v: 1.0 + Math.random() * 1.7,
+        a: 0.34 + Math.random() * 0.46,
+        glyph: Math.random() < 0.42 ? GLYPHS[(Math.random() * GLYPHS.length) | 0] : '',
+        life: 1
+      });
+    }
+  };
+
+  Flow.prototype._measure = function () {
+    var m = fitCanvas(this.canvas);
+    this.w = m.w; this.h = m.h; this.ctx = m.ctx;
+  };
+
+  Flow.prototype._band = function () {
+    if (!this.getBand) return null;
+    var host = this.canvas.parentElement;
+    if (!host) return null;
+    var hr = host.getBoundingClientRect();
+    var br = this.getBand().getBoundingClientRect();
+    if (!br.width) return null;
+    return { left: br.left - hr.left, right: br.right - hr.left, y: br.top - hr.top + br.height / 2 };
+  };
+
+  Flow.prototype._tokenSpans = function () {
+    var host = this.canvas.parentElement;
+    if (!host) return [];
+    var hr = host.getBoundingClientRect();
+    return this.tokens().map(function (el) {
+      var r = el.getBoundingClientRect();
+      return { l: r.left - hr.left, r: r.right - hr.left, hot: el.classList.contains('is-lit') };
+    });
+  };
+
+  Flow.prototype.start = function () {
+    if (REDUCED) { this._drawOnce(); return; }
+    if (this.running || document.hidden) return;
+    this.running = true;
+    var self = this;
+    (function loop() {
+      if (!self.running) return;
+      self._step();
+      self._draw();
+      self.raf = requestAnimationFrame(loop);
+    })();
+  };
+
+  Flow.prototype.pause = function () {
+    this.running = false;
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = 0;
+  };
+
+  Flow.prototype.setTheme = function () { this.colors = themeColors(); this._drawOnce(); };
+
+  Flow.prototype._step = function () {
+    var band = this._band();
+    if (!band) return;
+    this.acc += 1;
+    if (this.acc % 5 === 0) {
+      this.parts.push({
+        x: band.left - 8,
+        y: band.y + (Math.random() - 0.5) * 18,
+        v: 1.0 + Math.random() * 1.7,
+        a: 0.34 + Math.random() * 0.46,
+        glyph: Math.random() < 0.42 ? GLYPHS[(Math.random() * GLYPHS.length) | 0] : '',
+        life: 1
+      });
+    }
+    for (var i = this.parts.length - 1; i >= 0; i--) {
+      var p = this.parts[i];
+      p.x += p.v;
+      if (p.x > band.right + 12) { this.parts.splice(i, 1); continue; }
+      if (p.life < 1) p.life = Math.min(1, p.life + 0.08);
+    }
+  };
+
+  Flow.prototype._draw = function () {
+    var ctx = this.ctx, c = this.colors;
+    ctx.clearRect(0, 0, this.w, this.h);
+    var band = this._band();
+    if (!band) return;
+    var spans = this._tokenSpans();
+
+    for (var i = 0; i < this.parts.length; i++) {
+      var p = this.parts[i];
+      var hot = false;
+      for (var s = 0; s < spans.length; s++) {
+        if (p.x >= spans[s].l && p.x <= spans[s].r) { hot = true; break; }
+      }
+      var alpha = p.a * p.life * (hot ? 1 : 0.62);
+      var color = hot ? c.warn : c.dot;
+
+      /* 拖尾：固定长度线段，读起来就是"在流动" */
+      var trail = p.v * 9;
+      ctx.globalAlpha = alpha * 0.42;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = hot ? 1.4 : 1;
+      ctx.beginPath();
+      ctx.moveTo(p.x - trail, p.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = color;
+      if (p.glyph) {
+        ctx.font = '600 12px Consolas, "Cascadia Mono", monospace';
+        ctx.fillText(p.glyph, p.x, p.y + 4);
+      } else {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, hot ? 2.3 : 1.5, 0, 6.2832);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  Flow.prototype._drawOnce = function () { this._measure(); this._draw(); };
+
+  /* ── 对外接口 ─────────────────────────────────────── */
+  var api = {
+    reduced: REDUCED,
+    Field: Field,
+    Flow: Flow,
+    colors: themeColors
+  };
+
+  api.init = function (opts) {
+    var out = { field: null, flow: null };
+    var el = typeof opts.field === 'string' ? document.querySelector(opts.field) : opts.field;
+    if (el && el.getContext) out.field = new Field(el);
+    var fl = typeof opts.flow === 'string' ? document.querySelector(opts.flow) : opts.flow;
+    if (fl && fl.getContext && opts.getBand) {
+      out.flow = new Flow(fl, { getBand: opts.getBand, getTokens: opts.getTokens });
+    }
+    out.setTheme = function () {
+      if (out.field) out.field.setTheme();
+      if (out.flow) out.flow.setTheme();
+    };
+    out.burst = function (x, y, o) { if (out.field) out.field.burst(x, y, o); };
+    /* 在某个元素中心爆散（用视口坐标，因为 field 是 position:fixed） */
+    out.burstAt = function (target, o) {
+      var node = typeof target === 'string' ? document.querySelector(target) : target;
+      if (!node || !out.field) return;
+      var r = node.getBoundingClientRect();
+      out.field.burst(r.left + r.width / 2, r.top + r.height / 2, o);
+    };
+    return out;
+  };
+
+  return api;
+})();
+
+</script>
+<script>
 /* assets/app.js */
 /* nl2sh · 交互原型
  * 演示模式：不联网，用 data.js 里的结构化结果驱动全部界面。
@@ -4244,7 +5673,10 @@ window.NL2SH_AI = (function () {
     danger: { label: '危险', cap: 'DANGER', cls: 'seal--danger' }
   };
   var STATE = { read: '只读', add: '新增', edit: '修改', del: '删除' };
-  var SAMPLE_IDS = [0, 2, 5, 7, 9];
+  /* 首屏"常见任务"标签：从规则库里挑几条最有代表性的。
+     组合刻意覆盖不同类别——统计、日志分析、管道、打包、以及一条危险命令
+     （危险那条是拿来展示风险印章和沙箱回滚的，它在沙箱里跑，不会伤到任何东西）。 */
+  var SAMPLE_IDS = [0, 19, 27, 39, 7];
 
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) {
@@ -4326,6 +5758,7 @@ window.NL2SH_AI = (function () {
       '<div class="dissect__col dissect__col--r">' +
         right.map(function (r, k) { return leaHtml(r, half + k + 1); }).join('') +
       '</div>' +
+      '<canvas class="fx-flow" aria-hidden="true"></canvas>' +
       '<svg class="leaders" aria-hidden="true"></svg>';
 
     /* 流程图注放在图外，避免引线穿过文字 */
@@ -4728,6 +6161,7 @@ window.NL2SH_AI = (function () {
       btn.classList.toggle('is-on', on);
       btn.setAttribute('aria-selected', on ? 'true' : 'false');
     });
+    if (fx) fx.setTheme();
     if (current) renderResult(current, { instant: true });
   }
 
@@ -4810,6 +6244,27 @@ window.NL2SH_AI = (function () {
       var heroCmd = $('.cmd', heroFig);
       if (heroCmd) ro.observe(heroCmd);
     }
+  }
+
+  /* ── 粒子层 ───────────────────────────────────────── */
+  var fx = null;
+
+  function initFx() {
+    if (!window.NL2SH_FX) return;
+    var heroCmd = $('#heroDissect .cmd');
+    fx = window.NL2SH_FX.init({
+      field: '#fxField',
+      flow: '#heroDissect .fx-flow',
+      getBand: function () { return heroCmd; },
+      getTokens: function () { return $$('#heroDissect .tok'); }
+    });
+    /* 深链 ?mode=rescue 可能已经切过主题，初始化后必须再同步一次，
+       否则粒子会用学习模式的蓝色画在应急模式的黑底上 */
+    fx.setTheme();
+  }
+
+  function fxColors() {
+    return window.NL2SH_FX ? window.NL2SH_FX.colors() : { dot: '#0b6ba8', bad: '#b33325', safe: '#0d7466', warn: '#a8640a' };
   }
 
   /* ── 沙箱试跑 ─────────────────────────────────────── */
@@ -5009,6 +6464,8 @@ window.NL2SH_AI = (function () {
       item.run.changes = [];
       paintRun(result, item);
       updateSbxBar();
+      /* 时光倒流：粒子回流到按钮上 */
+      if (fx && r.ok) fx.burstAt('#undoBtn', { count: 18, power: 2.6, color: fxColors().safe });
     });
 
     var fix = $('#fixBtn', result);
@@ -5109,6 +6566,20 @@ window.NL2SH_AI = (function () {
     }
     paintRun(result, item);
     updateSbxBar();
+
+    /* 粒子反馈：真跑成功用安全色，失败用危险色 */
+    if (fx) {
+      var failed = r.code !== 0 || !!String(r.err || '').trim();
+      var c = fxColors();
+      fx.burstAt('#runBtn', {
+        count: failed ? 22 : 16,
+        power: failed ? 3.4 : 2.4,
+        color: failed ? c.bad : c.safe
+      });
+      var firstRow = $('#result .diff__row');
+      if (firstRow) fx.burstAt(firstRow, { count: 10, power: 1.8, color: c.warn });
+    }
+
     if (opts.onDone) opts.onDone(item.run);
   }
 
@@ -5438,6 +6909,10 @@ window.NL2SH_AI = (function () {
     heroDrawn = true;
     layoutLeaders(true);
     heroFig.classList.remove('is-measuring');
+    /* 解剖图显形后，粒子从命令中间"唤醒"一次 */
+    if (fx) setTimeout(function () {
+      fx.burstAt('#heroDissect .cmd', { count: 12, power: 1.7 });
+    }, 260);
   }
 
   /* 深链接：?q=一句话&mode=rescue  可以直接分享某一条结果 */
@@ -5468,6 +6943,7 @@ window.NL2SH_AI = (function () {
   /* 先量准再显形，避免引线画在旧位置上 */
   heroFig.classList.add('is-measuring');
   buildHero();
+  initFx();
   bind();
   renderHistory();
   applyDeepLink();
