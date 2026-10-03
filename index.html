@@ -505,6 +505,13 @@ main {
 }
 .tok__mark {
   display: none;
+  /* 角标是"标注"，不是命令的一部分。它悬浮在片段上方（不在流内），
+     但因为它在 DOM 里是命令文本的兄弟节点，**选中命令时会被一起复制**——
+     复制出来就成了 `du -ah .1 | sort -rh2`，一条坏命令。
+     复制按钮走的是干净的 item.cmd，不受影响；但手动框选会中招。
+     所以这里禁掉它的可选中性。 */
+  user-select: none;
+  -webkit-user-select: none;
   position: absolute;
   top: -1.4em;
   left: 50%;
@@ -3264,6 +3271,20 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
   .titleblock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .titleblock__cell--wide { grid-column: span 2; }
 }
+/* 命令级的"含模拟数据"小标：与执行区的警示条呼应。
+   执行区的条在输出下面，而"这条命令有模拟成分"这件事应当在看到命令时就成立。 */
+.sim-chip {
+  display: inline-block;
+  margin-left: 9px;
+  padding: 2px 7px;
+  border: 1px solid var(--caution);
+  border-radius: 2px;
+  background: var(--caution-bg);
+  color: var(--caution);
+  font: 600 10px/1.4 var(--f-mono);
+  letter-spacing: .06em;
+  vertical-align: middle;
+}
 </style>
 </head>
 <body>
@@ -3310,7 +3331,7 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
       <div class="hero__actions">
         <button class="btn btn--go btn--lg" type="button" id="startBtn">立即体验</button>
         <button class="btn btn--ghost" type="button" id="demoBtn">看一遍完整演示</button>
-        <span class="hero__hint">不用配 Key、不用联网也能完整跑通</span>
+        <span class="hero__hint">内置示例免 Key、免联网；AI 生成需联网（密钥在服务端，前端不留）</span>
       </div>
     </div>
 
@@ -3383,7 +3404,7 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
       <textarea id="q" name="q" rows="2" placeholder="用一句中文说，例如：把当前目录最大的十个文件列出来"></textarea>
       <div class="ask__actions">
         <button class="btn btn--go" type="submit" id="goBtn">生成命令</button>
-        <span class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>↵</kbd></span>
+        <span class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>↵</kbd> 生成 · <kbd>↵</kbd> 换行</span>
         <label class="auto" for="autoRun"><input id="autoRun" type="checkbox" checked>生成后自动在沙箱里验证</label>
         <button class="btn btn--ghost" type="button" id="clearBtn">清空</button>
       </div>
@@ -10478,6 +10499,22 @@ window.NL2SH_FX = (function () {
     var box = $('#runBox', result);
     if (!box || !item.run) return;
     box.innerHTML = runHtml(item);
+
+    /* 命令级的"含模拟数据"小标（与执行区那条警示条呼应，双保险）。
+       ⚠️ 位置很关键：**必须在这里加，不能放进 runHtml**。
+       runHtml 只是拼字符串，卡片那时还没进 DOM——在里面查 #secSyn 会查不到，
+       更糟的是可能查到**上一张卡**的节点，把标记挂错作品。
+       所以放在这里（结果已出、卡片已在 DOM），并且用 result 限定本卡范围。 */
+    if (item.run.simulated) {
+      var synH = $('#secSyn .sec__h', result);
+      if (synH && !synH.querySelector('.sim-chip')) {
+        var chip = document.createElement('span');
+        chip.className = 'sim-chip';
+        chip.textContent = '含模拟数据';
+        chip.title = '这条命令依赖内核或 systemd，输出按预设场景模拟；文件系统的改动是真实的';
+        synH.appendChild(chip);
+      }
+    }
 
     var undo = $('#undoBtn', result);
     if (undo) undo.addEventListener('click', function () { doRollback(result, item); });
