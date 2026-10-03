@@ -2300,9 +2300,34 @@ html[data-mode="geek"] .geek-only { display: block; }
   font: 600 11px/1.4 var(--f-mono);
   letter-spacing: .08em;
 }
-.idbar__main { font-size: 13px; color: var(--ink-2); }
-.idbar__main b { color: var(--ink); font-weight: 600; }
-.idbar__hint { margin-left: auto; font: 500 11px/1.5 var(--f-mono); color: var(--ink-3); }
+/* 作品名用可读字号，一眼看出"这是什么"——这是首屏最该先回答的问题 */
+.idbar__name {
+  flex: 0 0 auto;
+  font: 700 19px/1.1 var(--f-ui);
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+.idbar__sub {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--signal);
+}
+/* 一句话流程推到右边，不与作品名抢注意力 */
+.idbar__flow {
+  margin-left: auto;
+  font: 500 11px/1.5 var(--f-mono);
+  color: var(--ink-3);
+}
+/* 赛道归属单独占第二行（整行宽），不挤在第一行里 */
+.idbar__org {
+  flex: 1 1 100%;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.idbar__org b { color: var(--ink-2); font-weight: 600; }
+@media (max-width: 900px) {
+  .idbar__flow { display: none; }
+}
 
 /* 关于抽屉：原来的落地页与教学整块收进来 */
 .about {
@@ -9773,18 +9798,26 @@ window.NL2SH_FX = (function () {
     });
     anchor.parentNode.insertBefore(drawer, anchor.nextSibling);
 
-    /* ③ 赛事标识提到首屏最上面：内容与主题那 20% 里
-          "紧扣赛事主题、符合赛道定位"应当一眼可见，
-          而不是藏在 11px 的暗色等宽字里。 */
+    /* ③ 首屏顶部的身份标识。
+          两条要求同时成立：
+            ① **一眼看出这是什么作品** —— 作品名 + 一句定位，用可读字号。
+               原来只写"赛道三 · 智能交互与应用"，那说的是**参赛分类**，
+               不是"这个产品是什么"；评委得自己从输入框和命令卡去推断。
+            ② **不能变成落地页** —— 评审意见指出过"首屏堆了五六个层级、
+               一进来不知道先看哪"。所以这里只留**两行**：
+               第一行作品名与定位，第二行流程+赛道归属。
+               三张亮点卡、命令解剖、项目背景仍留在「关于」抽屉里——
+               它们讲的是"能做什么"，而首屏那张**真命令卡**已经在替它们说话了。 */
     var top = document.querySelector('main#top');
     if (top && !document.getElementById('idbar')) {
       var bar = document.createElement('div');
       bar.className = 'idbar';
       bar.id = 'idbar';
       bar.innerHTML =
-        '<span class="idbar__tag">赛道三</span>' +
-        '<span class="idbar__main"><b>智能交互与应用</b> · GDUST Linux 协会 AI 网页设计大赛参赛作品</span>' +
-        '<span class="idbar__hint">中文说需求 → 真模型生成 → 浏览器内沙箱真跑一遍 → 一键回滚</span>';
+        '<span class="idbar__name">NL2SH</span>' +
+        '<span class="idbar__sub">Linux 新手零门槛入门平台</span>' +
+        '<span class="idbar__flow">中文说需求 → 真模型生成 → 浏览器内沙箱真跑一遍 → 一键回滚</span>' +
+        '<span class="idbar__org"><b>赛道三 · 智能交互与应用</b> · GDUST Linux 协会 AI 网页设计大赛参赛作品</span>';
       top.insertBefore(bar, top.firstChild);
     }
   }
