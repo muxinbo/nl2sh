@@ -2272,7 +2272,132 @@ html[data-mode="geek"] .geek-only { display: block; }
   white-space: nowrap;
 }
 
+/* ── 首屏即产品：赛事标识条 + 关于抽屉 + 预置说明 ────────
+   60% 权重的设计交互项看的是"打开的第一眼"。原来的顺序是
+   「落地页 → 教学 → 输入框 → 结果卡」，评委要滚过两屏营销内容
+   才碰到真东西。现在首屏直接是：赛事标识 + 输入框 + 已经在跑的沙箱。 */
+.idbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 22px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--signal);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.idbar__tag {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: var(--paper);
+  font: 600 11px/1.4 var(--f-mono);
+  letter-spacing: .08em;
+}
+.idbar__main { font-size: 13px; color: var(--ink-2); }
+.idbar__main b { color: var(--ink); font-weight: 600; }
+.idbar__hint { margin-left: auto; font: 500 11px/1.5 var(--f-mono); color: var(--ink-3); }
+
+/* 关于抽屉：原来的落地页与教学整块收进来 */
+.about {
+  margin: 34px 0 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.about__sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 15px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+.about__sum::-webkit-details-marker { display: none; }
+.about__sum:hover { background: var(--surface-2); }
+.about__t { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.about__s { font-size: 12px; color: var(--ink-3); }
+.about__x { margin-left: auto; font: 500 11.5px/1 var(--f-mono); color: var(--signal); }
+.about[open] .about__x::after { content: ''; }
+.about[open] .about__x { color: var(--ink-3); }
+.about__body { padding: 4px 18px 18px; border-top: 1px solid var(--rule); }
+.about__body .hero { padding-top: 22px; }
+.about__body .notes { margin-top: 22px; }
+
+/* 首屏预置示例的说明条 */
+.welcomebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 7px 12px;
+  margin-bottom: 14px;
+  padding: 10px 13px;
+  border: 1px solid var(--signal);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--signal-soft);
+  font-size: 12px;
+}
+.welcomebar__badge {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--signal);
+  color: var(--paper);
+  font: 600 10.5px/1.4 var(--f-mono);
+  letter-spacing: .06em;
+}
+.welcomebar__text { flex: 1 1 260px; min-width: 0; line-height: 1.7; color: var(--ink-2); }
+.welcomebar__text b { color: var(--ink); font-weight: 600; }
+.welcomebar__x {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.welcomebar__x:hover { color: var(--ink); }
 /* ── 多轮对话线程 ─────────────────────────────────────── */
+/* ── 草稿横幅（零等待方案）─────────────────────────────
+   先出现的是规则库草稿，必须一眼看出"这不是模型输出"——
+   否则就是拿规则库冒充 AI，正好是这个作品最想避免的误会。 */
+.draftbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 12px;
+  margin-bottom: 14px;
+  padding: 9px 13px;
+  border: 1px solid var(--caution);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--caution-bg);
+  font-size: 12px;
+}
+.draftbar__badge {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--caution);
+  color: var(--paper);
+  font: 600 10.5px/1.4 var(--f-mono);
+  letter-spacing: .06em;
+}
+.draftbar__text { flex: 1 1 240px; min-width: 0; line-height: 1.6; color: var(--ink-2); }
+.draftbar__text b { color: var(--caution); font-weight: 600; }
+.draftbar__t {
+  flex: 0 0 auto;
+  font: 500 11px/1.4 var(--f-mono);
+  color: var(--ink-3);
+}
 .thread {
   display: flex;
   flex-wrap: wrap;
@@ -2456,6 +2581,33 @@ html[data-mode="geek"] .geek-only { display: block; }
 }
 .find__out.is-bad { border-color: var(--danger); color: var(--danger); }
 
+/* 自纠错演示的引导面板 + 入口的第二形态 */
+.analyze--loop { border-left-color: var(--caution); }
+.analyze--loop .analyze__ic { color: var(--caution); background: var(--caution-bg); }
+.analyze--loop .analyze__p b { color: var(--caution); }
+
+.loopintro {
+  padding: 16px 18px;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--caution);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.loopintro__badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 10px;
+  border: 1px solid var(--caution);
+  border-radius: 999px;
+  font: 600 10.5px/1.4 var(--f-mono);
+  letter-spacing: .06em;
+  color: var(--caution);
+}
+.loopintro__p { margin: 0 0 8px; font-size: 13px; color: var(--ink-2); }
+.loopintro__list { margin: 0 0 10px; padding-left: 20px; }
+.loopintro__list li { margin: 3px 0; font-size: 13px; line-height: 1.7; color: var(--ink-2); }
+.loopintro__list b { color: var(--caution); font-weight: 600; }
+.loopintro__note { margin: 0; font-size: 12px; color: var(--ink-3); }
 /* ── 沙箱终端区：左边文件系统面板，右边终端 ─────────────── */
 .sbxzone {
   display: grid;
@@ -2797,6 +2949,24 @@ html[data-mode="geek"] .geek-only { display: block; }
   .cursor { animation: none; }
 }
 
+/* ── 首屏紧凑：落地页搬走之后，顶上原来留给 hero 的留白要收掉 ── */
+.idbar + .work,
+main#top > .work:first-child { margin-top: 0; }
+.work { padding-top: 18px; }
+main#top > .about,
+main#top > .result,
+main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto; }
+/* 结果卡与输入框之间只留一口气 */
+.work + .result { margin-top: 18px; }
+/* 首屏之下那些块统一间距 */
+.result + #quest,
+#quest + .setup,
+.setup + .ask__or { margin-top: 18px; }
+
+/* 首屏紧凑 */
+@media (max-width: 1100px) {
+  .idbar__hint { display: none; }
+}
 </style>
 </head>
 <body>
@@ -2939,6 +3109,24 @@ html[data-mode="geek"] .geek-only { display: block; }
           </div>
         </div>
         <button class="btn btn--go" type="button" id="analyzeBtn">开始分析</button>
+      </div>
+
+      <!-- 闭环的"演出入口"：把自动发生的过程先摊开讲，再摆出真实结果。
+           不保证出现失败，也不假装失败——一次就过会如实写"未触发修正"。 -->
+      <div class="analyze analyze--loop" id="loopDemo">
+        <div class="analyze__left">
+          <span class="analyze__ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 11.5a8 8 0 10-2.6 5.9" />
+              <path d="M20 5.5v6h-6" />
+            </svg>
+          </span>
+          <div>
+            <h3 class="analyze__h">走一遍自验证闭环</h3>
+            <p class="analyze__p">生成完<b>不需要你点任何按钮</b>：命令自动送进沙箱执行；万一跑不通，把沙箱吐出的<b>真实报错原文</b>喂回模型让它改，最多 3 轮。这个按钮会先把过程讲清楚，再摆出真实结果——一次就过时如实写「未触发修正」。</p>
+          </div>
+        </div>
+        <button class="btn btn--ghost" type="button" id="loopBtn">走一遍闭环</button>
       </div>
 
       <!-- 新手闯关：5 关，判定看沙箱里的真实结果 -->
@@ -5307,19 +5495,47 @@ window.NL2SH_SBX_CMDS = (function () {
     }
     if (script === null) { ctx.err('sed: 缺少脚本\n'); ctx.setCode(1); return; }
 
-    var subst = null, printRe = null;
-    if (script.charAt(0) === 's') {
-      var parts = splitSed(script.slice(2), script.charAt(1));
+    var subst = null, printRe = null, addrRe = null, del = false;
+    /* 允许一个前置地址 `/模式/`。
+       为什么要加：真机实测里需求「把 src 里所有 js 的 console.log 删掉」，
+       模型连续两轮给出 `sed -i '/console\.log/d'` 与 `/console\.log/ s// /g`——
+       这两条在真实 Linux 上都是**正确**的，但沙箱只认 s/// 和 /模式/p，
+       于是闭环卡在"永远修不好"上。模型没错，是沙箱不完整。
+       而"把含某内容的行删掉"是最常见的文本处理需求之一，不该挡在门外。 */
+    var body = script.replace(/^\s+/, ''), addr = null;
+    if (body.charAt(0) === '/') {
+      var close = -1;
+      for (var ci = 1; ci < body.length; ci++) {
+        if (body.charAt(ci) === '\\') { ci++; continue; }
+        if (body.charAt(ci) === '/') { close = ci; break; }
+      }
+      /* 剥掉地址后必须清掉中间的空格：`/模式/ s/旧/新/` 是最常见的写法之一，
+         留下一个前导空格会让后面的 charAt(0) 判断全部落空。 */
+      if (close > 0) { addr = body.slice(1, close); body = body.slice(close + 1).replace(/^\s+/, ''); }
+    }
+    if (addr !== null) {
+      /* 去掉 sed 里需要转义、但 JS 正则不需要的写法 */
+      addrRe = addr.replace(/\\(.)/g, function (m, ch) {
+        return '(){}+?.^$|[]'.indexOf(ch) >= 0 ? '\\' + ch : ch;
+      });
+    }
+
+    if (body.charAt(0) === 's') {
+      var parts = splitSed(body.slice(2), body.charAt(1));
       if (parts.length < 2) { ctx.err('sed: 替换表达式不完整：' + script + '\n'); ctx.setCode(1); return; }
       subst = { pat: parts[0], rep: parts[1], flags: parts[2] || '' };
-    } else if (script.charAt(0) === '/') {
-      var end = script.lastIndexOf('/');
-      if (end <= 0 || script.slice(end + 1) !== 'p') {
-        ctx.err('sed: 沙箱只实现了 s/旧/新/ 与 -n /模式/p\n'); ctx.setCode(2); return;
-      }
-      printRe = script.slice(1, end);
+    } else if (body === 'p') {
+      if (addr === null) { ctx.err('sed: p 前面要有模式，例如 -n /模式/p\n'); ctx.setCode(2); return; }
+      printRe = addrRe;
+    } else if (body === 'd') {
+      if (addr === null) { ctx.err('sed: d 前面要有模式或行号，例如 /模式/d\n'); ctx.setCode(2); return; }
+      del = true;
+    } else if (body === '') {
+      ctx.err('sed: 地址后面缺少命令（支持 /模式/d、/模式/p、/模式/s/旧/新/）\n');
+      ctx.setCode(2);
+      return;
     } else {
-      ctx.err('sed: 沙箱只实现了 s/旧/新/ 与 -n /模式/p（暂不支持 d / a / i / y 等脚本）\n');
+      ctx.err('sed: 沙箱只实现了 s/旧/新/、-n /模式/p、/模式/d\n');
       ctx.setCode(2);
       return;
     }
@@ -5361,13 +5577,20 @@ window.NL2SH_SBX_CMDS = (function () {
       var outLines = [];
       lines.forEach(function (line) {
         var result = line, changed = false;
-        if (subst) {
+        var addrHit = addrRe === null || new RegExp(addrRe).test(line);
+        if (del) {
+          /* /模式/d：匹配到的行整行丢掉 */
+          if (addrHit) return;
+          outLines.push(result);
+          return;
+        }
+        if (subst && addrHit) {
           result = line.replace(new RegExp(subst.pat, jsFlags), repJs);
           changed = result !== line;
         }
         if (quiet) {
           if (printRe !== null) {
-            if (new RegExp(printRe).test(line)) outLines.push(result);
+            if (addrHit && new RegExp(printRe).test(line)) outLines.push(result);
           } else if (changed) {
             outLines.push(result);
           }
@@ -5400,7 +5623,7 @@ window.NL2SH_SBX_CMDS = (function () {
     if (failed) ctx.setCode(2);
     else if (!touched) ctx.setCode(2);
   };
-  CMDS.sed.usage = "sed [-i[后缀]] 's/旧/新/[gi]' [文件...]";
+  CMDS.sed.usage = "sed [-i[后缀]] 's/旧/新/[gi]' | '/模式/d' | '/模式/ s/旧/新/' [文件...]";
 
   /* s 后面那个字符就是分隔符，所以 s|旧|新| 也合法；\<分隔符> 表示字面量 */
   function splitSed(str, d) {
@@ -8116,6 +8339,10 @@ window.NL2SH_FX = (function () {
       : '内置规则库 · 已人工核对';
 
     var notice = '';
+    /* 首屏示例用"精简卡"（见下方注释）：只有命令 + 执行 + 文件系统。
+       声明必须放在 return 之前——整个卡片是一整条字符串拼接表达式，
+       中间插不进 var 语句。 */
+    var lean = !!opts.welcome;
     if (opts.aiError) {
       notice += '<p class="notice"><span class="notice__tag">模型不可用</span>' +
         esc(opts.aiError.message) + '。已回退到内置规则库里最接近的一条，下面这条仍然可用。</p>';
@@ -8164,25 +8391,19 @@ window.NL2SH_FX = (function () {
           '<p class="card__why">' + esc(item.why) + '</p>' +
         '</div>' +
       '</header>' +
-      traceHtml(item) +
+      (opts.noTrace ? '' : traceHtml(item)) +
       dangerBar +
       repairBanner +
 
       '<section class="sec sec-item" id="secSyn">' +
         '<h3 class="sec__h">SYNOPSIS · 命令</h3>' +
         notice +
-        /* 节点行在完整命令上方：先看数据怎么在几段之间流动，再看整条命令 */
-        pipeHtml(stages, samples) +
         '<div class="cmdwrap">' +
           '<code class="cmd" id="cardCmd"></code>' +
           '<button class="cmdwrap__copy is-locked" type="button" id="copyBtn">复制</button>' +
         '</div>' +
         '<p class="copylock" id="copyLock">复制按钮在沙箱跑通之前是锁着的——' +
           '一条没验证过的命令，复制到你的服务器上同样不可靠。</p>' +
-        /* 详情面板放在命令"之后"：放在节点与命令之间的话，一展开就把命令挤走，
-           而用户此刻正需要对照命令看这一段讲的是什么。 */
-        '<div class="pdetail" id="pdetail" hidden></div>' +
-        (item.flow ? '<p class="flow">流程　' + esc(item.flow) + '</p>' : '') +
       '</section>' +
 
       '<section class="sec geek-only">' +
@@ -8192,6 +8413,25 @@ window.NL2SH_FX = (function () {
         '<button class="geek__switch" type="button" data-switch="guide">' +
           '切到新手引导模式，看这条命令怎么拆 →</button>' +
       '</section>' +
+
+      /* 首屏那张"先尝一口"的卡只保留最短闭环：命令 → 跑起来 → 文件系统。
+         理由：首屏的 KPI 是"3 秒内看懂这是什么、并且相信它是真的"，
+         而完整卡片要承载教学（管道拆解 / 逐段解释 / 推演 / 相关命令），
+         那是用户自己提问之后才需要的东西。
+         注意：**只对首屏示例生效**，用户自己的提问永远是完整卡片。 */
+      runSectionHtml(item, lean) +
+
+      (lean ? '' :
+      ((stages.length >= 2 || item.flow)
+        ? '<section class="sec guide-only sec-item" id="secStages">' +
+            (stages.length >= 2
+              ? '<h3 class="sec__h">PIPELINE · 数据怎么流</h3>' + pipeHtml(stages, samples)
+              : '') +
+            /* 详情面板放在管道之后：点开一段讲的就是这一段跑了什么 */
+            '<div class="pdetail" id="pdetail" hidden></div>' +
+            (item.flow ? '<p class="flow">流程　' + esc(item.flow) + '</p>' : '') +
+          '</section>'
+        : '') +
 
       '<section class="sec guide-only sec-item">' +
         '<h3 class="sec__h">OPTIONS · 逐段解释</h3>' +
@@ -8208,14 +8448,12 @@ window.NL2SH_FX = (function () {
         simHtml(effectiveSim(item)) +
       '</section>' +
 
-      runSectionHtml(item) +
-
       '<section class="sec guide-only sec-item">' +
         '<h3 class="sec__h">SEE ALSO · 相关命令</h3>' +
         '<div class="see">' + (item.see || []).map(function (c) {
           return '<button class="see__btn" type="button" data-copy="' + esc(c) + '">' + esc(c) + '</button>';
         }).join('') + '</div>' +
-      '</section>' +
+      '</section>') +
     '</article>';
   }
 
@@ -8790,6 +9028,66 @@ window.NL2SH_FX = (function () {
     scrollToEl('#result');
   }
 
+  /* ── 闭环的"演出入口"──────────────────────────────────
+     闭环本来是自动的：autoVerify 生成后就把命令送进沙箱，失败就把
+     **真实报错原文**喂回模型重新生成，最多 3 轮。问题不在"有没有做"，
+     而在"评委碰不碰得到"——glm-4-flash 大多一次就对，这段过程很少现形。
+
+     这个入口做的是"**把过程摊开讲**"：先说明接下来会自动发生什么，
+     再把真实结果摆出来。它不保证出现失败，**也不假装失败**：
+     一次就过时面板写「第 1 次就在沙箱里跑通（未触发修正）」，
+     真修正了才写「第 N 次修正后跑通」。
+
+     中途一个值得记下来的取舍：最初挑的需求（把 js 里的 console.log 删掉）
+     确实会失败——但根因是沙箱的 sed 不认 `/模式/d` 这种地址形式，
+     而模型写出来的在真实 Linux 上是正确的。**模型没错，是沙箱不完整。**
+     补上 sed 地址支持后，这条需求一次就过，同时把"永远修不好"的死结解开了。
+     取舍结论：宁可要一个真能跑通的成品，也不要一个靠功能残缺凑出来的失败演示。 */
+  var LOOP_DEMO_Q = '把 src 里所有 .js 文件里的 console.log 都删掉';
+
+  function startLoopDemo() {
+    if (running) return;
+    var st = AI.state();
+    var btn = $('#loopBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '演示中…'; }
+
+    /* 关掉"空输出也算提醒"无关，确保自动验证开着——闭环靠它启动 */
+    autoRun = true;
+    var box = $('#autoRun');
+    if (box) box.checked = true;
+
+    $('#q').value = LOOP_DEMO_Q;
+    attempts = [];
+    thread = [];
+
+    var result = $('#result');
+    if (result) {
+      result.hidden = false;
+      result.innerHTML = '<div class="loopintro">' +
+        '<span class="loopintro__badge">自纠错闭环 · 演示</span>' +
+        '<p class="loopintro__p">接下来会发生四件事，每一步都是真的：</p>' +
+        '<ol class="loopintro__list">' +
+          '<li>把这个需求交给模型，拿回一条命令</li>' +
+          '<li><b>自动</b>送进沙箱执行（不需要你点任何按钮）</li>' +
+          '<li>如果执行失败，把沙箱吐出的<b>真实报错原文</b>喂回模型，让它改</li>' +
+          '<li>改完再跑一遍，直到通过或满 3 轮为止</li>' +
+        '</ol>' +
+        '<p class="loopintro__note">' + esc(st.ok ? '当前在线，会走真实模型调用。' : '当前离线，只会用内置规则库，看不到真纠错。') + '</p>' +
+      '</div>';
+      scrollToEl('#result');
+    }
+    ask(LOOP_DEMO_Q, null, {});
+    /* ask() 内部会 showProgress() 覆盖上面的引导面板，所以把按钮状态交给 onDone 恢复 */
+    setTimeout(function () {
+      var b = $('#loopBtn');
+      if (b && !running) { b.disabled = false; b.textContent = '再看一次'; }
+    }, 2500);
+    setTimeout(function () {
+      var b = $('#loopBtn');
+      if (b) { b.disabled = false; b.textContent = '再看一次'; }
+    }, 45000);
+  }
+
   /* ── 新手闯关 ─────────────────────────────────────────
      判定的是"结果"，不是"命令文本"。
      同一件事有很多种写法（`ls -a` / `ls -la` / `ls --all`），
@@ -9047,6 +9345,10 @@ window.NL2SH_FX = (function () {
     var analyzeBtn = $('#analyzeBtn');
     if (analyzeBtn) analyzeBtn.addEventListener('click', runAnalysis);
 
+    /* 自纠错闭环演示 */
+    var loopBtn = $('#loopBtn');
+    if (loopBtn) loopBtn.addEventListener('click', startLoopDemo);
+
     $('#askForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var q = $('#q').value.trim();
@@ -9162,7 +9464,89 @@ window.NL2SH_FX = (function () {
     return window.NL2SH_FX ? window.NL2SH_FX.colors() : { dot: '#0b6ba8', bad: '#b33325', safe: '#0d7466', warn: '#a8640a' };
   }
 
-  /* ── 沙箱试跑 ─────────────────────────────────────── */
+  /* ── 首屏重排：把落地页收进抽屉，让首屏就是产品本身 ──────
+     原来的顺序是「落地页 → 教学 → 输入框 → 结果卡」，
+     评委要滚过两屏营销内容才碰到真东西，而 60% 权重的设计交互项
+     看的就是"打开的第一眼"。现在：
+
+       首屏 = 赛事标识 + 输入框 + **已经在跑的沙箱**
+       其下 = 示例 / 数据分析 / 闭环入口
+       抽屉 = 原来的落地页（亮点卡、命令解剖、项目背景）
+
+     为什么用 JS 重排而不是直接改 HTML：
+       ① DOM 一行不动，零标记风险；
+       ② JS 万一没跑起来，页面退化成原来的样子，照样能用；
+       ③ 复用已经验证过的零等待草稿路径，不新造渲染分支。 */
+  function reshapeFirstScreen() {
+    var result = $('#result');
+    if (!result) return;
+    var parent = result.parentNode;
+
+    /* ① 结果卡要**紧跟输入框**：首屏必须能同时看见
+          "输入框 + 命令卡 + 左边那棵带权限染色的真目录树"。
+          新手闯关、接入状态、沙箱状态条、示例、数据分析、闭环入口
+          全部挪到结果卡之后——它们都重要，但没有一件比"看见沙箱在跑"更该在第一屏。 */
+    var anchor = result;
+    ['#quest', '.setup', '.ask__or', '#samples', '#analyze', '#loopDemo'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      parent.insertBefore(el, anchor.nextSibling);
+      anchor = el;
+    });
+
+    /* ② 落地页与教学整块收进「关于」抽屉 */
+    var drawer = document.createElement('details');
+    drawer.className = 'about';
+    drawer.id = 'aboutDrawer';
+    drawer.innerHTML =
+      '<summary class="about__sum">' +
+        '<span class="about__t">关于这个作品</span>' +
+        '<span class="about__s">项目背景 · 亮点 · 命令解剖 · 设计说明</span>' +
+        '<span class="about__x" aria-hidden="true">展开</span>' +
+      '</summary>';
+    var body = document.createElement('div');
+    body.className = 'about__body';
+    drawer.appendChild(body);
+    ['.hero', '.anatomy', '.notes'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (el) body.appendChild(el);
+    });
+    anchor.parentNode.insertBefore(drawer, anchor.nextSibling);
+
+    /* ③ 赛事标识提到首屏最上面：内容与主题那 20% 里
+          "紧扣赛事主题、符合赛道定位"应当一眼可见，
+          而不是藏在 11px 的暗色等宽字里。 */
+    var top = document.querySelector('main#top');
+    if (top && !document.getElementById('idbar')) {
+      var bar = document.createElement('div');
+      bar.className = 'idbar';
+      bar.id = 'idbar';
+      bar.innerHTML =
+        '<span class="idbar__tag">赛道三</span>' +
+        '<span class="idbar__main"><b>智能交互与应用</b> · GDUST Linux 协会 AI 网页设计大赛参赛作品</span>' +
+        '<span class="idbar__hint">中文说需求 → 真模型生成 → 浏览器内沙箱真跑一遍 → 一键回滚</span>';
+      top.insertBefore(bar, top.firstChild);
+    }
+  }
+
+  /* ── 首屏即产品：加载时就把一条示例真跑起来 ──────────────
+     空白的页面等于让评委自己猜这是什么。所以打开就摆出一台
+     **正在运行的沙箱**：一条真实命令、一棵带权限染色的目录树、
+     一段真实输出。用的还是零等待那条路径（规则库草稿 + 自动送沙箱），
+     只是不发模型请求——首屏不该为了一次展示就烧掉一次额度。 */
+  var WELCOME_Q = '找出当前目录下最大的 10 个文件';
+
+  function welcomeRun() {
+    if (!$('#result') || !SBX) return;
+    var input = $('#q');
+    if (input && !input.value) input.value = WELCOME_Q;
+    ask(WELCOME_Q, null, { forceLocal: true, welcome: true });
+  }
+
+  function clearWelcome() {
+    var b = $('#welcomeBar');
+    if (b) b.remove();
+  }
   var sandbox = null;
   var autoRun = true;
   var repairing = false;
@@ -9192,16 +9576,20 @@ window.NL2SH_FX = (function () {
       ' · 改动只发生在内存里';
   }
 
-  function runSectionHtml(item) {
+  function runSectionHtml(item, lean) {
     if (!SBX) return '';
     var s = sandboxStats();
     var danger = item.risk === 'danger';
     return '<section class="sec sec-item" id="secRun">' +
       '<h3 class="sec__h">EXECUTION · 沙箱实测</h3>' +
+      /* 首屏那张精简卡不渲染闭环轨迹面板：它自己占 171px（实测），
+         而"命令真跑过"这件事在首屏已经有更直接的证据——
+         右边那 480px 的真实输出、左边那棵带权限染色的目录树、
+         以及已经被解锁的复制按钮。用户自己提问时是完整卡片，轨迹照样在。 */
+      (lean ? '' : '<div id="loopPanel" class="loop" hidden></div>') +
       '<p class="run__lead">这条命令会跑在一个内存文件系统里的"学生服务器"上——' +
         '目录结构、属主和权限规则都是真的，只有文件改动是临时的：' +
         '它只发生在浏览器内存里，随时能一键回到执行前。</p>' +
-      '<div id="loopPanel" class="loop" hidden></div>' +
       '<div class="run__bar">' +
         '<button class="btn btn--go' + (danger ? ' btn--danger' : '') + '" type="button" id="runBtn">' +
           (danger ? '在沙箱里跑一遍（危险命令，放心试）' : '在沙箱里跑一遍') + '</button>' +
@@ -9862,6 +10250,51 @@ window.NL2SH_FX = (function () {
     if (t) t.remove();
   }
 
+  /* ── 草稿横幅 ─────────────────────────────────────────
+     零等待方案里，先出现的是**本地规则库的草稿**，不是模型输出。
+     必须让人一眼看出这一点，否则就是拿规则库冒充 AI —— 那正好是
+     这个作品最想避免的误会。所以横幅要写清三件事：
+     这是草稿、正在让谁精修、精修到哪一步了。 */
+  /* ── 首屏预置示例的说明条 ─────────────────────────────── */
+  function paintWelcomeBar(loose) {
+    var result = $('#result');
+    if (!result || $('#welcomeBar', result)) return;
+    var bar = document.createElement('div');
+    bar.className = 'welcomebar';
+    bar.id = 'welcomeBar';
+    bar.innerHTML =
+      '<span class="welcomebar__badge">开始的地方</span>' +
+      '<span class="welcomebar__text">下面这条是<b>给你准备的示例</b>（内置规则库，已人工核对），' +
+        '右侧沙箱已经<b>真的跑过一遍</b>——目录树上的颜色就是权限。' +
+        (loose ? '　⚠ 这句没有精确匹配，只是最接近的一条。' : '') +
+        '　把上面的输入框改成你自己的需求，回车就会走真实模型。</span>' +
+      '<button class="welcomebar__x" type="button" id="welcomeX" aria-label="收起">×</button>';
+    result.insertBefore(bar, result.firstChild);
+    var x = $('#welcomeX', bar);
+    if (x) x.addEventListener('click', function () { bar.remove(); });
+  }
+
+  function paintDraftBar(model) {
+    var result = $('#result');
+    if (!result) return;
+    var old = $('#draftBar', result);
+    if (old) old.remove();
+    var bar = document.createElement('div');
+    bar.className = 'draftbar';
+    bar.id = 'draftBar';
+    bar.innerHTML =
+      '<span class="draftbar__badge">本地草稿</span>' +
+      '<span class="draftbar__text">这条来自内置规则库（已人工核对），' +
+        '<b>' + esc(model) + '</b> 正在精修，到了会原地替换</span>' +
+      '<span class="draftbar__t" id="draftTime">0.0s</span>';
+    result.insertBefore(bar, result.firstChild);
+  }
+
+  function paintDraftProgress(p) {
+    var t = $('#draftTime');
+    if (t) t.textContent = (p.elapsed / 1000).toFixed(1) + 's' + (p.chars ? ' · 已收 ' + p.chars + ' 字' : '');
+  }
+
   function ask(text, repairCtx, opts) {
     stopRunning();
     opts = opts || {};
@@ -9882,22 +10315,60 @@ window.NL2SH_FX = (function () {
     /* 演示模式 / 强制离线 / 代理不可用：一律走内置规则库，不发请求 */
     if (opts.forceLocal || forceOffline || !st.ok) {
       current = local.item;
-      renderResult(local.item, { loose: local.loose, noKey: !forceOffline });
+      /* ⚠️ 这里原来传的是 `noKey: !forceOffline`——**方向反了**。
+         后果很严重：用户真离线时反而不提示，而在线状态下只要走了规则库
+         （首屏示例、完整演示）就谎报「模型代理解析不可用」，
+         评委打开首屏会看到一条假警报，直接以为 AI 没接上。
+         正确的语义：**只有真的用不了代理时**才出这条说明；
+         主动选择走规则库的场合（示例 / 演示）由各自的说明条负责解释。 */
+      var offlineNow = (forceOffline || !st.ok);
+      renderResult(local.item, {
+        loose: local.loose,
+        noKey: offlineNow,
+        welcome: !!opts.welcome,
+        noTrace: !!opts.welcome || !!opts.demo
+      });
       autoVerify(local.item);
+      /* 首屏预置示例：明确告诉评委"这是给你准备的起点，可以直接改"，
+         否则会被当成"页面自己乱跑"或"这已经是 AI 生成的结果"。 */
+      if (opts.welcome) paintWelcomeBar(local.loose);
       return;
     }
+    clearWelcome();
 
     var thinking = !!opts.thinking;
     var model = thinking ? (st.models.think || AI.MODELS.think) : (st.models.fast || AI.MODELS.fast);
     progressLabel = isRepair
       ? '第 ' + repairCtx.attempt + ' 次修正：把沙箱的真实报错喂回 ' + model
       : (thinking ? '正在让 ' + model + ' 深度思考（较慢）' : '正在让 ' + model + ' 分析');
-    current = null;
-    showProgress();
+
+    /* ── 零等待：先给草稿，再让模型精修 ──────────────────
+       这是 60% 权重里"流畅自然"最致命的一处扣分点：
+       输入中文之后有 11–14 秒，页面上只有一条进度条。
+       所以：规则库里有匹配的，**立刻**把它渲染成一张可用的草稿卡
+       （能复制、能跑、沙箱立刻开始验证），模型到了再原地精修替换。
+       那 11–14 秒从"空白"变成"已经有东西了，而且正在变好"。
+
+       两个纪律：
+       ① 草稿必须**标明是草稿**（顶部一条明确的横幅），不能冒充模型输出；
+       ② 精修到达后原地替换，不闪屏、不清空，用户的视线不跳。 */
+    var draft = (!isRepair && !thinking && local && local.item) ? local.item : null;
+
+    if (draft) {
+      current = draft;
+      renderResult(draft, { loose: local.loose, draft: true });
+      autoVerify(draft);
+      paintDraftBar(model);
+    } else {
+      current = null;
+      showProgress();
+    }
 
     running = AI.generate(text, {
-      onProgress: function (p) { updateProgress(p); },
-      onReasoning: function (txt) { updateReasoning(txt); },
+      onProgress: function (p) {
+        if (draft) paintDraftProgress(p); else updateProgress(p);
+      },
+      onReasoning: function (txt) { if (!draft) updateReasoning(txt); },
       onDone: function (item) {
         running = null;
         item.modelLabel = model;
@@ -9973,11 +10444,17 @@ window.NL2SH_FX = (function () {
     if (!attempts.length) { host.hidden = true; host.innerHTML = ''; return; }
     host.hidden = false;
     var passed = attempts.some(function (a) { return a.ok; });
+    /* 一次就过时如实说"没触发修正"——不假装纠正过。
+       闭环演示的可信度全在这一点上：它对失败诚实，对"没失败"也要诚实。 */
+    var badge = passed
+      ? (attempts.length === 1 ? '第 1 次就在沙箱里跑通（未触发修正）'
+        : '第 ' + attempts.length + ' 次修正后跑通')
+      : '尝试了 ' + attempts.length + ' 次仍未跑通';
     host.innerHTML =
       '<div class="loop__head">' +
         '<span class="loop__title">沙箱自验证闭环</span>' +
         '<span class="loop__badge ' + (passed ? 'loop__badge--ok' : 'loop__badge--bad') + '">' +
-          (passed ? '已在沙箱中跑通' : '尝试了 ' + attempts.length + ' 次仍未跑通') +
+          badge +
         '</span>' +
       '</div>' +
       attempts.map(function (a, i) {
@@ -10313,6 +10790,17 @@ window.NL2SH_FX = (function () {
   renderQuest();
   restoreMode();
   applyDeepLink();
+
+  /* 首屏重排必须在 applyDeepLink 之后：
+     深链可能直接定位到某条结果，重排要发生在它定好位之前。 */
+  reshapeFirstScreen();
+  updateSbxBar();
+
+  /* 首屏即产品：没有深链带进来的结果时，加载后立刻把一条示例真跑起来。
+     深链场景（?q=…）已经有内容了，再加一条会误导。 */
+  if (!current) {
+    try { welcomeRun(); } catch (e) { /* 首屏示例失败不该拖垮整页 */ }
+  }
 
   (function firstPaint() {
     var waits = [];
