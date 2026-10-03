@@ -10383,11 +10383,15 @@ window.NL2SH_FX = (function () {
       current = local.item;
       /* ⚠️ 这里原来传的是 `noKey: !forceOffline`——**方向反了**。
          后果很严重：用户真离线时反而不提示，而在线状态下只要走了规则库
-         （首屏示例、完整演示）就谎报「模型代理解析不可用」，
-         评委打开首屏会看到一条假警报，直接以为 AI 没接上。
-         正确的语义：**只有真的用不了代理时**才出这条说明；
-         主动选择走规则库的场合（示例 / 演示）由各自的说明条负责解释。 */
-      var offlineNow = (forceOffline || !st.ok);
+         （首屏示例、完整演示）就谎报「模型代理解析不可用」。
+
+        改成 `forceOffline || !st.ok` 之后**还有第二个坑**（线上实测才暴露）：
+          **首屏示例在 AI.health() 探测完成之前就渲染了**，那一刻 st.ok 还是 false，
+          于是线上首屏同时出现"AI 已接入"和"代理不可用"两句互相打脸的话。
+         修法：首屏示例**永远不出这条提示**——它是刻意走规则库的示例，
+          由「开始的地方」说明条负责解释；真离线时用户自己的提问照样会提示，
+          接入状态面板也会如实显示原因。 */
+      var offlineNow = (forceOffline || !st.ok) && !opts.welcome;
       renderResult(local.item, {
         loose: local.loose,
         noKey: offlineNow,
