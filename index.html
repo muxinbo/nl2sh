@@ -728,31 +728,34 @@ main {
   transform: none;
 }
 
-/* 风险印章：图纸上的审定戳 */
+/* 风险印章：图纸上的审定戳。
+   原来 min-width 84 / height 58 / 再叠一行大写说明，整块占掉卡头的 90px 左右，
+   把首屏的纵向空间吃掉一大口。收成"一枚小戳"——语义一点没少（颜色 + 三个字 + 缩写），
+   但它不再和"命令本身"抢版面。 */
 .seal {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   transform: rotate(-3.5deg);
 }
 .seal__box {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 84px;
-  height: 58px;
-  padding: 0 10px;
+  min-width: 58px;
+  height: 34px;
+  padding: 0 8px;
   border: 2px solid currentColor;
   background: var(--seal-bg);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.16em;
-  text-indent: 0.16em;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
 }
 .seal__cap {
-  font: 500 9.5px/1 var(--f-mono);
-  letter-spacing: 0.22em;
+  font: 500 9px/1 var(--f-mono);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
@@ -3008,6 +3011,146 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
   color: var(--ink-2);
   white-space: normal;
 }
+/* ── 学习报告 ───────────────────────────────────────────
+   去年赛道三一等奖的获奖公式是"记录 → 分析 → 给最优方案"，
+   这里把它做成看得见的一块：分类分布、易错点、下一步建议。
+   刻意**不给分数、不给排名**——这是学习工具，不是绩效考核。 */
+.reportwrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.reportwrap__hint { flex: 1 1 260px; min-width: 0; font-size: 12px; line-height: 1.7; color: var(--ink-3); }
+.reportwrap__clear {
+  flex: 0 0 auto;
+  padding: 5px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-3);
+  font: 500 11.5px/1.4 var(--f-ui);
+  cursor: pointer;
+}
+.reportwrap__clear:hover { border-color: var(--danger); color: var(--danger); }
+
+.reportpanel { margin-top: 14px; }
+.report {
+  padding: 16px 18px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.report__empty, .report__none { margin: 0; font-size: 13px; color: var(--ink-3); }
+.rgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.rcell {
+  padding: 12px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  text-align: center;
+}
+.rcell b { display: block; font: 600 22px/1.2 var(--f-mono); color: var(--signal); }
+.rcell span { display: block; margin-top: 4px; font-size: 11.5px; color: var(--ink-3); }
+.rh {
+  margin: 18px 0 9px;
+  font: 600 12px/1.4 var(--f-mono);
+  letter-spacing: .08em;
+  color: var(--ink-3);
+}
+.rh:first-of-type { margin-top: 0; }
+.rbars { list-style: none; margin: 0; padding: 0; }
+.rbar { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+.rbar__n { flex: 0 0 86px; font-size: 12.5px; color: var(--ink-2); }
+.rbar__track {
+  flex: 1 1 auto;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.rbar__track i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--signal), var(--safe));
+}
+.rbar__v { flex: 0 0 auto; font: 600 12px/1 var(--f-mono); color: var(--ink); }
+.rpits { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.rpit {
+  padding: 10px 13px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--caution);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  font-size: 13px;
+  color: var(--ink);
+}
+.rpit__h { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.75; color: var(--ink-2); }
+.rpit__h code { color: var(--caution); }
+.rnext { margin: 0 0 8px; font-size: 13px; color: var(--ink-2); }
+.rnext b { color: var(--ink); font-weight: 600; }
+.rnext__cmd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.rnext__cmd code {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 7px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper);
+  font: 500 12px/1.6 var(--f-mono);
+  color: var(--signal);
+  overflow-wrap: anywhere;
+}
+.report__foot { margin: 14px 0 0; font-size: 11.5px; color: var(--ink-3); }
+/* ── 闯关的知识点与错误引导 ─────────────────────────────
+   外部评审："新手闯关没有中间提示、知识点拆解、错误引导，
+   错了只甩一句原始报错，更像考试而不是教学。"
+   这三块就是补这个：先讲这一关练的是什么概念 → 失败后归类为什么错 → 试到第二次给具体写法。 */
+.qcard__know {
+  margin: 9px 0 0;
+  padding: 10px 13px;
+  border-left: 3px solid var(--signal);
+  border-radius: 4px;
+  background: var(--signal-soft);
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+.qcard__know b { color: var(--signal); font-weight: 600; }
+.qcard__know code { color: var(--signal); background: none; padding: 0; }
+.qcard__tries {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border-left: 3px solid var(--caution);
+  border-radius: 4px;
+  background: var(--caution-bg);
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--ink-2);
+}
+.qcard__tries b { color: var(--caution); font-weight: 600; }
+.qcard__tries code { color: var(--caution); background: none; padding: 0; }
+.qcard__why {
+  display: block;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--rule-strong);
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+.qcard__why b { color: var(--danger); font-weight: 600; }
+.qcard__why code { color: var(--caution); background: none; padding: 0; }
 </style>
 </head>
 <body>
@@ -3133,6 +3276,14 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
       </div>
       <p class="ask__or">或者从这几个常见任务开始</p>
       <div class="samples" id="samples"></div>
+      <!-- 学习报告：回应去年赛道三一等奖的获奖公式（记录 → 分析 → 给最优方案），
+           也补上外部评审指出的"没有错题本、易错点汇总、学习进度统计"。 -->
+      <div class="reportwrap" id="reportWrap">
+        <button class="btn btn--ghost" type="button" id="reportBtn" disabled>学习报告</button>
+        <span class="reportwrap__hint">每次沙箱执行都会记一笔：练过哪几类操作、在哪里卡住过、下一步建议练什么。记录只存在你自己的浏览器里。</span>
+        <button class="reportwrap__clear" type="button" id="reportClear">清空记录</button>
+      </div>
+      <div class="reportpanel" id="reportPanel" hidden></div>
 
       <!-- AI 数据分析：赛道三的评审侧重点第一条是"模型选择、API 调用、数据处理能力"。
            前两项作品里已经有了，"数据处理能力"一直缺一块——沙箱里明明躺着一台服务器
@@ -9148,12 +9299,20 @@ window.NL2SH_FX = (function () {
      这是它和选择题式"考试"的根本区别。
      而且判定用的是真沙箱，做不到的事情没法蒙过去。 */
   var QUEST_KEY = 'nl2sh.quest';
+  /* 每关试了几次。用来做"渐进提示"：第 1 次失败给方向，第 2 次给具体写法。
+     目的是不让新手在同一个坑里反复撞——外部评审说闯关"像考试不像教学"，
+     一半原因就是失败后除了报错什么都不给。 */
+  var questTries = {};
 
   var LEVELS = [
     {
       id: 1, title: '先看清自己在哪',
       goal: '打印出你当前所在目录的完整路径',
       hint: '一个只有三个字母的命令',
+      hint2: '就是 pwd，print working directory 的缩写——「打印工作目录」。',
+      know: 'Linux 里所有路径都从根目录 <code>/</code> 开始。<b>当前目录</b>（工作目录）' +
+        '是你此刻站的位置——很多「文件明明在，却提示找不到」的根源就是站错了地方。' +
+        '所以养成动手前先 <code>pwd</code> 看一眼的习惯。',
       check: function (sb, run) {
         var want = sb.cwd();
         var got = String(run.out || '').trim();
@@ -9165,6 +9324,10 @@ window.NL2SH_FX = (function () {
       id: 2, title: '连隐藏文件一起看',
       goal: '列出当前目录下的所有文件，包括以点开头的隐藏文件',
       hint: 'ls 有一个"全都列出来"的开关',
+      hint2: '在 ls 后面加 -a（all）。想连权限、大小、时间一起看，就写 ls -la。',
+      know: '以 <code>.</code> 开头的文件在 Linux 里默认被藏起来，它们通常是配置（例如 <code>.env</code>）。' +
+        '<code>-a</code> 就是把藏起来的也拿出来。这也是「我明明看到文件在，程序却说没有」的常见原因——' +
+        '隐藏文件没被列出来。',
       check: function (sb, run) {
         var out = String(run.out || '');
         if (!out.trim()) return { ok: false, why: '这条命令没有输出' };
@@ -9177,6 +9340,10 @@ window.NL2SH_FX = (function () {
       id: 3, title: '从一堆里挑出要的那类',
       goal: '找出 uploads 目录里所有的 .png 文件',
       hint: 'find 或者带通配符的 ls',
+      hint2: '写法是 find uploads -name "*.png" —— 注意 *.png 一定要用引号包住。',
+      know: '<code>*</code> 叫通配符，意思是「任意字符」。<b>加不加引号差别很大</b>：' +
+        '不加引号时，shell 会抢先把 <code>*.png</code> 展开成当前目录里的具体文件名，' +
+        '传给 find 的就不是「模式」而是一串文件名了——这就是必须有引号的原因。',
       check: function (sb, run) {
         var out = String(run.out || '');
         var pngs = ['avatar.png', 'banner.png'];
@@ -9191,6 +9358,10 @@ window.NL2SH_FX = (function () {
       id: 4, title: '改权限，而不是删数据',
       goal: '让 scripts/deploy.sh 变成可执行文件',
       hint: 'chmod 加上"执行"那一位',
+      hint2: 'chmod +x scripts/deploy.sh —— +x 就是「加上可执行」。',
+      know: 'Linux 给每个文件记三段权限：<b>读(r)、写(w)、执行(x)</b>，' +
+        '分别对应属主、同组、其他人。脚本「写好了却跑不起来」，几乎都是缺 <code>x</code>。' +
+        '改权限而不是删掉重来，是运维的基本素养。',
       check: function (sb, run) {
         var node = findNodeIn(sb.tree('.'), '/home/student/project/scripts/deploy.sh');
         if (!node) return { ok: false, why: 'deploy.sh 不见了——这一步不需要删除任何文件' };
@@ -9202,6 +9373,10 @@ window.NL2SH_FX = (function () {
       id: 5, title: '删得干净，也删得准',
       goal: '删掉 cache 目录和它里面的所有文件，但别碰别的东西',
       hint: '递归删除要带 -r',
+      hint2: 'rm -r cache —— r 是 recursive（递归），删目录必须带它。删之前先 ls cache 看一眼里面有什么。',
+      know: '目录不能直接 <code>rm</code>，必须加 <code>-r</code> 表示「连里面的东西一起」。' +
+        '这是最危险的一条命令，所以正确习惯是：<b>先 <code>ls</code> 确认要删什么，再动手删</b>。' +
+        '沙箱里删错了能一键回滚，真机上不能——这就是让你先在沙箱里练的原因。',
       check: function (sb, run) {
         var t = sb.tree('.');
         if (findNodeIn(t, '/home/student/project/cache')) return { ok: false, why: 'cache 目录还在' };
@@ -9270,6 +9445,9 @@ window.NL2SH_FX = (function () {
       '<div class="qcard">' +
         '<p class="qcard__no">第 ' + lv.id + ' 关 / ' + LEVELS.length + '</p>' +
         '<p class="qcard__t">' + esc(lv.goal) + '</p>' +
+        /* 知识点拆解：先告诉这一关在教什么概念，而不是只给一个任务。
+           外部评审指出闯关"更像考试而不是教学"，就是缺这一层。 */
+        (lv.know ? '<p class="qcard__know"><b>这一关练的是</b>' + lv.know + '</p>' : '') +
         '<p class="qcard__h">提示：' + esc(lv.hint) + '</p>' +
         '<div class="qcard__in">' +
           '<span class="term__prompt">$</span>' +
@@ -9324,6 +9502,7 @@ window.NL2SH_FX = (function () {
 
     if (res.ok) {
       questDone[lv.id] = true;
+      questTries[lv.id] = 0;
       saveQuest();
       out.className = 'qcard__r is-good';
       out.textContent = '通过 —— ' + res.why;
@@ -9341,7 +9520,23 @@ window.NL2SH_FX = (function () {
       setTimeout(renderQuest, 1800);
     } else {
       out.className = 'qcard__r is-bad';
-      out.textContent = '还不对 —— ' + res.why + (extra ? '（' + extra + '）' : '');
+      /* 错误引导：原来只甩一句原始报错（"还不对 —— …（真实报错：Permission denied）"），
+         用户知道错了但不知道**为什么错、怎么避**。
+         现在把报错喂给和"学习报告"同一张易错点表，给出归类 + 一句能照着做的办法。
+         同一份知识只写一次，两个地方都用——这也避免了"教学口径不一致"。 */
+      questTries[lv.id] = (questTries[lv.id] || 0) + 1;
+      var pit = String(run.err || '').trim() ? findPitfall(String(run.err)) : null;
+      var guide = pit
+        ? '<span class="qcard__why"><b>为什么错：</b>' + esc(pit.name) + ' —— ' + pit.hint + '</span>'
+        : '';
+      /* 渐进提示：同一关试到第 2 次，就给一条能照着敲的具体写法。
+         必须在**失败当时**追加——原来放在关卡重渲染里，而失败并不会触发重渲染，
+         等于永远不显示（实测发现）。 */
+      var more = (questTries[lv.id] >= 2 && lv.hint2)
+        ? '<span class="qcard__tries">试了 ' + questTries[lv.id] + ' 次了，给一条能照着敲的：' +
+          esc(lv.hint2) + '</span>'
+        : '';
+      out.innerHTML = '还不对 —— ' + esc(res.why) + (extra ? '（' + esc(extra) + '）' : '') + guide + more;
       input.select();
     }
   }
@@ -9401,6 +9596,16 @@ window.NL2SH_FX = (function () {
     /* 自纠错闭环演示 */
     var loopBtn = $('#loopBtn');
     if (loopBtn) loopBtn.addEventListener('click', startLoopDemo);
+
+    /* 学习报告 */
+    var reportBtn = $('#reportBtn');
+    if (reportBtn) reportBtn.addEventListener('click', toggleReport);
+    var reportClear = $('#reportClear');
+    if (reportClear) reportClear.addEventListener('click', function () {
+      clearLog();
+      var p = $('#reportPanel');
+      if (p) { p.hidden = false; p.innerHTML = reportHtml(); }
+    });
 
     $('#askForm').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -9540,7 +9745,9 @@ window.NL2SH_FX = (function () {
           新手闯关、接入状态、沙箱状态条、示例、数据分析、闭环入口
           全部挪到结果卡之后——它们都重要，但没有一件比"看见沙箱在跑"更该在第一屏。 */
     var anchor = result;
-    ['#quest', '.setup', '.ask__or', '#samples', '#analyze', '#loopDemo'].forEach(function (sel) {
+    /* 学习报告的入口也必须挪到结果卡之后：它原本在输入框下面，会把结果卡整体下推 83px，
+       把刚争回来的首屏空间又吃掉（闭环徽章因此被挤出折叠线）。 */
+    ['#quest', '.setup', '.ask__or', '#samples', '#reportWrap', '#reportPanel', '#analyze', '#loopDemo'].forEach(function (sel) {
       var el = document.querySelector(sel);
       if (!el) return;
       parent.insertBefore(el, anchor.nextSibling);
@@ -9643,9 +9850,9 @@ window.NL2SH_FX = (function () {
       (lean
         ? '<p class="runloop" id="loopBadge" hidden></p>'
         : '<div id="loopPanel" class="loop" hidden></div>') +
-      '<p class="run__lead">这条命令会跑在一个内存文件系统里的"学生服务器"上——' +
-        '目录结构、属主和权限规则都是真的，只有文件改动是临时的：' +
-        '它只发生在浏览器内存里，随时能一键回到执行前。</p>' +
+      /* 这段原来在解释"沙箱是真的、改动在内存里"——和上方的欢迎条、以及
+         沙箱状态条说的是同一件事，三处重复。收成一句只讲"独有信息"（可回滚）。 */
+      '<p class="run__lead">改动只发生在浏览器内存里，随时能一键回到执行前。</p>' +
       '<div class="run__bar">' +
         '<button class="btn btn--go' + (danger ? ' btn--danger' : '') + '" type="button" id="runBtn">' +
           (danger ? '在沙箱里跑一遍（危险命令，放心试）' : '在沙箱里跑一遍') + '</button>' +
@@ -10122,6 +10329,9 @@ window.NL2SH_FX = (function () {
     var out = $('#manualOut');
     if (!sb || !out) return;
     var r = sb.run(cmd);
+    /* 手敲的也要进学习记录——自己动手敲才是真练习，
+       只统计"点按钮生成的那些"会让报告严重低估用户的实际投入。 */
+    logRun({ cmd: cmd, risk: 'safe', source: 'manual' }, r);
     if (manualLine === 0) out.textContent = '';
     var chunk = [];
     chunk.push('<span class="t-prompt">student@sandbox</span>:<span class="t-prompt">' +
@@ -10200,6 +10410,93 @@ window.NL2SH_FX = (function () {
     }
 
     if (opts.onDone) opts.onDone(item.run);
+    logRun(item, item.run);
+  }
+
+  /* ── 学习记录 ─────────────────────────────────────────
+     去年第一届赛道三的一等奖是"心理学情感智能体"，评委给的获奖描述是：
+     「通过人机互动**记录**交互内容，并且通过数据进行**内容分析**，
+     从而给机主**最优解决方案**」——公式就是 记录 → 分析 → 给方案。
+
+     我们的强项在后半段（真跑+解释+给命令），前半段一直缺：
+     历史、收藏、闯关进度都只存在本地、而且从不汇总，用户学完就走，
+     没有任何"沉淀"。所以这里补上埋点：**每一次沙箱执行都记一笔**，
+     累积在 localStorage 里，喂给「学习报告」做分类统计与易错点归纳。
+
+     有一条纪律：**只记命令与结果，不记输入框里的原始中文**。
+     报告要的是"你练了哪几类操作"，不是"你说过什么话"。 */
+  var LOG_KEY = 'nl2sh.runs';
+  var sessionLog = [];
+
+  /* 命令 → 能力分类。按第一个词判断，够用而且不会误判。 */
+  var CMD_CLASSES = [
+    { id: 'file', name: '文件与目录', re: /^(ls|cd|pwd|mkdir|rmdir|touch|cp|mv|rm|find|tree|stat|file|basename|dirname|ln|tar|zip|unzip|tee)$/ },
+    { id: 'text', name: '文本处理', re: /^(cat|head|tail|grep|sed|awk|sort|uniq|cut|tr|wc|paste|diff|xargs)$/ },
+    { id: 'perm', name: '权限与属主', re: /^(chmod|chown|chgrp|umask|id|whoami|su|sudo)$/ },
+    { id: 'sys', name: '系统信息', re: /^(df|du|free|ps|top|uname|date|uptime|which|env|echo)$/ },
+    { id: 'proc', name: '进程与服务', re: /^(kill|pkill|systemctl|journalctl|service|ss|netstat|nohup|bg|fg|jobs)$/ },
+    { id: 'other', name: '其它', re: /.*/ }
+  ];
+
+  function cmdClass(cmd) {
+    var first = String(cmd || '').trim().split(/[\s|;&]+/)[0].replace(/^\W+/, '');
+    for (var i = 0; i < CMD_CLASSES.length; i++) {
+      if (CMD_CLASSES[i].re.test(first)) return CMD_CLASSES[i];
+    }
+    return CMD_CLASSES[CMD_CLASSES.length - 1];
+  }
+
+  /* 报错 → 易错点。取的是"为什么错"的类别，不是原始报错文本。 */
+  var PITFALLS = [
+    { id: 'perm', name: '权限不够', hint: '对没有权限的文件动手了。先看权限：<code>ls -l</code>；要改权限用 <code>chmod</code>，但别一上来就 777。', re: /permission denied|operation not permitted/i },
+    { id: 'noent', name: '路径或文件不存在', hint: '名字写错了，或者你在别的目录下。先 <code>pwd</code> 看在哪、<code>ls</code> 看有什么。', re: /no such file or directory|cannot access/i },
+    { id: 'isdir', name: '把目录当成文件操作', hint: '删目录要加 <code>-r</code>，改目录内容要先进去。', re: /is a directory/i },
+    { id: 'notempty', name: '目录非空', hint: '目录里还有东西。<code>rmdir</code> 只删空目录，非空要用 <code>rm -r</code>。', re: /directory not empty/i },
+    { id: 'unsupported', name: '命令或写法沙箱没实现', hint: '这条依赖内核/systemd，浏览器里没有。换个等价的基础命令组合试试。', re: /沙箱(只实现了|未实现)|not implemented/i },
+    { id: 'usage', name: '参数写法不对', hint: '参数格式错了。看看这条命令的用法：在下面终端里敲 <code>help</code>。', re: /usage:|invalid option|unrecognized/i }
+  ];
+
+  function findPitfall(errText) {
+    var t = String(errText || '');
+    for (var i = 0; i < PITFALLS.length; i++) if (PITFALLS[i].re.test(t)) return PITFALLS[i];
+    return null;
+  }
+
+  function logRun(item, run) {
+    if (!item || !item.cmd || !run) return;
+    var errText = [run.err, run.out].filter(Boolean).join('\n');
+    var ok = run.code === 0 && !String(run.err || '').trim();
+    var pit = ok ? null : findPitfall(errText);
+    sessionLog.push({
+      c: cmdClass(item.cmd).id,
+      r: item.risk || 'safe',
+      s: item.source === 'ai' ? 'ai' : (item.source === 'manual' ? 'manual' : 'lib'),
+      ok: ok ? 1 : 0,
+      sim: run.simulated ? 1 : 0,
+      pit: pit ? pit.id : (ok ? '' : 'other'),
+      t: Date.now()
+    });
+    if (sessionLog.length > 300) sessionLog = sessionLog.slice(-300);
+    saveLog();
+    paintReportBadge();
+  }
+
+  function saveLog() {
+    try { window.localStorage.setItem(LOG_KEY, JSON.stringify(sessionLog)); } catch (e) { }
+  }
+
+  function loadLog() {
+    try {
+      var raw = window.localStorage.getItem(LOG_KEY);
+      var v = raw ? JSON.parse(raw) : [];
+      if (Object.prototype.toString.call(v) === '[object Array]') sessionLog = v.slice(-300);
+    } catch (e) { sessionLog = []; }
+  }
+
+  function clearLog() {
+    sessionLog = [];
+    saveLog();
+    paintReportBadge();
   }
 
   /* 高危命令在执行前的二次确认。
@@ -10328,16 +10625,145 @@ window.NL2SH_FX = (function () {
     var bar = document.createElement('div');
     bar.className = 'welcomebar';
     bar.id = 'welcomeBar';
+    /* 与上面的「沙箱就绪」状态条**不再重复**：那条负责状态与重置，
+       这条只负责一件事——说清"这是给你的起点，改成自己的需求就走真实模型"。
+       原来两段文案都在解释"沙箱是真的、改动在内存里"，等于同一句话说两遍。 */
     bar.innerHTML =
       '<span class="welcomebar__badge">开始的地方</span>' +
-      '<span class="welcomebar__text">下面这条是<b>给你准备的示例</b>（内置规则库，已人工核对），' +
-        '右侧沙箱已经<b>真的跑过一遍</b>——目录树上的颜色就是权限。' +
-        (loose ? '　⚠ 这句没有精确匹配，只是最接近的一条。' : '') +
-        '　把上面的输入框改成你自己的需求，回车就会走真实模型。</span>' +
+      '<span class="welcomebar__text">这是<b>给你准备的示例</b>（内置规则库，已人工核对）。' +
+        (loose ? '<b>⚠ 这句没有精确匹配</b>，只是最接近的一条。' : '') +
+        '把上面的输入框改成<b>你自己的需求</b>，回车就会走真实模型生成。</span>' +
       '<button class="welcomebar__x" type="button" id="welcomeX" aria-label="收起">×</button>';
     result.insertBefore(bar, result.firstChild);
     var x = $('#welcomeX', bar);
     if (x) x.addEventListener('click', function () { bar.remove(); });
+  }
+
+  /* ── 学习报告：把上面记下来的东西变成"看得见的进步" ────
+     这是对去年赛道三一等奖公式（记录 → 分析 → 给最优方案）的正面回应，
+     也补上了外部评审指出的"没有错题本、易错点汇总、学习进度统计"。
+
+     报告只做三件事，一件都不多：
+       ① 你练了哪几类操作（分布）——让人看到自己的覆盖面；
+       ② 你在哪里卡住过（易错点归类 + 怎么避）——这是错题本；
+       ③ 下一步该练什么（推荐 2 条具体命令）——这是"给最优方案"。
+     不给分数、不给排名：这是学习工具，不是绩效考核。 */
+  var REPORT_MIN = 3;
+
+  function reportStats() {
+    var byClass = {}, byRisk = { safe: 0, caution: 0, danger: 0 }, pits = {}, ai = 0, okc = 0, sim = 0;
+    sessionLog.forEach(function (x) {
+      byClass[x.c] = (byClass[x.c] || 0) + 1;
+      if (byRisk[x.r] !== undefined) byRisk[x.r]++;
+      if (x.s === 'ai') ai++;
+      if (x.ok) okc++;
+      if (x.sim) sim++;
+      if (x.pit) pits[x.pit] = (pits[x.pit] || 0) + 1;
+    });
+    return { total: sessionLog.length, byClass: byClass, byRisk: byRisk, pits: pits, ai: ai, ok: okc, sim: sim };
+  }
+
+  function classMeta(id) {
+    for (var i = 0; i < CMD_CLASSES.length; i++) if (CMD_CLASSES[i].id === id) return CMD_CLASSES[i];
+    return null;
+  }
+  function pitMeta(id) {
+    for (var i = 0; i < PITFALLS.length; i++) if (PITFALLS[i].id === id) return PITFALLS[i];
+    return null;
+  }
+
+  /* 下一步练什么：挑用户**占比最低**的那一类，给两条真实可跑的命令。
+     推荐用的是沙箱里确实实现了的命令（不然点了跑不通，反而打击人）。 */
+  var CLASS_NEXT = {
+    file: ['按大小列出前 10 个文件（只看列表，不改动）', 'ls -lS | head -n 10'],
+    text: ['统计日志里各状态码出现次数', "awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn"],
+    perm: ['看看某个文件的权限和属主', 'ls -l notes.txt'],
+    sys: ['看现在磁盘还剩多少', 'df -h'],
+    proc: ['看看 nginx 相关进程在不在', "ps aux | grep nginx"],
+    other: ['换一种说法再问一次', 'ls -la']
+  };
+
+  function reportHtml() {
+    var st = reportStats();
+    if (st.total < 1) {
+      return '<p class="report__empty">还没有记录。上面生成一条命令、让沙箱跑一遍，这里就会开始积累。</p>';
+    }
+    var order = CMD_CLASSES.map(function (c) { return c.id; });
+    var maxN = 1;
+    order.forEach(function (id) { if ((st.byClass[id] || 0) > maxN) maxN = st.byClass[id]; });
+
+    var bars = order.filter(function (id) { return st.byClass[id]; }).map(function (id) {
+      var n = st.byClass[id];
+      return '<li class="rbar">' +
+        '<span class="rbar__n">' + esc(classMeta(id).name) + '</span>' +
+        '<span class="rbar__track"><i style="width:' + Math.round(n / maxN * 100) + '%"></i></span>' +
+        '<b class="rbar__v">' + n + '</b></li>';
+    }).join('');
+
+    var pitRows = Object.keys(st.pits).sort(function (a, b) { return st.pits[b] - st.pits[a]; })
+      .slice(0, 3).map(function (id) {
+        var m = pitMeta(id) || { name: '其它报错', hint: '把报错原文读一遍，通常它已经说了原因。' };
+        return '<li class="rpit"><b>' + esc(m.name) + '</b> × ' + st.pits[id] +
+          '<span class="rpit__h">' + m.hint + '</span></li>';
+      }).join('');
+
+    /* 推荐：覆盖最少的那一类 */
+    var weakest = order.filter(function (id) { return id !== 'other'; })
+      .sort(function (a, b) { return (st.byClass[a] || 0) - (st.byClass[b] || 0); })[0];
+    var next = CLASS_NEXT[weakest] || CLASS_NEXT.other;
+
+    return '<div class="report">' +
+      '<div class="rgrid">' +
+        '<div class="rcell"><b>' + st.total + '</b><span>次沙箱执行</span></div>' +
+        '<div class="rcell"><b>' + st.ok + '</b><span>次一次跑通</span></div>' +
+        '<div class="rcell"><b>' + st.ai + '</b><span>条来自真实模型</span></div>' +
+        '<div class="rcell"><b>' + (st.byRisk.danger + st.byRisk.caution) + '</b><span>条需要谨慎</span></div>' +
+      '</div>' +
+      '<h4 class="rh">练过的操作类型</h4>' +
+      '<ul class="rbars">' + bars + '</ul>' +
+      (pitRows
+        ? '<h4 class="rh">卡住过的地方（按次数排）</h4><ul class="rpits">' + pitRows + '</ul>'
+        : '<h4 class="rh">卡住过的地方</h4><p class="report__none">到目前为止没有失败记录 —— 换个更难的场景试试。</p>') +
+      '<h4 class="rh">下一步建议</h4>' +
+      '<p class="rnext">你在<b>' + esc(classMeta(weakest).name) + '</b>这一类练得最少，试试这条：</p>' +
+      '<div class="rnext__cmd"><code>' + esc(next[1]) + '</code>' +
+        '<button class="find__run" type="button" data-sbx="' + esc(next[1]) + '">在沙箱里验证</button>' +
+        '<pre class="find__out" hidden></pre></div>' +
+      '<p class="report__foot">记录只保存在你自己的浏览器里，不上传——换设备或清缓存就会重新开始。</p>' +
+    '</div>';
+  }
+
+  function paintReportBadge() {
+    var b = $('#reportBtn');
+    if (!b) return;
+    var n = sessionLog.length;
+    b.textContent = n ? '学习报告（已积累 ' + n + ' 次执行）' : '学习报告';
+    b.disabled = n < 1;
+  }
+
+  function toggleReport() {
+    var host = $('#reportPanel');
+    if (!host) return;
+    if (!host.hidden) { host.hidden = true; return; }
+    host.hidden = false;
+    host.innerHTML = reportHtml();
+    /* 报告里的"在沙箱里验证"复用同一套交互 */
+    $$('.find__run', host).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var sb = getSandbox();
+        var out = btn.parentNode.querySelector('.find__out');
+        if (!sb || !out) return;
+        var r = null;
+        try { r = sb.run(btn.getAttribute('data-sbx')); } catch (e) { r = null; }
+        out.hidden = false;
+        var text = r ? (String(r.out || '') + String(r.err || '')).trim() : '沙箱执行失败';
+        if (!text) text = '（这条命令没有任何输出）';
+        out.textContent = '$ ' + btn.getAttribute('data-sbx') + '\n' + text + '\n[退出码 ' + (r ? r.code : '?') + ']';
+        out.classList.toggle('is-bad', !!(r && (r.code !== 0 || String(r.err || '').trim())));
+        btn.textContent = '再跑一次';
+      });
+    });
+    scrollToEl('#reportPanel');
   }
 
   function paintDraftBar(model) {
@@ -10885,6 +11311,8 @@ window.NL2SH_FX = (function () {
      深链可能直接定位到某条结果，重排要发生在它定好位之前。 */
   reshapeFirstScreen();
   updateSbxBar();
+  loadLog();
+  paintReportBadge();
 
   /* 首屏即产品：没有深链带进来的结果时，加载后立刻把一条示例真跑起来。
      深链场景（?q=…）已经有内容了，再加一条会误导。 */
