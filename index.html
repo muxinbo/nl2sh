@@ -3585,7 +3585,7 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
       </div>
       <div class="note">
         <h3>技术说明</h3>
-        <p><strong>纯静态零后端架构</strong>：页面、沙箱、50 条规则库全部在浏览器本地运行；AI 生成经同源边缘函数代理调用大模型，密钥只存在服务端环境变量里。你的输入不经过第三方服务器，也不会留存在任何地方。</p>
+        <p><strong>纯静态零后端架构</strong>：页面、沙箱、50 条规则库全部在浏览器本地运行；AI 生成经边缘函数代理调用大模型（同源路由优先，部署环境没有该路由时回退到兜底域），密钥只存在服务端环境变量里。你的输入不经过第三方服务器，也不会留存在任何地方。</p>
       </div>
     </div>
   </section>
@@ -9259,6 +9259,10 @@ window.NL2SH_FX = (function () {
 
   /* ── 会话索引 ─────────────────────────────────────── */
   function markHistory(item) {
+    /* ⚠️ 在线时草稿也会走到这里，而**草稿的 item.q 是规则库自己的问句**（不是用户问的那句）——
+       于是"本次会话"侧栏里一次提问出现两条，其中一条是用户从没问过的话。
+       所以正式结果入库时，先把紧挨着的草稿条去掉；草稿自己也别单独入库。 */
+    if (!item.__draft && history.length && history[0].item.__draft) history.shift();
     history = history.filter(function (h) { return h.item.q !== item.q; });
     history.unshift({ item: item });
     history = history.slice(0, 12);
