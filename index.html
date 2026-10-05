@@ -7020,7 +7020,7 @@ window.NL2SH_AI = (function () {
           → 同源必然 404，必须填上 Worker 的地址，否则评委永远只看到离线模式。
      所以策略是"同源优先，失败再走兜底"，并把最终生效的基址记在 state.base 上。
      ⚠️ 只有这里留空且同源也不通时才会降级到离线模式。 */
-  var FALLBACK_ORIGIN = 'https://nl2sh-api.zibochen82.workers.dev';
+  var FALLBACK_ORIGIN = 'https://nl2sh.pages.dev';
   /* 上面这个地址是已部署的 Cloudflare Worker（2026-10-03 部署并实测）：
        · /api/health → {"ok":true,"hasKey":true,...}
        · OPTIONS 预检 → 204 + Access-Control-Allow-Origin: *
