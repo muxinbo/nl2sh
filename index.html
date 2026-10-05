@@ -7020,7 +7020,12 @@ window.NL2SH_AI = (function () {
           → 同源必然 404，必须填上 Worker 的地址，否则评委永远只看到离线模式。
      所以策略是"同源优先，失败再走兜底"，并把最终生效的基址记在 state.base 上。
      ⚠️ 只有这里留空且同源也不通时才会降级到离线模式。 */
-  var FALLBACK_ORIGIN = 'https://nl2sh.pages.dev';
+  /* 兜底域：pages.dev 上部署了 _worker.js（见 deploy/CloudflarePages函数代理-操作步骤.md），
+   实测 /api/health 返回 hasKey:true、/api/chat 能真实流式（首字节 ~0.8s），
+   而且它对跨源请求正确回告 X-NL2SH-* 诊断头。
+   旧的 workers.dev 已确认在部分国内网络下 DNS 被污染（解析到 Facebook/Dropbox 的 IP），
+   所以换成这个；而**真正解决"国内可达"的仍然是 EdgeOne 那条**（腾讯云国内节点）。 */
+var FALLBACK_ORIGIN = 'https://nl2sh.pages.dev';
   /* 上面这个地址是已部署的 Cloudflare Worker（2026-10-03 部署并实测）：
        · /api/health → {"ok":true,"hasKey":true,...}
        · OPTIONS 预检 → 204 + Access-Control-Allow-Origin: *

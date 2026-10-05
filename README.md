@@ -163,13 +163,14 @@ preview/                效果图
   `color-mix` 全 0 处，JS 里连可选链都没用），本机只有 Chromium 内核浏览器，
   **不能声称验证过 Firefox / Safari**
 - **受众面窄**：只覆盖 Linux 入门阶段的文件与文本操作，进阶运维场景几乎为零
-- **「页面能打开」不等于「AI 能用」——这是两个不同的域名**：
-  静态页在 `muxinbo.github.io`，模型代理在 `nl2sh-api.zibochen82.workers.dev`。
-  实测 `*.workers.dev` 在大陆被 DNS 污染（21 秒超时零响应，DNS 返回 Facebook / Dropbox 的 IP），
-  所以**在没有代理的网络下，页面正常显示、但四个 AI 功能一个都出不来，会一直停在「离线模式」**。
-  对赛道三这条评分点（「后端智能必须突出」）是伤筋动骨的。
-  修法在 `deploy/EdgeOne函数代理-操作步骤.md`：把代理搬到国内节点，或给 Worker 绑一个自定义域名
-  （污染的是 `workers.dev` 这个**通配域名本身**，自定义域名走正常 Cloudflare 节点）。
+- **AI 代理放在哪、以及它的可达性**：静态页在 `muxinbo.github.io`（另有 `nl2sh.pages.dev`），
+  **模型代理是 `pages.dev` 上的同域 `_worker.js`**——不是另起一个域名。
+  实测：`/api/health` 返回 `hasKey:true`；`/api/chat` 真实流式（首字节约 0.8s）；
+  `github.io` 走跨源回退时预检 204、`X-NL2SH-*` 诊断头可读。
+  早先的代理在 `*.workers.dev`，实测**在部分国内网络下 DNS 被污染**
+  （解析到 Facebook / Dropbox 的 IP、curl 21 秒超时），所以换掉了。
+  ⚠️ 但 `pages.dev` 与 `workers.dev` 同属 Cloudflare，**可达性仍取决于评委所在的网络**；
+  腾讯云 EdgeOne（国内节点）是更稳的一条，函数代码与操作手册都在 `deploy/` 里备好了。
 
 ---
 
