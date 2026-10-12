@@ -3354,6 +3354,58 @@ main#top > .work { max-width: var(--maxw); margin-left: auto; margin-right: auto
   color: var(--ink-2);
 }
 
+/* ── 精致度 pass（只动表现层，不动布局尺寸）────────────────
+   对手第一眼的观感是"大厂 B 端"：干净、呼吸感好、动作流畅。
+   我们赢在识别度（工程图纸），但确实偏密、偏"工具"。
+   这一组只做**不改变任何元素尺寸**的打磨，所以首屏那些量好的位置一个都不会动：
+
+     · 可点元素的 hover / active 反馈统一（原来只有部分有）
+     · 键盘焦点环：原来依赖浏览器默认（在深色底上很丑），改成品牌色细环
+     · 过渡时长统一到 160ms，避免"有的地方滑、有的地方跳"
+     · 卡片阴影分两级（静置 / 悬浮），让层次读得出来
+     · 滚动条也纳入配色，避免出现一条系统灰
+
+   为什么不顺手加留白：首屏徽章上方只剩 21px 余量，
+   任何增高都会把它顶出折叠线——"呼吸感"要靠减法，不靠加高。 */
+:root {
+  --ease: cubic-bezier(.2, .7, .3, 1);
+  --dur: 160ms;
+  --shadow-lift: 0 0 0 1px rgba(232, 238, 248, 0.07), 0 20px 44px -20px rgba(0, 0, 0, 0.8);
+}
+
+button, a, .sample, .mode, .pstage, .tok, summary {
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              color var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+              transform var(--dur) var(--ease);
+}
+
+/* 键盘焦点：默认环在深色底上很不体面，换成品牌色细环 */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* 悬浮：抬起 1px + 换成二级阴影。位移只有 1px，不会造成布局抖动。 */
+.card:hover { box-shadow: var(--shadow-lift); }
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+.sample:hover, .mode:hover { border-color: var(--rule-strong); }
+.index__item:hover { background: var(--surface-2); }
+.fsTree__undo:hover, .cmdwrap__copy:hover, .sbxbar__btn:hover { border-color: var(--rule-strong); color: var(--ink); }
+.titleblock__v a:hover, .foot a:hover { text-decoration: underline; }
+
+/* 滚动条：深色底上出现系统灰条很跳 */
+* { scrollbar-color: var(--rule-strong) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rule-strong); border: 2px solid transparent; background-clip: content-box; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-3); background-clip: content-box; }
+
+/* 选中文字也用品牌色，细节统一 */
+::selection { background: var(--signal-soft); color: var(--ink); }
+
 </style>
 </head>
 <body>
@@ -10166,7 +10218,13 @@ window.NL2SH_FX = (function () {
       bar.innerHTML =
         '<span class="idbar__name">NL2SH</span>' +
         '<span class="idbar__sub">Linux 新手零门槛入门平台</span>' +
-        '<span class="idbar__flow">中文说需求 → 真模型生成 → 浏览器内沙箱真跑一遍 → 一键回滚</span>' +
+        /* 这一行原来写的是流程（中文说需求 → 真模型生成 → …）。
+           流程说的是"它怎么工作"，而评委第一眼要的是"**这跟我有什么关系**"。
+           对手那句话说得很到位：「老人零操作 · 提醒不靠打电话 · 一次布置长期生效」——
+           具体、有画面、说人话。所以我们这句也要回答"**为什么值得用**"：
+           敢敲（价值）+ 删错了能回来（安全感），而不只是罗列步骤。
+           详细的"怎么工作"在下面那张真命令卡里，本来就看得见。 */
+        '<span class="idbar__flow">让新手敢敲下第一条命令 · 沙箱里随便删，一键回到执行前</span>' +
         '<span class="idbar__org"><b>赛道三 · 智能交互与应用</b> · GDUST Linux 协会 AI 网页设计大赛参赛作品</span>';
       top.insertBefore(bar, top.firstChild);
     }
@@ -10240,6 +10298,7 @@ window.NL2SH_FX = (function () {
         '<button class="btn btn--go' + (danger ? ' btn--danger' : '') + '" type="button" id="runBtn">' +
           (danger ? '在沙箱里跑一遍（危险命令，放心试）' : '在沙箱里跑一遍') + '</button>' +
         '<button class="btn btn--ghost btn--fav" type="button" id="favBtn" aria-pressed="false">☆ 收藏</button>' +
+        '<button class="btn btn--ghost" type="button" id="cardBtn" title="导出一张 PNG：需求 + 命令 + 逐段拆解 + 风险提示，可以存下来或打印">导出速查卡</button>' +
         '<span class="run__meta" id="runMeta">' + s.files + ' 个文件 · ' + esc(s.cwd) + '</span>' +
       '</div>' +
       /* 终端区：左边 30% 是实时文件系统面板，右边是"执行结果 + 可交互终端"。
@@ -10674,6 +10733,189 @@ window.NL2SH_FX = (function () {
     paintFsTree(result, opts || {});
   }
 
+  /* ── 速查卡导出 ────────────────────────────────────────
+     把"这次学到了什么"变成一张能带走的图：需求 + 命令 + 逐段拆解 + 风险提示。
+     为什么值得做：外部评审与用户都提过，这个作品的教学内容**看得见但带不走**；
+     而对手有一整套"可打印的物料"（大字用药表、药盒标签），在"作品价值"那一项上
+     天然显得更有产出。我们不做资料堆砌，只做**一张真正用得上的卡**：
+     贴在显示器边上、或者发给刚学 Linux 的同学。
+
+     实现上刻意只用 Canvas：无依赖、不联网、断网也能导出，
+     和"零后端、纯静态"的架构保持一致（不为了一个导出功能引入任何库）。
+     画风沿用站内的工程图纸语言（深海军蓝底 + 白发丝线 + 角标 + 编号标签），
+     这样导出的图本身就带着识别度。 */
+  function exportCardPng(item) {
+    if (!item || !item.cmd) return null;
+    var W = 1000, PAD = 58, DPR = 2;
+    var MAXW = W - PAD * 2;
+
+    /* 为什么画两遍：第一版把高度写死 1320，结果首屏那张**精简卡**没有逐段拆解，
+       下半页就是一大片空白——导出的图看着像没做完。
+       所以先在"测量画布"上走一遍得到实际用到的高度，再按这个高度出图。
+       两遍用的是同一段绘制代码（draw），所以不会出现"量的和画的不一致"。 */
+    function draw(g, height, withFooter) {
+      g.fillStyle = '#0b1220';
+      g.fillRect(0, 0, W, height);
+      g.strokeStyle = 'rgba(232,238,248,0.055)';
+      g.lineWidth = 1;
+      for (var gx = 24; gx < W; gx += 24) { g.beginPath(); g.moveTo(gx, 0); g.lineTo(gx, height); g.stroke(); }
+      for (var gy = 24; gy < height; gy += 24) { g.beginPath(); g.moveTo(0, gy); g.lineTo(W, gy); g.stroke(); }
+
+      var y = PAD + 26;
+      function label(t) {
+        g.font = '600 13px "Cascadia Mono", Consolas, monospace';
+        g.fillStyle = '#5f7391';
+        g.fillText(t, PAD, y);
+        y += 30;
+      }
+      function wrap(text, font, color, maxW, lh, indent) {
+        g.font = font; g.fillStyle = color;
+        var chars = String(text).split('');
+        var line = '', lines = [];
+        for (var i = 0; i < chars.length; i++) {
+          var t = line + chars[i];
+          if (g.measureText(t).width > maxW && line) { lines.push(line); line = chars[i]; }
+          else line = t;
+        }
+        if (line) lines.push(line);
+        lines.forEach(function (l) { g.fillText((indent || '') + l, PAD, y); y += lh; });
+      }
+      function body(text, color, maxW, lh, indent) {
+        wrap(text, '400 19px system-ui, "Microsoft YaHei", sans-serif', color, maxW, lh, indent);
+      }
+
+      /* 抬头 */
+      g.font = '700 34px system-ui, "Microsoft YaHei", sans-serif';
+      g.fillStyle = '#e8eef8';
+      g.fillText('NL2SH · 命令速查卡', PAD, y);
+      y += 32;
+      g.font = '400 14px "Cascadia Mono", Consolas, monospace';
+      g.fillStyle = '#5f7391';
+      g.fillText('说人话，出命令  ·  nl2sh.pages.dev', PAD, y);
+      y += 40;
+      g.strokeStyle = 'rgba(232,238,248,0.16)'; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(PAD, y); g.lineTo(W - PAD, y); g.stroke();
+      y += 44;
+
+      /* 需求 */
+      label('你的需求');
+      body(item.q || '（未记录）', '#e8eef8', MAXW, 32);
+      y += 26;
+
+      /* 命令（先量行数再铺底，底板高度才对得上） */
+      label('命令');
+      var cw = g.measureText ? null : null;
+      var cmdLines = [];
+      g.font = '500 22px "Cascadia Mono", Consolas, monospace';
+      var cl = '';
+      for (var ci = 0; ci < String(item.cmd).length; ci++) {
+        var ct = cl + String(item.cmd)[ci];
+        if (g.measureText(ct).width > MAXW - 28 && cl) { cmdLines.push(cl); cl = String(item.cmd)[ci]; }
+        else cl = ct;
+      }
+      if (cl) cmdLines.push(cl);
+      var boxH = cmdLines.length * 34 + 22;
+      var boxTop = y - 24;
+      g.fillStyle = 'rgba(122,215,234,0.07)';
+      g.fillRect(PAD - 14, boxTop, MAXW + 28, boxH);
+      g.strokeStyle = 'rgba(122,215,234,0.34)'; g.lineWidth = 1;
+      g.strokeRect(PAD - 14, boxTop, MAXW + 28, boxH);
+      g.font = '500 22px "Cascadia Mono", Consolas, monospace';
+      g.fillStyle = '#7ad7ea';
+      cmdLines.forEach(function (l) { g.fillText(l, PAD, y); y += 34; });
+      y += 40;
+
+      /* 逐段拆解（有才画） */
+      var segs = (item.segments && item.segments.length) ? item.segments : [];
+      if (segs.length) {
+        label('逐段拆解');
+        segs.forEach(function (sg, i) {
+          g.font = '500 20px "Cascadia Mono", Consolas, monospace';
+          g.fillStyle = '#e8eef8';
+          g.fillText((i + 1) + '. ' + String(sg.part || '').slice(0, 34), PAD, y);
+          y += 28;
+          wrap(String(sg.explanation || ''), '400 17px system-ui, "Microsoft YaHei", sans-serif',
+            '#9db0cc', MAXW - 30, 26, '   ');
+          y += 16;
+        });
+        y += 10;
+      }
+
+      /* 风险与边界 */
+      label('风险与边界');
+      var risk = item.risk === 'danger' ? '危险' : (item.risk === 'caution' ? '谨慎' : '安全');
+      var riskColor = item.risk === 'danger' ? '#ff7b8a' : (item.risk === 'caution' ? '#f9e2af' : '#7ee787');
+      g.font = '600 20px system-ui, "Microsoft YaHei", sans-serif';
+      g.fillStyle = riskColor;
+      g.fillText(risk, PAD, y);
+      g.font = '400 17px system-ui, "Microsoft YaHei", sans-serif';
+      g.fillStyle = '#9db0cc';
+      g.fillText(String(item.why || '').slice(0, 44), PAD + 62, y);
+      y += 34;
+
+      /* 如实标注来源与模拟成分——和界面上同一套规矩，导出的图里也不许含糊 */
+      var notes = [];
+      notes.push(item.source === 'ai' ? ('由 ' + (item.modelLabel || '模型') + ' 实时生成') : '来自内置规则库（已人工核对）');
+      if (item.run && item.run.simulated) notes.push('输出含模拟数据（依赖内核 / systemd 的命令按预设场景模拟）');
+      if (item.loose) notes.push('规则库没有完全匹配，这是字面上最接近的一条');
+      notes.push('沙箱里的文件改动只发生在浏览器内存，随时可回到执行前');
+      notes.forEach(function (t) {
+        g.font = '400 15px system-ui, "Microsoft YaHei", sans-serif';
+        g.fillStyle = '#5f7391';
+        g.fillText('· ' + t, PAD, y);
+        y += 24;
+      });
+
+      if (withFooter) {
+        var fy = height - PAD - 48;
+        g.strokeStyle = 'rgba(232,238,248,0.16)'; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(PAD, fy); g.lineTo(W - PAD, fy); g.stroke();
+        g.font = '500 13px "Cascadia Mono", Consolas, monospace';
+        g.fillStyle = '#5f7391';
+        g.fillText('GDUST LINUX 协会 · AI 网页设计大赛 · 赛道三：智能交互与应用', PAD, fy + 28);
+        g.fillText('NL2SH-01  ·  1:1  ·  导出时间 ' + new Date().toISOString().slice(0, 10), PAD, fy + 48);
+      }
+
+      /* 外框与四角裁切标记（最后画，压在最上层） */
+      g.strokeStyle = 'rgba(232,238,248,0.16)'; g.lineWidth = 1;
+      g.strokeRect(PAD - 22, PAD - 22, W - (PAD - 22) * 2, height - (PAD - 22) * 2);
+      g.strokeStyle = 'rgba(232,238,248,0.42)'; g.lineWidth = 2;
+      var tick = 16, x0 = PAD - 22, y0 = PAD - 22, x1 = W - PAD + 22, y1 = height - PAD + 22;
+      [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]].forEach(function (c) {
+        g.beginPath();
+        g.moveTo(c[0] + c[2] * tick, c[1]); g.lineTo(c[0], c[1]); g.lineTo(c[0], c[1] + c[3] * tick);
+        g.stroke();
+      });
+      return y;
+    }
+
+    /* 第一遍：量 */
+    var probe = document.createElement('canvas');
+    probe.width = W; probe.height = 3000;
+    var used = draw(probe.getContext('2d'), 3000, false);
+    var H = Math.max(700, Math.min(Math.round(used + PAD + 76), 2200));
+
+    /* 第二遍：按实际高度出图 */
+    var cv = document.createElement('canvas');
+    cv.width = W * DPR; cv.height = H * DPR;
+    var g2 = cv.getContext('2d');
+    g2.scale(DPR, DPR);
+    draw(g2, H, true);
+    return cv.toDataURL('image/png');
+  }
+
+  function downloadCard(item) {
+    var url = exportCardPng(item);
+    if (!url) return false;
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'nl2sh-速查卡-' + String(item.q || 'command').replace(/[\\/:*?"<>|\s]+/g, '').slice(0, 16) + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return true;
+  }
+
   function bindRun(result, item) {
     var btn = $('#runBtn', result);
     if (!btn) return;
@@ -10689,6 +10931,13 @@ window.NL2SH_FX = (function () {
     bindFsTree(result, item);
     if (!item.run) paintFsTree(result);
 
+    var card = $('#cardBtn', result);
+    if (card) card.addEventListener('click', function () {
+      if (!item || !item.cmd) return;
+      var ok = downloadCard(item);
+      card.textContent = ok ? '已导出 ✓' : '导出失败';
+      setTimeout(function () { card.textContent = '导出速查卡'; }, 1800);
+    });
     var fav = $('#favBtn', result);
     if (fav) {
       paintFav(fav, item);
@@ -11084,7 +11333,9 @@ window.NL2SH_FX = (function () {
       if (x.sim) sim++;
       if (x.pit) pits[x.pit] = (pits[x.pit] || 0) + 1;
     });
-    return { total: sessionLog.length, byClass: byClass, byRisk: byRisk, pits: pits, ai: ai, ok: okc, sim: sim };
+  
+
+  return { total: sessionLog.length, byClass: byClass, byRisk: byRisk, pits: pits, ai: ai, ok: okc, sim: sim };
   }
 
   function classMeta(id) {
